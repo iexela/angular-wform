@@ -167,14 +167,11 @@ function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, contr
         ),
     ));
     removed.forEach(key => control.removeControl(key));
-    updated.forEach(key => control.setControl(
-        key,
-        processControl(
-            getByKey(value, key),
-            node.children[key],
-            nextNode.children[key],
-            control.controls[key],
-        ),
+    updated.forEach(key => processControl(
+        getByKey(value, key),
+        node.children[key],
+        nextNode.children[key],
+        control.controls[key],
     ));
 
     if (node.disabled !== nextNode.disabled && nextNode.disabled) {
@@ -183,6 +180,7 @@ function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, contr
 
     if (areValidatorsChanged(node.validator, nextNode.validator)) {
         control.setValidators(createFormValidator(nextNode.validator));
+        control.updateValueAndValidity();
     }
 
     registerFormNode(control, nextNode);
@@ -248,6 +246,7 @@ function processArray(value: any, node: VFormArray, nextNode?: VFormArray, contr
 
     if (areValidatorsChanged(node.validator, nextNode.validator)) {
         control.setValidators(createFormValidator(nextNode.validator));
+        control.updateValueAndValidity();
     }
 
     registerFormNode(control, nextNode);

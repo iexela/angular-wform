@@ -1,8 +1,6 @@
-import { getFormNode, vControl, VForm, vForm, VFormControlOptions, vValidator } from '..';
+import { getFormNode, vControl, VForm, vForm, VFormControlOptions } from '..';
 import { trackControl } from './test-utils';
-
-const moreThan10 = vValidator(control => control.value <= 10 ? { min: true } : null);
-const even = vValidator(control => (control.value % 2) === 1 ? { even: true } : null);
+import { even, moreThan10 } from './test-mocks';
 
 function renderNumber(n: number, options?: VFormControlOptions): VForm<number> {
     return vForm(() => vControl(options)).build(n);
@@ -15,9 +13,6 @@ function renderConditionalNumber(initial: number, anchor: number, optionsLess: V
 function renderDisabledConditionalNumber(initial: number, anchor: number): VForm<number> {
     return renderConditionalNumber(initial, anchor, { disabled: true }, { disabled: false });
 }
-
-// Should it bind values in vForm?
-// Should we allow to use simple validator functions?
 
 describe('VFormControl', () => {
     describe('first render', () => {
@@ -69,9 +64,13 @@ describe('VFormControl', () => {
             expect(renderNumber(1, options).control.errors).toEqual({ min: true });
             expect(renderNumber(100, options).control.errors).toBeFalsy();
         });
+
+        it('should not validate disabled control', () => {
+            expect(renderNumber(null as any, { required: true, disabled: true }).control.errors).toBeFalsy();
+        });
     });
 
-    describe('getters', () => {
+    describe('value getters', () => {
         it('should render provided value', () => {
             expect(renderNumber(1).value).toBe(1);
         });
@@ -86,46 +85,6 @@ describe('VFormControl', () => {
     
         it('should return rawValue if "disabled"', () => {
             expect(renderNumber(1, { disabled: true }).rawValue).toBe(1);
-        });
-    });
-
-    describe('virtual function', () => {
-        it('should accept initial value', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
-            const form = vForm(fn).build(1 as number);
-    
-            expect(fn.calls.count()).toBe(1);
-            expect(fn.calls.mostRecent().args[0]).toBe(1);
-        });
-    
-        it('should accept value passed into "setValue" method', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
-            const form = vForm(fn).build(1 as number);
-    
-            form.setValue(5);
-    
-            expect(fn.calls.count()).toBe(2);
-            expect(fn.calls.mostRecent().args[0]).toBe(5);
-        });
-    
-        it('should accept current value if "update" is called', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
-            const form = vForm(fn).build(1 as number);
-    
-            form.update();
-    
-            expect(fn.calls.count()).toBe(2);
-            expect(fn.calls.mostRecent().args[0]).toBe(1);
-        });
-    
-        it('should not be called if value was changed using "control.setValue"', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
-            const form = vForm(fn).build(1 as number);
-    
-            form.control.setValue(5);
-    
-            expect(fn.calls.count()).toBe(1);
-            expect(fn.calls.mostRecent().args[0]).toBe(1);
         });
     });
 
@@ -237,6 +196,18 @@ describe('VFormControl', () => {
             expect(form.control.errors).toEqual({ min: true, even: true });
         });
 
+        it('should rerender control if value was changed in meantime', () => {
+            const form = renderConditionalNumber(2, 5, {}, { validator: moreThan10 });
+    
+            form.control.setValue(7);
+    
+            expect(form.control.errors).toBeFalsy();
+    
+            form.update();
+
+            expect(form.control.errors).toEqual({ min: true });
+        });
+
         it('should do nothing if validators were not changed', () => {
             const form = vForm(() => vControl({ required: true, validator: [moreThan10, even] })).build(1);
     
@@ -261,8 +232,8 @@ describe('VFormControl', () => {
     describe('getFormNode', () => {
         it('should return node from the latest render operation', () => {
             const node1 = vControl();
-            const node2 = vControl();
-            const node3 = vControl();
+            const node2 = vControl({ validator: moreThan10 });
+            const node3 = vControl({ validator: even });
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
             const form = vForm(fn).build(1);
