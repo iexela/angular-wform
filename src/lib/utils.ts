@@ -94,7 +94,7 @@ export function arrayDiff<T>(a: T[], b: T[], toKey: TransformFn<T, any>): ArrayD
         next: bIndex.get(key)!.index,
     }));
     const updated = common.filter(({ previous, next }) => a[previous] !== b[next]);
-    const indexUpdated = common.filter(({ previous, next }) => previous !== next);
+    const indexUpdated = common.filter(({ previous, next }) => a[previous] === b[next] && previous !== next);
     const untouched = common
         .filter(({ previous, next }) => a[previous] === b[next] && previous === next)
         .map(({ next }) => next);

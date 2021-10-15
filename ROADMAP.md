@@ -6,3 +6,6 @@
 ** Tree
 ** locals & args
 ** tests for group -> array
+* Ensure that different objects can be rendered in containers
+** group => array
+** array => group

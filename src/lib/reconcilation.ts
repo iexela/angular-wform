@@ -133,7 +133,7 @@ function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, contr
         const group = new FormGroup(
             mapValues(
                 node.children,
-                (child, key) => processControl(
+                (child, key) => processNode(
                     getByKey(value, key),
                     child,
                 ),
@@ -161,13 +161,13 @@ function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, contr
     const { added, removed, updated } = objectDiff(node.children, nextNode.children);
     added.forEach(key => control.setControl(
         key,
-        processControl(
+        processNode(
             getByKey(value, key),
             nextNode.children[key],
         ),
     ));
     removed.forEach(key => control.removeControl(key));
-    updated.forEach(key => processControl(
+    updated.forEach(key => processNode(
         getByKey(value, key),
         node.children[key],
         nextNode.children[key],
@@ -191,7 +191,7 @@ function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, contr
 function processArray(value: any, node: VFormArray, nextNode?: VFormArray, control?: FormArray): AbstractControl {
     if (!nextNode || !control) {
         const array = new FormArray(
-            node.children.map((child, i) => processControl(
+            node.children.map((child, i) => processNode(
                 getByIndex(value, i),
                 child,
             )),
@@ -216,29 +216,44 @@ function processArray(value: any, node: VFormArray, nextNode?: VFormArray, contr
     }
 
     const { added, removed, updated, indexUpdated } = arrayDiff(node.children, nextNode.children, child => child.key);
+
+    const indexToControl: { [index: number]: AbstractControl } = {};
+    updated.forEach(({ previous }) => {
+        indexToControl[previous] = control.controls[previous];
+    });
+    indexUpdated.map(({ previous }) => {
+        indexToControl[previous] = control.controls[previous];
+    });
+
     removed.reverse().forEach(index => control.removeAt(index));
     added.forEach(index => control.insert(
         index,
-        processControl(
+        processNode(
             getByIndex(value, index),
             nextNode.children[index],
         ),
     ));
-    const previusUpdatedControls = updated.map(({ previous }) => control.controls[previous]);
-    updated.forEach(({ previous, next }, i) => control.setControl(
-        next,
-        processControl(
+    updated.forEach(({ previous, next }) => {
+        const nextControl = indexToControl[previous];
+
+        processNode(
             getByIndex(value, next),
             node.children[previous],
             nextNode.children[next],
-            previusUpdatedControls[i],
-        ),
-    ));
-    const previousIndexUpdatedControls = indexUpdated.map(({ previous }) => control.controls[previous]);
-    indexUpdated.forEach(({ next }, i) => control.setControl(
-        next,
-        previousIndexUpdatedControls[i],
-    ));
+            nextControl,
+        );
+
+        if (control.controls[next] !== nextControl) {
+            control.setControl(next, nextControl);
+        }
+    });
+    indexUpdated.forEach(({ previous, next }) => {
+        const nextControl = indexToControl[previous];
+
+        if (control.controls[next] !== nextControl) {
+            control.setControl(next, nextControl);
+        }
+    });
 
     if (node.disabled !== nextNode.disabled && nextNode.disabled) {
         control.disable();

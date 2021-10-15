@@ -7,6 +7,7 @@ export const small = vValidator(control => control.value.volume >= 80 ? { small:
 export const light = vValidator(control => control.value.weight >= 80 ? { light: true } : null);
 
 export interface Box {
+    name?: string;
     weight?: number;
     volume?: number;
     fragile?: boolean;
@@ -39,4 +40,28 @@ export const heavyParcel = {
 export const heavyAndLargeParcel = {
     weight: 100,
     volume: 100,
+};
+
+export const krokodile = {
+    name: 'krokodile',
+    weight: 100,
+    volume: 120,
+};
+
+export const elephant = {
+    name: 'elephant',
+    weight: 1000,
+    volume: 1100,
+};
+
+export const mouse = {
+    name: 'mouse',
+    weight: 0.5,
+    volume: 9,
+};
+
+export const fly = {
+    name: 'fly',
+    weight: 0.01,
+    volume: 0.11,
 };
