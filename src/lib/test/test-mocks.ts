@@ -13,6 +13,15 @@ export interface Box {
     fragile?: boolean;
 }
 
+export interface Flight {
+    name: string;
+    route: string[];
+    cost: {
+        price: number;
+        discount: number;
+    };
+}
+
 export const parcel = {
     weight: 20,
     volume: 40,
@@ -64,4 +73,22 @@ export const fly = {
     name: 'fly',
     weight: 0.01,
     volume: 0.11,
+};
+
+export const belarusToAustralia = {
+    name: 'Belarus - Australia',
+    route: ['Belarus', 'Germany', 'China', 'Australia'],
+    cost: {
+        price: 1900.99,
+        discount: 20,
+    },
+};
+
+export const belarusToRussia = {
+    name: 'Belarus - Russia',
+    route: ['Belarus', 'Russia'],
+    cost: {
+        price: 19.99,
+        discount: 20,
+    },
 };

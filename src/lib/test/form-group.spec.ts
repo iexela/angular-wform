@@ -1,5 +1,5 @@
-import { getFormNode, vControl, VForm, vForm, VFormControlOptions, VFormGroupOptions, vGroup } from '..';
-import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume } from './test-mocks';
+import { getFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupOptions, vGroup } from '..';
+import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia } from './test-mocks';
 import { trackControl } from './test-utils';
 
 function withVolume(options: VFormControlOptions = {}): VFormGroupOptions {
@@ -35,6 +35,23 @@ function renderConditionalGroup(initial: Box, anchor: number, optionsLess: VForm
 
 function renderDisabledConditionalGroup(initial: Box, anchor: number): VForm<Box> {
     return renderConditionalGroup(initial, anchor, { disabled: true }, { disabled: false });
+}
+
+function flightFormBuilder(): VFormBuilder<Flight> {
+    return vForm((value: Flight) => vGroup({
+        children: {
+            name: vControl(),
+            route: vArray({
+                children: value.route.map(node => vControl({ key: node })),
+            }),
+            cost: vGroup({
+                children: {
+                    price: vControl(),
+                    discount: vControl(),
+                },
+            }),
+        },
+    }))
 }
 
 describe('VFormGroup', () => {
@@ -114,6 +131,12 @@ describe('VFormGroup', () => {
 
         it('should not validate disabled control', () => {
             expect(renderGroup(largeParcel, { validator: small, disabled: true }).control.errors).toBeFalsy();
+        });
+
+        it('should render nested vform containers', () => {
+            const form = flightFormBuilder().build(belarusToAustralia);
+
+            expect(form.value).toEqual(belarusToAustralia);
         });
     });
 
@@ -433,6 +456,14 @@ describe('VFormGroup', () => {
             expect(form.hasControl('weight')).toBeTrue();
             expect(form.hasControl('volume')).toBeFalse();
             expect(form.value).toEqual({ weight: largeParcel.weight });
+        });
+
+        it('should rerender nested vform containers', () => {
+            const form = flightFormBuilder().build(belarusToAustralia);
+
+            form.setValue(belarusToRussia);
+
+            expect(form.value).toEqual(belarusToRussia);
         });
     });
 
