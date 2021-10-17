@@ -3,27 +3,19 @@ import { VFormArray, VFormGroup, VFormNode, VFormNodePatch, VFormNodeType, VVali
 import { arrayDiff, arrayify, flatMap, mapValues, objectDiff } from './utils';
 
 export enum VReconcilationType {
-    Build, Update, Patch
-}
-
-export interface VReconcilationBuildRequest {
-    type: VReconcilationType.Build;
-    node: VFormNode;
-    value: any;
+    Update, Patch
 }
 
 export interface VReconcilationUpdateRequest {
     type: VReconcilationType.Update;
     node: VFormNode;
-    nextNode: VFormNode;
     value: any;
-    control: AbstractControl;
+    control?: AbstractControl;
 }
 
 export interface VReconcilationPatchRequest {
     type: VReconcilationType.Patch;
-    node: VFormNode;
-    patchNode: VFormNodePatch;
+    node: VFormNodePatch;
     value: any;
     control: AbstractControl;
 }
@@ -33,34 +25,47 @@ export interface VReconcilationResponse {
     node: VFormNode;
 }
 
-export type VReconcilationRequest = VReconcilationBuildRequest | VReconcilationUpdateRequest | VReconcilationPatchRequest;
+export type VReconcilationRequest = VReconcilationUpdateRequest | VReconcilationPatchRequest;
+
+interface VRenderResult {
+    node: VFormNode;
+    validators: ValidatorFn | ValidatorFn[] | null;
+}
+
+class VRenderContext {
+    private _disabled: boolean[] = [];
+
+    tryDisabled(disabled: boolean) {
+        const disabledTop = this._disabled.length === 0 ? false : this._disabled[this._disabled.length - 1];
+
+        return disabledTop ? true : disabled;
+    }
+
+    push(node: VFormGroup | VFormArray): void {
+        this._disabled.push(this.tryDisabled(node.disabled));
+    }
+
+    pop(): void {
+        this._disabled.pop();
+    }
+}
 
 export function reconcile(request: VReconcilationRequest): VReconcilationResponse {
     switch (request.type) {
-        case VReconcilationType.Build:
-            return {
-                control: processNode(request.value, request.node),
-                node: request.node,
-            };
         case VReconcilationType.Update:
             return {
-                control: processNode(request.value, request.node, request.nextNode, request.control),
-                node: request.nextNode,
+                control: processNode(new VRenderContext(), request.value, request.node, request.control),
+                node: request.node,
             };
         case VReconcilationType.Patch:
             // TODO: implement
             return {
-                node: request.node,
+                node: getFormNode(request.control),
                 control: request.control,
             };
         default:
             throw Error(`Unsupported reconcilation operation`);
     }
-}
-
-interface VRenderResult {
-    node: VFormNode;
-    validators: ValidatorFn | ValidatorFn[] | null;
 }
 
 const results = new WeakMap<AbstractControl, VRenderResult>();
@@ -79,37 +84,28 @@ export function getFormNode(control: AbstractControl): VFormNode {
     return result.node;
 }
 
-function processValidators(node?: VValidatorNode, nextNode?: VValidatorNode, control?: AbstractControl): ValidatorFn | ValidatorFn[] | null {
-    let validators: ValidatorFn | ValidatorFn[] | null = null;
-
-    if (!control) {
-        validators = createFormValidator(node);
-    } else if (areValidatorsChanged(node, nextNode)) {
-        validators = createFormValidator(nextNode);
-        control.setValidators(validators);
-        control.updateValueAndValidity();
-    }
-
-    return validators;
+function restoreFormNode(control: AbstractControl): VFormNode {
+    // TODO: consider the case when control is not managed by vform
+    return getFormNode(control);
 }
 
-function processNode(value: any, node: VFormNode, nextNode?: VFormNode, control?: AbstractControl): AbstractControl {
+function processNode(ctx: VRenderContext, value: any, node: VFormNode, control?: AbstractControl): AbstractControl {
     // TODO: make reconcilation more robust by relying on effective control attributes rather than node attributes
     // TODO: add node.asyncValidators handling
     switch (node.type) {
         case VFormNodeType.Control:
-            return processControl(value, node, nextNode, control);
+            return processControl(ctx, value, node, control);
         case VFormNodeType.Group:
-            return processGroup(value, node as VFormGroup, nextNode as VFormGroup, control as FormGroup);
+            return processGroup(ctx, value, node as VFormGroup, control as FormGroup);
         case VFormNodeType.Array:
-            return processArray(value, node as VFormArray, nextNode as VFormArray, control as FormArray);
+            return processArray(ctx, value, node as VFormArray, control as FormArray);
         default:
             throw Error(`Unsupported node type`);
     }
 }
 
-function processControl(value: any, node: VFormNode, nextNode?: VFormNode, control?: AbstractControl): AbstractControl {
-    if (!nextNode || !control) {
+function processControl(ctx: VRenderContext, value: any, node: VFormNode, control?: AbstractControl): AbstractControl {
+    if (!node || !control) {
         const validators = processValidators(node.validator);
         const newControl = new FormControl({
             value,
@@ -121,37 +117,40 @@ function processControl(value: any, node: VFormNode, nextNode?: VFormNode, contr
         return newControl;
     }
 
-    if (nextNode.type !== VFormNodeType.Control || !(control instanceof FormControl)) {
+    if (node.type !== VFormNodeType.Control || !(control instanceof FormControl)) {
         throw Error('Changing of node type is not supported');
     }
 
-    if (node.disabled !== nextNode.disabled) {
-        if (nextNode.disabled) {
+    const nextDisabled = ctx.tryDisabled(node.disabled);
+    if (control.disabled !== nextDisabled) {
+        if (nextDisabled) {
             control.disable();
         } else {
             control.enable();
         }
     }
 
-    const validators = processValidators(node.validator, nextNode.validator, control);
+    const validators = processValidators(node.validator, control);
 
     if (control.value !== value) {
         control.setValue(value);
     }
 
-    registerRenderResult(control, { node: nextNode, validators });
+    registerRenderResult(control, { node: node, validators });
 
     return control;
 }
 
+function processGroup(ctx: VRenderContext, value: any, node: VFormGroup, control?: FormGroup): AbstractControl {
+    if (!control) {
+        ctx.push(node);
 
-function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, control?: FormGroup): AbstractControl {
-    if (!nextNode || !control) {
         const validators = processValidators(node.validator);
         const group = new FormGroup(
             mapValues(
                 node.children,
                 (child, key) => processNode(
+                    ctx,
                     getByKey(value, key),
                     child,
                 ),
@@ -165,50 +164,62 @@ function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, contr
 
         registerRenderResult(group, { node, validators });
 
+        ctx.pop();
+
         return group;
     }
 
-    if (nextNode.type !== VFormNodeType.Group || !(control instanceof FormGroup)) {
+    if (node.type !== VFormNodeType.Group || !(control instanceof FormGroup)) {
         throw Error('Changing of node type is not supported');
     }
 
-    if (node.disabled !== nextNode.disabled && !nextNode.disabled) {
+    ctx.push(node);
+
+    const nextDisabled = ctx.tryDisabled(node.disabled);
+    if (control.disabled !== nextDisabled && !nextDisabled) {
         control.enable();
     }
 
-    const { added, removed, updated } = objectDiff(node.children, nextNode.children);
+    const currentChildrenNodes = mapValues(control.controls, restoreFormNode);
+    const { added, removed, updated } = objectDiff(currentChildrenNodes, node.children);
     added.forEach(key => control.setControl(
         key,
         processNode(
+            ctx,
             getByKey(value, key),
-            nextNode.children[key],
+            node.children[key],
         ),
     ));
     removed.forEach(key => control.removeControl(key));
     updated.forEach(key => processNode(
+        ctx,
         getByKey(value, key),
         node.children[key],
-        nextNode.children[key],
         control.controls[key],
     ));
 
-    if (node.disabled !== nextNode.disabled && nextNode.disabled) {
+    if (control.disabled !== nextDisabled && nextDisabled) {
         control.disable();
     }
 
-    const validators = processValidators(node.validator, nextNode.validator, control);
+    const validators = processValidators(node.validator, control);
 
-    registerRenderResult(control, { node: nextNode, validators });
+    registerRenderResult(control, { node: node, validators });
+
+    ctx.pop();
 
     return control;
 }
 
-function processArray(value: any, node: VFormArray, nextNode?: VFormArray, control?: FormArray): AbstractControl {
-    if (!nextNode || !control) {
+function processArray(ctx: VRenderContext, value: any, node: VFormArray, control?: FormArray): AbstractControl {
+    if (!control) {
+        ctx.push(node);
+
         const validators = processValidators(node.validator);
 
         const array = new FormArray(
             node.children.map((child, i) => processNode(
+                ctx,
                 getByIndex(value, i),
                 child,
             )),
@@ -221,18 +232,24 @@ function processArray(value: any, node: VFormArray, nextNode?: VFormArray, contr
 
         registerRenderResult(array, { node, validators });
 
+        ctx.pop();
+
         return array;
     }
 
-    if (nextNode.type !== VFormNodeType.Array || !(control instanceof FormArray)) {
+    if (node.type !== VFormNodeType.Array || !(control instanceof FormArray)) {
         throw Error('Changing of node type is not supported');
     }
 
-    if (node.disabled !== nextNode.disabled && !nextNode.disabled) {
+    ctx.push(node);
+
+    const nextDisabled = ctx.tryDisabled(node.disabled);
+    if (control.disabled !== nextDisabled && !nextDisabled) {
         control.enable();
     }
 
-    const { added, removed, updated, indexUpdated } = arrayDiff(node.children, nextNode.children, child => child.key);
+    const currentChildrenNodes = control.controls.map(restoreFormNode);
+    const { added, removed, updated, indexUpdated } = arrayDiff(currentChildrenNodes, node.children, child => child.key);
 
     const indexToControl: { [index: number]: AbstractControl } = {};
     updated.forEach(({ previous }) => {
@@ -246,17 +263,18 @@ function processArray(value: any, node: VFormArray, nextNode?: VFormArray, contr
     added.forEach(index => control.insert(
         index,
         processNode(
+            ctx,
             getByIndex(value, index),
-            nextNode.children[index],
+            node.children[index],
         ),
     ));
     updated.forEach(({ previous, next }) => {
         const nextControl = indexToControl[previous];
 
         processNode(
+            ctx,
             getByIndex(value, next),
-            node.children[previous],
-            nextNode.children[next],
+            node.children[next],
             nextControl,
         );
 
@@ -272,15 +290,35 @@ function processArray(value: any, node: VFormArray, nextNode?: VFormArray, contr
         }
     });
 
-    if (node.disabled !== nextNode.disabled && nextNode.disabled) {
+    if (control.disabled !== nextDisabled && nextDisabled) {
         control.disable();
     }
 
-    const validators = processValidators(node.validator, nextNode.validator, control);
+    const validators = processValidators(node.validator, control);
 
-    registerRenderResult(control, { node: nextNode, validators });
+    registerRenderResult(control, { node: node, validators });
+
+    ctx.pop();
 
     return control;
+}
+
+function processValidators(node?: VValidatorNode, control?: AbstractControl): ValidatorFn | ValidatorFn[] | null {    
+    if (!control) {
+        return createFormValidator(node);
+    }
+
+    const lastNode = getFormNode(control).validator;
+
+    let validators: ValidatorFn | ValidatorFn[] | null = null;
+
+    if (areValidatorsChanged(lastNode, node)) {
+        validators = createFormValidator(node);
+        control.setValidators(validators);
+        control.updateValueAndValidity();
+    }
+
+    return validators;
 }
 
 function areValidatorsChanged(a?: VValidatorNode, b?: VValidatorNode): boolean {

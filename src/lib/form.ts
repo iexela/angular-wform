@@ -31,7 +31,7 @@ export class VForm<T> {
 
     constructor(factory: VFormNodeFactory<T>, value: T) {
         const { node, control } = reconcile({
-            type: VReconcilationType.Build,
+            type: VReconcilationType.Update,
             node: factory(value),
             value
         });
@@ -44,8 +44,7 @@ export class VForm<T> {
     setValue(value: T): void {
         const { node, control } = reconcile({
             type: VReconcilationType.Update,
-            node: this._node,
-            nextNode: this._factory(value),
+            node: this._factory(value),
             value,
             control: this._control,
         });
@@ -109,8 +108,7 @@ export class VForm<T> {
 
         const { node, control } = reconcile({
             type: VReconcilationType.Update,
-            node: this._node,
-            nextNode: this._factory(value),
+            node: this._factory(value),
             value,
             control: this._control,
         });
@@ -123,8 +121,7 @@ export class VForm<T> {
 
         const { node, control } = reconcile({
             type: VReconcilationType.Patch,
-            node: this._node,
-            patchNode: patcher(value, this._node),
+            node: patcher(value, this._node),
             value,
             control: this._control,
         });
