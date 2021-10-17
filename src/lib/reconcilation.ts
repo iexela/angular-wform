@@ -58,20 +58,39 @@ export function reconcile(request: VReconcilationRequest): VReconcilationRespons
     }
 }
 
-const nodes = new WeakMap<AbstractControl, VFormNode>();
+interface VRenderResult {
+    node: VFormNode;
+    validators: ValidatorFn | ValidatorFn[] | null;
+}
 
-function registerFormNode(control: AbstractControl, node: VFormNode): void {
-    nodes.set(control, node);
+const results = new WeakMap<AbstractControl, VRenderResult>();
+
+function registerRenderResult(control: AbstractControl, result: VRenderResult): void {
+    results.set(control, result);
 }
 
 export function getFormNode(control: AbstractControl): VFormNode {
-    const node = nodes.get(control);
+    const result = results.get(control);
 
-    if (!node) {
-        throw new Error('FormNode was not found for control');
+    if (!result) {
+        throw new Error('FormNode has been ever rendered');
     }
 
-    return node;
+    return result.node;
+}
+
+function processValidators(node?: VValidatorNode, nextNode?: VValidatorNode, control?: AbstractControl): ValidatorFn | ValidatorFn[] | null {
+    let validators: ValidatorFn | ValidatorFn[] | null = null;
+
+    if (!control) {
+        validators = createFormValidator(node);
+    } else if (areValidatorsChanged(node, nextNode)) {
+        validators = createFormValidator(nextNode);
+        control.setValidators(validators);
+        control.updateValueAndValidity();
+    }
+
+    return validators;
 }
 
 function processNode(value: any, node: VFormNode, nextNode?: VFormNode, control?: AbstractControl): AbstractControl {
@@ -91,12 +110,13 @@ function processNode(value: any, node: VFormNode, nextNode?: VFormNode, control?
 
 function processControl(value: any, node: VFormNode, nextNode?: VFormNode, control?: AbstractControl): AbstractControl {
     if (!nextNode || !control) {
+        const validators = processValidators(node.validator);
         const newControl = new FormControl({
             value,
             disabled: node.disabled,
-        }, createFormValidator(node.validator));
+        }, validators);
 
-        registerFormNode(newControl, node);
+        registerRenderResult(newControl, { node, validators });
 
         return newControl;
     }
@@ -113,16 +133,13 @@ function processControl(value: any, node: VFormNode, nextNode?: VFormNode, contr
         }
     }
 
-    if (areValidatorsChanged(node.validator, nextNode.validator)) {
-        control.setValidators(createFormValidator(nextNode.validator));
-        control.updateValueAndValidity();
-    }
+    const validators = processValidators(node.validator, nextNode.validator, control);
 
     if (control.value !== value) {
         control.setValue(value);
     }
 
-    registerFormNode(control, nextNode);
+    registerRenderResult(control, { node: nextNode, validators });
 
     return control;
 }
@@ -130,6 +147,7 @@ function processControl(value: any, node: VFormNode, nextNode?: VFormNode, contr
 
 function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, control?: FormGroup): AbstractControl {
     if (!nextNode || !control) {
+        const validators = processValidators(node.validator);
         const group = new FormGroup(
             mapValues(
                 node.children,
@@ -138,14 +156,14 @@ function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, contr
                     child,
                 ),
             ),
-            createFormValidator(node.validator),
+            validators,
         );
 
         if (node.disabled) {
             group.disable();
         }
 
-        registerFormNode(group, node);
+        registerRenderResult(group, { node, validators });
 
         return group;
     }
@@ -178,31 +196,30 @@ function processGroup(value: any, node: VFormGroup, nextNode?: VFormGroup, contr
         control.disable();
     }
 
-    if (areValidatorsChanged(node.validator, nextNode.validator)) {
-        control.setValidators(createFormValidator(nextNode.validator));
-        control.updateValueAndValidity();
-    }
+    const validators = processValidators(node.validator, nextNode.validator, control);
 
-    registerFormNode(control, nextNode);
+    registerRenderResult(control, { node: nextNode, validators });
 
     return control;
 }
 
 function processArray(value: any, node: VFormArray, nextNode?: VFormArray, control?: FormArray): AbstractControl {
     if (!nextNode || !control) {
+        const validators = processValidators(node.validator);
+
         const array = new FormArray(
             node.children.map((child, i) => processNode(
                 getByIndex(value, i),
                 child,
             )),
-            createFormValidator(node.validator),
+            validators,
         );
 
         if (node.disabled) {
             array.disable();
         }
 
-        registerFormNode(array, node);
+        registerRenderResult(array, { node, validators });
 
         return array;
     }
@@ -259,12 +276,9 @@ function processArray(value: any, node: VFormArray, nextNode?: VFormArray, contr
         control.disable();
     }
 
-    if (areValidatorsChanged(node.validator, nextNode.validator)) {
-        control.setValidators(createFormValidator(nextNode.validator));
-        control.updateValueAndValidity();
-    }
+    const validators = processValidators(node.validator, nextNode.validator, control);
 
-    registerFormNode(control, nextNode);
+    registerRenderResult(control, { node: nextNode, validators });
 
     return control;
 }
