@@ -33,8 +33,17 @@ export function pickBy<R extends T, T extends Dictionary, K extends keyof T>(obj
     }, {} as any);
 }
 
-export function arrayify<T>(value: T | T[]): T[] {
-    if (Array.isArray(value)) {
+export function isNil(value: any): value is null | undefined {
+    return value == null;
+}
+
+export function arrayify<T>(value: null): [];
+export function arrayify<T>(value: undefined): [];
+export function arrayify<T>(value: T | T[]): T[];
+export function arrayify<T>(value: T | T[] | null | undefined): T[] {
+    if (isNil(value)) {
+        return [];
+    } else if (Array.isArray(value)) {
         return value;
     } else {
         return [value];

@@ -18,7 +18,7 @@ const EMPTY_DATA = Object.freeze({});
 
 function createControlValidator(options: VFormControlOptions): Maybe<VValidatorNode> {
     if (options.validator && options.required) {
-        return andValidators([Validators.required, composeValidators(arrayify(options.validator))]);
+        return andValidators(Validators.required, composeValidators(...arrayify(options.validator)));
     } else if (options.validator) {
         return createValidator(options.validator);
     } else if (options.required) {
@@ -28,7 +28,7 @@ function createControlValidator(options: VFormControlOptions): Maybe<VValidatorN
 }
 
 function createValidator(validator?: AnyValidator): Maybe<VValidatorNode> {
-    return validator ? composeValidators(arrayify(validator)) : undefined;
+    return validator ? composeValidators(...arrayify(validator)) : undefined;
 }
 
 export function vControl(options?: VFormControlOptions): VFormControl {

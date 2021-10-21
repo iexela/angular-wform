@@ -90,7 +90,6 @@ function restoreFormNode(control: AbstractControl): VFormNode {
 }
 
 function processNode(ctx: VRenderContext, value: any, node: VFormNode, control?: AbstractControl): AbstractControl {
-    // TODO: make reconcilation more robust by relying on effective control attributes rather than node attributes
     // TODO: add node.asyncValidators handling
     switch (node.type) {
         case VFormNodeType.Control:

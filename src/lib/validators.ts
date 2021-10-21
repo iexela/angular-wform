@@ -10,10 +10,12 @@ export function vValidator<T>(validator: ValidatorFn, locals?: any[]): VSimpleVa
     };
 }
 
+export type VValidatorFactory0<T> = () => ValidatorFn;
 export type VValidatorFactory1<T, A1> = (a1: A1) => ValidatorFn;
 export type VValidatorFactory2<T, A1, A2> = (a1: A1, a2: A2) => ValidatorFn;
 export type VValidatorFactory3<T, A1, A2, A3> = (a1: A1, a2: A2, a3: A3) => ValidatorFn;
 
+export function vValidatorFactory<T>(factory: VValidatorFactory0<T>): () => VFactoryValidatorNode;
 export function vValidatorFactory<T, A1>(factory: VValidatorFactory1<T, A1>): (a1: A1) => VFactoryValidatorNode;
 export function vValidatorFactory<T, A1, A2>(factory: VValidatorFactory2<T, A1, A2>): (a1: A1, a2: A2) => VFactoryValidatorNode;
 export function vValidatorFactory<T, A1, A2, A3>(factory: VValidatorFactory3<T, A1, A2, A3>): (a1: A1, a2: A2, a3: A3) => VFactoryValidatorNode;
@@ -25,9 +27,9 @@ export function vValidatorFactory<T>(factory: VValidatorFactory): (args: any[]) 
     });
 }
 
-export function vCompoundValidator<T>(mixer: VValidatorMixer<T>): (validatorsAndNodes: (ValidatorFn | VValidatorNode)[]) => VCompoundValidatorNode {
-    return validatorsAndNodes => {
-        const nodes = validatorsAndNodes.map(item => isValidatorNode(item) ? item : vValidator(item));
+export function vCompoundValidator<T>(mixer: VValidatorMixer<T>): (...validatorsAndNodes: (ValidatorFn | VValidatorNode)[]) => VCompoundValidatorNode {
+    return function() {
+        const nodes = Array.from(arguments).map(item => isValidatorNode(item) ? item : vValidator(item));
         return {
             type: VValidatorNodeType.Compound,
             mixer,
