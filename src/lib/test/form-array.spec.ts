@@ -1,4 +1,4 @@
-import { getFormNode, vArray, vControl, VForm, vForm, VFormArrayOptions, VFormBuilder, VFormControlOptions, vGroup, vValidator } from '..';
+import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayOptions, VFormBuilder, VFormControlOptions, vGroup, vValidator } from '..';
 import { Box, elephant, even, krokodile, moreThan10, mouse } from './test-mocks';
 import { trackControl } from './test-utils';
 
@@ -492,7 +492,7 @@ describe('VFormArray', () => {
         });
     });
 
-    describe('getFormNode', () => {
+    describe('getLastFormNode', () => {
         it('should return node from the latest render operation', () => {
             const node1 = vArray(withItem(fibonaci10));
             const node2 = vArray({
@@ -507,13 +507,13 @@ describe('VFormArray', () => {
 
             const form = vForm(fn).build(fibonaci10);
 
-            expect(getFormNode(form.control)).toBe(node1);
+            expect(getLastFormNode(form.control)).toBe(node1);
 
             form.update();
-            expect(getFormNode(form.control)).toBe(node2);
+            expect(getLastFormNode(form.control)).toBe(node2);
 
             form.update();
-            expect(getFormNode(form.control)).toBe(node3);
+            expect(getLastFormNode(form.control)).toBe(node3);
         });
     });
 });

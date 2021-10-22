@@ -1,13 +1,24 @@
-import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { Maybe, Nullable } from './common';
 import { VFormArray, VFormGroup, VFormNode, VFormNodePatch, VFormNodeType, VValidatorNode, VValidatorNodeType } from './model';
-import { arrayDiff, arrayify, flatMap, mapValues, objectDiff } from './utils';
+import { arrayDiff, arrayDiffUnordered, arrayify, flatMap, isAngularAtLeast, mapValues, objectDiff } from './utils';
 
 export enum VReconcilationType {
     Update, Patch
 }
 
+export enum VValidationStrategy {
+    Append,
+    Replace,
+}
+
+export interface VReconcilationFlags {
+    validationStrategy: VValidationStrategy;
+}
+
 export interface VReconcilationUpdateRequest {
     type: VReconcilationType.Update;
+    flags: VReconcilationFlags;
     node: VFormNode;
     value: any;
     control?: AbstractControl;
@@ -15,6 +26,7 @@ export interface VReconcilationUpdateRequest {
 
 export interface VReconcilationPatchRequest {
     type: VReconcilationType.Patch;
+    flags: VReconcilationFlags;
     node: VFormNodePatch;
     value: any;
     control: AbstractControl;
@@ -29,11 +41,34 @@ export type VReconcilationRequest = VReconcilationUpdateRequest | VReconcilation
 
 interface VRenderResult {
     node: VFormNode;
-    validators: ValidatorFn | ValidatorFn[] | null;
+    validator: ValidatorBundle;
 }
+
+const CompiledValidatorFnMarker = Symbol('compiled-validator-fn');
+
+interface CompiledValidatorFn extends ValidatorFn {
+    setValidators(validators: ValidatorFn[]): void;
+    dispose(): void;
+}
+
+interface ValidatorBundle {
+    children: ValidatorFn[];
+    compiled?: CompiledValidatorFn;
+}
+
+interface Control12Api {
+    hasValidator(validator: ValidatorFn): boolean;
+    addValidators(validator: ValidatorFn): void;
+    removeValidators(validator: ValidatorFn): void;
+}
+
+const canAccessListOfValidators = isAngularAtLeast(11, 0);
+const canManageValidatorsIndividually = isAngularAtLeast(12, 2);
 
 class VRenderContext {
     private _disabled: boolean[] = [];
+
+    constructor(readonly flags: VReconcilationFlags) {}
 
     tryDisabled(disabled: boolean) {
         const disabledTop = this._disabled.length === 0 ? false : this._disabled[this._disabled.length - 1];
@@ -54,13 +89,18 @@ export function reconcile(request: VReconcilationRequest): VReconcilationRespons
     switch (request.type) {
         case VReconcilationType.Update:
             return {
-                control: processNode(new VRenderContext(), request.value, request.node, request.control),
+                control: processNode(
+                    new VRenderContext(request.flags),
+                    request.value,
+                    request.node,
+                    request.control,
+                ),
                 node: request.node,
             };
         case VReconcilationType.Patch:
             // TODO: implement
             return {
-                node: getFormNode(request.control),
+                node: getLastFormNode(request.control),
                 control: request.control,
             };
         default:
@@ -74,19 +114,29 @@ function registerRenderResult(control: AbstractControl, result: VRenderResult): 
     results.set(control, result);
 }
 
-export function getFormNode(control: AbstractControl): VFormNode {
+export function getLastFormNode(control: AbstractControl): VFormNode {
     const result = results.get(control);
 
     if (!result) {
-        throw new Error('FormNode has been ever rendered');
+        throw new Error('FormNode has been never rendered');
     }
 
     return result.node;
 }
 
+export function getLastValidatorBundle(control: AbstractControl): ValidatorBundle {
+    const result = results.get(control);
+
+    if (!result) {
+        return createValidatorBundle([]);
+    }
+
+    return result.validator;
+}
+
 function restoreFormNode(control: AbstractControl): VFormNode {
     // TODO: consider the case when control is not managed by vform
-    return getFormNode(control);
+    return getLastFormNode(control);
 }
 
 function processNode(ctx: VRenderContext, value: any, node: VFormNode, control?: AbstractControl): AbstractControl {
@@ -105,13 +155,13 @@ function processNode(ctx: VRenderContext, value: any, node: VFormNode, control?:
 
 function processControl(ctx: VRenderContext, value: any, node: VFormNode, control?: AbstractControl): AbstractControl {
     if (!node || !control) {
-        const validators = processValidators(node.validator);
+        const validator = processValidators(ctx, node.validator);
         const newControl = new FormControl({
             value,
             disabled: node.disabled,
-        }, validators);
+        }, validator.compiled);
 
-        registerRenderResult(newControl, { node, validators });
+        registerRenderResult(newControl, { node, validator });
 
         return newControl;
     }
@@ -129,13 +179,13 @@ function processControl(ctx: VRenderContext, value: any, node: VFormNode, contro
         }
     }
 
-    const validators = processValidators(node.validator, control);
+    const validator = processValidators(ctx, node.validator, control);
 
     if (control.value !== value) {
         control.setValue(value);
     }
 
-    registerRenderResult(control, { node: node, validators });
+    registerRenderResult(control, { node: node, validator });
 
     return control;
 }
@@ -144,7 +194,7 @@ function processGroup(ctx: VRenderContext, value: any, node: VFormGroup, control
     if (!control) {
         ctx.push(node);
 
-        const validators = processValidators(node.validator);
+        const validator = processValidators(ctx, node.validator);
         const group = new FormGroup(
             mapValues(
                 node.children,
@@ -154,14 +204,14 @@ function processGroup(ctx: VRenderContext, value: any, node: VFormGroup, control
                     child,
                 ),
             ),
-            validators,
+            validator.compiled,
         );
 
         if (node.disabled) {
             group.disable();
         }
 
-        registerRenderResult(group, { node, validators });
+        registerRenderResult(group, { node, validator });
 
         ctx.pop();
 
@@ -201,9 +251,9 @@ function processGroup(ctx: VRenderContext, value: any, node: VFormGroup, control
         control.disable();
     }
 
-    const validators = processValidators(node.validator, control);
+    const validator = processValidators(ctx, node.validator, control);
 
-    registerRenderResult(control, { node: node, validators });
+    registerRenderResult(control, { node: node, validator });
 
     ctx.pop();
 
@@ -214,7 +264,7 @@ function processArray(ctx: VRenderContext, value: any, node: VFormArray, control
     if (!control) {
         ctx.push(node);
 
-        const validators = processValidators(node.validator);
+        const validator = processValidators(ctx, node.validator);
 
         const array = new FormArray(
             node.children.map((child, i) => processNode(
@@ -222,14 +272,14 @@ function processArray(ctx: VRenderContext, value: any, node: VFormArray, control
                 getByIndex(value, i),
                 child,
             )),
-            validators,
+            validator.compiled,
         );
 
         if (node.disabled) {
             array.disable();
         }
 
-        registerRenderResult(array, { node, validators });
+        registerRenderResult(array, { node, validator });
 
         ctx.pop();
 
@@ -293,31 +343,223 @@ function processArray(ctx: VRenderContext, value: any, node: VFormArray, control
         control.disable();
     }
 
-    const validators = processValidators(node.validator, control);
+    const validator = processValidators(ctx, node.validator, control);
 
-    registerRenderResult(control, { node: node, validators });
+    registerRenderResult(control, { node: node, validator });
 
     ctx.pop();
 
     return control;
 }
 
-function processValidators(node?: VValidatorNode, control?: AbstractControl): ValidatorFn | ValidatorFn[] | null {    
+function processValidators(ctx: VRenderContext, node?: VValidatorNode, control?: AbstractControl): ValidatorBundle {    
     if (!control) {
-        return createFormValidator(node);
+        return createValidatorBundle(createValidators(node));
     }
 
-    const lastNode = getFormNode(control).validator;
-
-    let validators: ValidatorFn | ValidatorFn[] | null = null;
+    const lastNode = getLastFormNode(control).validator;
+    const lastValidatorBundle = getLastValidatorBundle(control);
 
     if (areValidatorsChanged(lastNode, node)) {
-        validators = createFormValidator(node);
-        control.setValidators(validators);
+        const validatorBundle = applyValidators({
+            strategy: ctx.flags.validationStrategy,
+            control,
+            lastValidatorBundle,
+            nextValidators: createValidators(node),
+        });
         control.updateValueAndValidity();
+        return validatorBundle;
+    } else {
+        return applyValidators({
+            strategy: ctx.flags.validationStrategy,
+            control,
+            lastValidatorBundle,
+            nextValidators: lastValidatorBundle.children,
+        });
+    }
+}
+
+interface ApplyValidatorsOptions {
+    strategy: VValidationStrategy;
+    control: AbstractControl;
+    lastValidatorBundle: ValidatorBundle;
+    nextValidators: ValidatorFn[];
+}
+
+function applyValidators({ strategy, control, lastValidatorBundle, nextValidators }: ApplyValidatorsOptions): ValidatorBundle {
+    switch (strategy) {
+        case VValidationStrategy.Append:
+            if (canManageValidatorsIndividually) {
+                return appendValidatorsIndividually(control as Control12Api, lastValidatorBundle, nextValidators);
+            } else if (canAccessListOfValidators) {
+                return appendValidatorsInBulk(control, lastValidatorBundle, nextValidators);
+            } else {
+                return appendValidatorsByComposing(control, lastValidatorBundle, nextValidators);
+            }
+        case VValidationStrategy.Replace:
+            return replaceValidators(control, lastValidatorBundle, nextValidators);
+        default:
+            throw new Error(`Unsupported validation strategy: '${VValidationStrategy[strategy]}'`);
+    }
+}
+
+function appendValidatorsIndividually(control: Control12Api, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+    const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
+
+    const hasCompiledValidator = lastValidatorBundle.compiled && control.hasValidator(lastValidatorBundle.compiled);
+    const hasValidators = added.length > 0 || common.length > 0;
+    const areValidatorsModified = added.length > 0 || removed.length > 0;
+
+    if (lastValidatorBundle.compiled && !hasCompiledValidator) {
+        lastValidatorBundle.compiled.dispose();
     }
 
-    return validators;
+    if (hasValidators) {
+        if (!hasCompiledValidator) {
+            const bundle = createValidatorBundle(added.concat(common));
+            control.addValidators(bundle.compiled!);
+            return bundle;
+        } else if (areValidatorsModified) {
+            return modifyValidatorBundle(lastValidatorBundle, added.concat(common));
+        }
+    } else if (hasCompiledValidator) {
+        lastValidatorBundle.compiled!.dispose();
+        control.removeValidators(lastValidatorBundle.compiled!);
+        return createValidatorBundle([]);
+    }
+
+    return lastValidatorBundle;
+}
+
+function appendValidatorsInBulk(control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+    const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
+
+    const validators = getControlValidators(control);
+    const hasCompiledValidator = lastValidatorBundle.compiled && validators.includes(lastValidatorBundle.compiled);
+    const hasValidators = added.length > 0 || common.length > 0;
+    const areValidatorsModified = added.length > 0 || removed.length > 0;
+
+    if (lastValidatorBundle.compiled && !hasCompiledValidator) {
+        lastValidatorBundle.compiled.dispose();
+    }
+
+    if (hasValidators) {
+        if (!hasCompiledValidator) {
+            const bundle = createValidatorBundle(added.concat(common));
+            control.setValidators([...validators, bundle.compiled!]);
+            return bundle;
+        } else if (areValidatorsModified) {
+            return modifyValidatorBundle(lastValidatorBundle, added.concat(common));
+        }
+    } else if (hasCompiledValidator) {
+        lastValidatorBundle.compiled!.dispose();
+        control.setValidators(validators.filter(v => v !== lastValidatorBundle.compiled));
+        return createValidatorBundle([]);
+    }
+
+    return lastValidatorBundle;
+}
+
+function appendValidatorsByComposing(control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+    const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
+
+    const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
+    const hasValidators = added.length > 0 || common.length > 0;
+    const areValidatorsModified = added.length > 0 || removed.length > 0;
+
+    if (lastValidatorBundle.compiled && !hasCompiledValidator) {
+        lastValidatorBundle.compiled.dispose();
+    }
+
+    if (hasValidators) {
+        if (!hasCompiledValidator) {
+            const bundle = createValidatorBundle(added.concat(common).concat(arrayify(control.validator)));
+            control.validator = bundle.compiled || null;
+            return bundle;
+        } else if (areValidatorsModified) {
+            return modifyValidatorBundle(lastValidatorBundle, added.concat(common));
+        }
+    } else if (hasCompiledValidator) {
+        lastValidatorBundle.compiled!.dispose();
+        control.validator = null;
+        return createValidatorBundle([]);
+    }
+
+    return lastValidatorBundle;
+}
+
+function replaceValidators(control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+    const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
+
+    const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
+    const hasValidators = added.length > 0 || common.length > 0;
+    const areValidatorsModified = added.length > 0 || removed.length > 0;
+
+    if (lastValidatorBundle.compiled && !hasCompiledValidator) {
+        lastValidatorBundle.compiled.dispose();
+    }
+
+    if (hasValidators) {
+        if (!hasCompiledValidator) {
+            const bundle = createValidatorBundle(added.concat(common));
+            control.validator = bundle.compiled || null;
+            return bundle;
+        } else if (areValidatorsModified) {
+            lastValidatorBundle.compiled!.setValidators(added.concat(common));
+            return lastValidatorBundle;
+        }
+    } else {
+        if (hasCompiledValidator) {
+            lastValidatorBundle.compiled!.dispose();
+        }
+        control.validator = null;
+        return createValidatorBundle([]);
+    }
+
+    return lastValidatorBundle;
+}
+
+function createValidatorBundle(children: ValidatorFn[]): ValidatorBundle {
+    return {
+        children,
+        compiled: children.length ? createCompiledValidator(children) : undefined,
+    };
+}
+
+function modifyValidatorBundle(bundle: ValidatorBundle, validators: ValidatorFn[]): ValidatorBundle {
+    if (!bundle.compiled) {
+        return createValidatorBundle(validators);
+    }
+
+    bundle.compiled.setValidators(validators);
+    return bundle;
+}
+
+function createCompiledValidator(children: ValidatorFn[]): CompiledValidatorFn {
+    let composed: Nullable<ValidatorFn> = Validators.compose(children);
+    children = [];
+
+    const compiled = (control: AbstractControl) => {
+        if (composed) {
+            return composed(control);
+        }
+        return null;
+    };
+
+    (compiled as any)[CompiledValidatorFnMarker] = true;
+
+    compiled.setValidators = (validators: ValidatorFn[]) => {
+        composed = Validators.compose(validators);
+    };
+    compiled.dispose = () => {
+        composed = null;
+    };
+
+    return compiled;
+}
+
+function getControlValidators(control: AbstractControl): ValidatorFn[] {
+    return arrayify((control as any)._rawValidators);
 }
 
 function areValidatorsChanged(a?: VValidatorNode, b?: VValidatorNode): boolean {
@@ -366,8 +608,8 @@ function isValidatorEqual(a: VValidatorNode, b: VValidatorNode): boolean {
     return false;
 }
 
-function createFormValidator(node?: VValidatorNode): ValidatorFn | ValidatorFn[] | null {
-    return node ? arrayify(createValidator(node)) : null;
+function createValidators(node?: VValidatorNode): ValidatorFn[] {
+    return node ? arrayify(createValidator(node)) : [];
 }
 
 function createValidator(node: VValidatorNode): ValidatorFn | ValidatorFn[] {

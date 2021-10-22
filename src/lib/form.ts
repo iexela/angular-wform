@@ -1,13 +1,14 @@
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
-import { Maybe, ProcedureFn } from './common';
+import { ProcedureFn } from './common';
 import { VFormNodeFactory, VFormNode, VFormPatcher as VFormNodePatcher } from './model';
-import { reconcile, VReconcilationType } from './reconcilation';
+import { reconcile, VReconcilationFlags, VReconcilationType } from './reconcilation';
 import { calculateValue } from './utils';
 
 export class VForm<T> {
     private _node: VFormNode;
     private _control: AbstractControl;
     private _factory: VFormNodeFactory<T>;
+    private flags: VReconcilationFlags;
 
     get control(): AbstractControl {
         return this._control;
@@ -29,9 +30,12 @@ export class VForm<T> {
         return this._control.invalid;
     }
 
-    constructor(factory: VFormNodeFactory<T>, value: T) {
+    constructor(factory: VFormNodeFactory<T>, flags: VReconcilationFlags, value: T) {
+        this.flags = flags;
+
         const { node, control } = reconcile({
             type: VReconcilationType.Update,
+            flags,
             node: factory(value),
             value
         });
@@ -44,6 +48,7 @@ export class VForm<T> {
     setValue(value: T): void {
         const { node, control } = reconcile({
             type: VReconcilationType.Update,
+            flags: this.flags,
             node: this._factory(value),
             value,
             control: this._control,
@@ -108,6 +113,7 @@ export class VForm<T> {
 
         const { node, control } = reconcile({
             type: VReconcilationType.Update,
+            flags: this.flags,
             node: this._factory(value),
             value,
             control: this._control,
@@ -121,6 +127,7 @@ export class VForm<T> {
 
         const { node, control } = reconcile({
             type: VReconcilationType.Patch,
+            flags: this.flags,
             node: patcher(value, this._node),
             value,
             control: this._control,

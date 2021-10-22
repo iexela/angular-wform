@@ -1,4 +1,4 @@
-import { getFormNode, vControl, VForm, vForm, VFormControlOptions } from '..';
+import { getLastFormNode, vControl, VForm, vForm, VFormControlOptions } from '..';
 import { trackControl } from './test-utils';
 import { even, moreThan10 } from './test-mocks';
 
@@ -229,7 +229,7 @@ describe('VFormControl', () => {
         });
     });
 
-    describe('getFormNode', () => {
+    describe('getLastFormNode', () => {
         it('should return node from the latest render operation', () => {
             const node1 = vControl();
             const node2 = vControl({ validator: moreThan10 });
@@ -238,13 +238,13 @@ describe('VFormControl', () => {
 
             const form = vForm(fn).build(1);
 
-            expect(getFormNode(form.control)).toBe(node1);
+            expect(getLastFormNode(form.control)).toBe(node1);
 
             form.update();
-            expect(getFormNode(form.control)).toBe(node2);
+            expect(getLastFormNode(form.control)).toBe(node2);
 
             form.update();
-            expect(getFormNode(form.control)).toBe(node3);
+            expect(getLastFormNode(form.control)).toBe(node3);
         });
     });
 });

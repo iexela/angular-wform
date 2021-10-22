@@ -1,11 +1,14 @@
-import { AbstractControl, ValidatorFn } from '@angular/forms';
+import { AbstractControl, FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { vCompoundValidator, vControl, vForm, vValidator, vValidatorFactory } from '..';
+import { VValidationStrategy } from '../reconcilation';
 
-const testValidator1 = () => null;
-const testValidator2 = () => null;
-const testValidator3 = () => null;
-const testValidator4 = () => null;
-const testValidator5 = () => null;
+const TEST_VALUE = Object.freeze({});
+
+const testValidator1 = makeValidator(1);
+const testValidator2 = makeValidator(2);
+const testValidator3 = makeValidator(3);
+const testValidator4 = makeValidator(4);
+const testValidator5 = makeValidator(5);
 
 function trackValidators(control: AbstractControl) {
     const add = spyOn(control, 'addValidators');
@@ -23,6 +26,29 @@ function trackValidators(control: AbstractControl) {
     };
 }
 
+function makeValidator(index: number): ValidatorFn {
+    return control => control.value === TEST_VALUE ? { [`__error_${index}__`]: true } : null;
+}
+
+function hasControlValidator(control: AbstractControl, validator: ValidatorFn): boolean {
+    if (!control.validator) {
+        return false;
+    }
+    
+    const temporaryControl = new FormControl(TEST_VALUE);
+    const errorsToFind = validator(temporaryControl);
+    const foundErrors = control.validator(temporaryControl);
+
+    const foundErrorsKeys = Object.keys(foundErrors || {});
+    const errorsToFindKeys = Object.keys(errorsToFind || {});
+
+    if (errorsToFindKeys.length === 0 || foundErrorsKeys.length === 0) {
+        return false;
+    }
+
+    return errorsToFindKeys.every(key => foundErrorsKeys.includes(key));
+}
+
 type V3 = (a: number, b: string, c: boolean) => ValidatorFn;
 
 describe('validators', () => {
@@ -33,7 +59,7 @@ describe('validators', () => {
                     validator: vValidator(testValidator1),
                 })).build(5);
 
-                expect(form.control.hasValidator(testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
             });
         });
 
@@ -45,7 +71,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
             });
 
             it('should remove validator', () => {
@@ -55,7 +81,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
             });
 
             it('should not change validator if validator function was not modified', () => {
@@ -67,7 +93,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
                 tracker.expectNotChanged();
             });
 
@@ -78,8 +104,8 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
-                expect(form.control.hasValidator(testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
             });
 
             it('should not change validator if locals are empty', () => {
@@ -91,7 +117,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
                 tracker.expectNotChanged();
             });
 
@@ -104,7 +130,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
                 tracker.expectNotChanged();
             });
 
@@ -115,8 +141,8 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
-                expect(form.control.hasValidator(testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
             });
 
             it('should assign another validator if node type of validator was changed', () => {
@@ -128,8 +154,8 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
-                expect(form.control.hasValidator(testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
             });
         });
     });
@@ -141,7 +167,7 @@ describe('validators', () => {
                     validator: vValidatorFactory(() => testValidator1)(),
                 })).build(5);
 
-                expect(form.control.hasValidator(testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
             });
 
             it('should create validator with specified arguments and assign it to control', () => {
@@ -151,7 +177,7 @@ describe('validators', () => {
                     validator: vValidatorFactory(factory)(1, 'abc', true),
                 })).build(5);
 
-                expect(form.control.hasValidator(testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
                 expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
             });
         });
@@ -166,7 +192,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
                 expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
             });
 
@@ -179,7 +205,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
             });
 
             it('should not recreate validator if arguments are the same', () => {
@@ -193,7 +219,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
                 expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
                 tracker.expectNotChanged();
             });
@@ -207,7 +233,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
                 expect(factory).toHaveBeenCalledWith(1, 'abc', false);
                 expect(factory).toHaveBeenCalledTimes(2);
             });
@@ -222,7 +248,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
                 expect(factory1).toHaveBeenCalledWith(1, 'abc', false);
                 expect(factory2).toHaveBeenCalledWith(1, 'abc', false);
                 expect(factory1).toHaveBeenCalledTimes(1);
@@ -238,8 +264,8 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
-                expect(form.control.hasValidator(testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
             });
         });
     });
@@ -269,9 +295,9 @@ describe('validators', () => {
                     validator: compoundValidator(testValidator1),
                 })).build(5);
 
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
-                expect(form.control.hasValidator(testValidator4)).toBeTrue();
-                expect(form.control.hasValidator(testValidator5)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
             });
         });
 
@@ -291,11 +317,11 @@ describe('validators', () => {
                 form.setValue(20);
                 
                 expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
-                expect(form.control.hasValidator(testValidator2)).toBeFalse();
-                expect(form.control.hasValidator(testValidator3)).toBeFalse();
-                expect(form.control.hasValidator(testValidator4)).toBeTrue();
-                expect(form.control.hasValidator(testValidator5)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator3)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
             });
 
             it('should remove validators', () => {
@@ -308,9 +334,9 @@ describe('validators', () => {
 
                 form.setValue(20);
                 
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
-                expect(form.control.hasValidator(testValidator4)).toBeFalse();
-                expect(form.control.hasValidator(testValidator5)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator4)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator5)).toBeFalse();
             });
 
             it('should do not recreate validators if child validation nodes were not modified', () => {
@@ -335,8 +361,8 @@ describe('validators', () => {
                 form.setValue(20);
                 
                 expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
-                expect(form.control.hasValidator(testValidator4)).toBeTrue();
-                expect(form.control.hasValidator(testValidator5)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
             });
 
             it('should do not recreate validators if child validation nodes were not modified (local args)', () => {
@@ -359,8 +385,8 @@ describe('validators', () => {
                 form.setValue(20);
                 
                 expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2]);
-                expect(form.control.hasValidator(testValidator4)).toBeTrue();
-                expect(form.control.hasValidator(testValidator5)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
             });
 
             it('should recreate validators if at least on child validation node was modified', () => {
@@ -382,8 +408,8 @@ describe('validators', () => {
                 form.setValue(20);
                 
                 expect(factory).toHaveBeenCalledTimes(2);
-                expect(form.control.hasValidator(testValidator4)).toBeFalse();
-                expect(form.control.hasValidator(testValidator5)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator4)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
             });
 
             it('should recreate validators if mixer function is different', () => {
@@ -402,10 +428,10 @@ describe('validators', () => {
                 
                 expect(factory1).toHaveBeenCalledOnceWith([testValidator5]);
                 expect(factory2).toHaveBeenCalledOnceWith([testValidator5]);
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
-                expect(form.control.hasValidator(testValidator2)).toBeFalse();
-                expect(form.control.hasValidator(testValidator3)).toBeTrue();
-                expect(form.control.hasValidator(testValidator4)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
             });
 
             it('should assign another validator if node type of validator was changed', () => {
@@ -420,14 +446,152 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(form.control.hasValidator(testValidator1)).toBeFalse();
-                expect(form.control.hasValidator(testValidator2)).toBeFalse();
-                expect(form.control.hasValidator(testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
             });
         });
     });
 
     describe('basic validators', () => {
 
+    });
+
+    describe('side effects', () => {
+        describe(`${VValidationStrategy[VValidationStrategy.Append]} strategy`, () => {
+            it('should restore removed validator', () => {
+                const form = vForm(() => vControl({
+                    validator: vValidator(testValidator1),
+                })).build(5);
+    
+                form.control.setValidators(null);
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+    
+                form.update();
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+            });
+    
+            it('should not remove other validators', () => {
+                const form = vForm(() => vControl({
+                    validator: vValidator(testValidator1),
+                })).build(5);
+    
+                form.control.setValidators([form.control.validator!, testValidator2]);
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                
+                form.update();
+                
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+            });
+    
+            it('should not remove other validators, if set of validators was modified', () => {
+                const form = vForm((n: number) => vControl({
+                    validator: n < 10 ? vValidator(testValidator1) : vValidator(testValidator2),
+                })).build<number>(5);
+                
+                form.control.setValidators([form.control.validator!, testValidator3]);
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                
+                form.setValue(20);
+                
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+            });
+    
+            it('should update set of validators, even if initial validator was composed', () => {
+                const form = vForm((n: number) => vControl({
+                    validator: n < 10 ? vValidator(testValidator1) : vValidator(testValidator2),
+                })).build<number>(5);
+                
+                form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                
+                form.setValue(20);
+                
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+            });
+        });
+
+        describe(`${VValidationStrategy[VValidationStrategy.Replace]} strategy`, () => {
+            it('should restore removed validator', () => {
+                const form = vForm(() => vControl({
+                    validator: vValidator(testValidator1),
+                })).validationStrategy(VValidationStrategy.Replace).build(5);
+    
+                form.control.setValidators(null);
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+    
+                form.update();
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+            });
+    
+            it('should remove other validators', () => {
+                const form = vForm(() => vControl({
+                    validator: vValidator(testValidator1),
+                })).validationStrategy(VValidationStrategy.Replace).build(5);
+    
+                form.control.setValidators([form.control.validator!, testValidator2]);
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                
+                form.update();
+                
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+            });
+    
+            it('should remove other validators, if set of validators was modified', () => {
+                const form = vForm((n: number) => vControl({
+                    validator: n < 10 ? vValidator(testValidator1) : vValidator(testValidator2),
+                })).validationStrategy(VValidationStrategy.Replace).build<number>(5);
+    
+                form.control.setValidators([form.control.validator!, testValidator3]);
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                
+                form.setValue(20);
+                
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator3)).toBeFalse();
+            });
+    
+            it('should replace set of validators, even if initial validator was composed', () => {
+                const form = vForm((n: number) => vControl({
+                    validator: n < 10 ? vValidator(testValidator1) : vValidator(testValidator2),
+                })).validationStrategy(VValidationStrategy.Replace).build<number>(5);
+    
+                form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
+    
+                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                
+                form.setValue(20);
+                
+                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator3)).toBeFalse();
+            });
+        });
     });
 });

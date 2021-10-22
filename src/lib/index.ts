@@ -27,7 +27,7 @@ export {
 export * from './model';
 
 export {
-    getFormNode
+    getLastFormNode,
 } from './reconcilation';
 
 export {

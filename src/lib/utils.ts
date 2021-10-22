@@ -1,7 +1,26 @@
+import { VERSION } from '@angular/core';
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 import { PredicateFn, TransformFn } from './common';
 
 type Dictionary = { [key: string]: any };
+
+const intVersion = {
+    major: parseInt(VERSION.major),
+    minor: parseInt(VERSION.minor),
+};
+
+export function isAngularAtLeast(major: number, minor: number): boolean {
+    if (intVersion.major < major) {
+        return false;
+    }
+    if (intVersion.major > major) {
+        return true;
+    }
+    if (intVersion.minor < minor) {
+        return false;
+    }
+    return true;
+}
 
 export function mapControls<T>(control: AbstractControl, transform: TransformFn<AbstractControl, any>): any {
     if (control instanceof FormGroup) {
@@ -37,9 +56,6 @@ export function isNil(value: any): value is null | undefined {
     return value == null;
 }
 
-export function arrayify<T>(value: null): [];
-export function arrayify<T>(value: undefined): [];
-export function arrayify<T>(value: T | T[]): T[];
 export function arrayify<T>(value: T | T[] | null | undefined): T[] {
     if (isNil(value)) {
         return [];
@@ -85,6 +101,12 @@ export interface ArrayDiffResult {
     untouched: number[];
 }
 
+export interface ArrayDiffUnorderedResult<T> {
+    added: T[];
+    removed: T[];
+    common: T[];
+}
+
 export function arrayDiff<T>(a: T[], b: T[], toKey: TransformFn<T, any>): ArrayDiffResult {
     const aIndex = indexate(a, toKey);
     const bIndex = indexate(b, toKey);
@@ -109,6 +131,23 @@ export function arrayDiff<T>(a: T[], b: T[], toKey: TransformFn<T, any>): ArrayD
         .map(({ next }) => next);
 
     return { added, removed, updated, indexUpdated, untouched };
+}
+
+export function arrayDiffUnordered<T>(a: T[], b: T[]): ArrayDiffUnorderedResult<T> {
+    const aIndex = new Set(a);
+    const bIndex = new Set(b);
+
+    const added = filterIterator(
+        bIndex.keys(),
+        key => !aIndex.has(key));
+
+    const removed = filterIterator(
+        aIndex.keys(),
+        key => !bIndex.has(key));
+
+    const common = filterIterator(aIndex.keys(), key => bIndex.has(key));
+
+    return { added, removed, common };
 }
 
 function filterIterator<T>(iterator: IterableIterator<T>, predicate: PredicateFn<T>): T[] {

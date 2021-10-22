@@ -1,4 +1,4 @@
-import { getFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupOptions, vGroup } from '..';
+import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupOptions, vGroup } from '..';
 import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia } from './test-mocks';
 import { trackControl } from './test-utils';
 
@@ -467,7 +467,7 @@ describe('VFormGroup', () => {
         });
     });
 
-    describe('getFormNode', () => {
+    describe('getLastFormNode', () => {
         it('should return node from the latest render operation', () => {
             const node1 = vGroup(withVolume());
             const node2 = vGroup(withVolume({ validator: moreThan10 }));
@@ -476,13 +476,13 @@ describe('VFormGroup', () => {
 
             const form = vForm(fn).build(parcel);
 
-            expect(getFormNode(form.control)).toBe(node1);
+            expect(getLastFormNode(form.control)).toBe(node1);
 
             form.update();
-            expect(getFormNode(form.control)).toBe(node2);
+            expect(getLastFormNode(form.control)).toBe(node2);
 
             form.update();
-            expect(getFormNode(form.control)).toBe(node3);
+            expect(getLastFormNode(form.control)).toBe(node3);
         });
     });
 });

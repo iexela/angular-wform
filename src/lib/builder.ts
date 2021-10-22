@@ -2,6 +2,7 @@ import { Maybe } from './common';
 import { VEnvFormNodeFactory, VEnvFormNodeType, VFormEnvironment } from './env-model';
 import { VForm } from './form';
 import { VFormNode, VFormNodeFactory } from './model';
+import { VValidationStrategy } from './reconcilation';
 import { mapValues, pickBy } from './utils';
 
 export interface VFormBuilderFactory {
@@ -13,25 +14,36 @@ export interface VEnvFormBuilderFactory<TNode> {
     <T>(factory: VEnvFormNodeFactory<T, TNode>): VFormBuilder<T>;
 }
 
-export interface VFormBuilder<T> {
-    build<U extends T>(value: U): VForm<U>;
+export class VFormBuilder<T> {
+    private _validationStrategy: VValidationStrategy = VValidationStrategy.Append;
+
+    constructor(private _factory: VFormNodeFactory<T>) {
+    }
+
+    validationStrategy(strategy: VValidationStrategy): this {
+        this._validationStrategy = strategy;
+
+        return this;
+    }
+
+    build<U extends T>(value: U): VForm<U> {
+        return new VForm(
+            this._factory,
+            {
+                validationStrategy: this._validationStrategy,
+            },
+            value,
+        );
+    }
 }
 
 export function vForm<T>(factory: VFormNodeFactory<T>): VFormBuilder<T> {
-    return {
-        build(value) {
-            return new VForm(factory, value)
-        },
-    };
+    return new VFormBuilder(factory);
 }
 
 vForm.use = <T, TNode>(env: VFormEnvironment<TNode>): VEnvFormBuilderFactory<TNode> => {
     function vEnvForm<T>(factory: VEnvFormNodeFactory<T, TNode>): VFormBuilder<T> {
-        return {
-            build(value) {
-                return new VForm(resolveEnvFactory(factory, env), value);
-            },
-        };
+        return vForm(resolveEnvFactory(factory, env));
     }
     
     return vEnvForm;
