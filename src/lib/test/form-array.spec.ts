@@ -1,4 +1,4 @@
-import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayOptions, VFormBuilder, VFormControlOptions, vGroup, vValidator } from '..';
+import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayChildren, VFormArrayOptions, VFormBuilder, VFormControlOptions, vGroup, vValidator } from '..';
 import { Box, elephant, even, krokodile, moreThan10, mouse } from './test-mocks';
 import { trackControl } from './test-utils';
 
@@ -6,10 +6,8 @@ function defaultItemRenderer<T>(value: T, index: number): VFormControlOptions {
     return { key: index };
 }
 
-function withItem<T>(items: T[], fn: (value: T, index: number) => VFormControlOptions = defaultItemRenderer): VFormArrayOptions {
-    return {
-        children: (items || []).map((item, index) => vControl(fn(item, index))),
-    };
+function withItem<T>(items: T[], fn: (value: T, index: number) => VFormControlOptions = defaultItemRenderer): VFormArrayChildren {
+    return (items || []).map((item, index) => vControl(fn(item, index)));
 }
 
 const fibonaci5 = [0, 1, 1, 2, 3];
@@ -21,35 +19,30 @@ const fibonaci2_10 = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
 const lengthLessThan10 = vValidator(control => control.value.length >= 10 ? { length: true } : null);
 const startedFrom0 = vValidator(control => control.value[0] !== 0 ? { zero: true } : null);
 
-function renderArray(initial: number[], options?: VFormArrayOptions): VForm<number[]> {
-    return vForm(() => vArray({
-        ...withItem(initial),
-        ...options,
-    })).build(initial);
+function renderArray(initial: number[], options: VFormArrayOptions = {}, children?: VFormArrayChildren): VForm<number[]> {
+    return vForm(() => vArray(options, children || withItem(initial))).build(initial);
 }
 
-function renderConditionalGroup(initial: number[], anchor: number, optionsLess: VFormArrayOptions, optionsMore: VFormArrayOptions): VForm<number[]> {
-    return vForm((value: number[]) => vArray({
-        ...withItem(initial),
-        ...value.every(v => v < anchor) ? optionsLess : optionsMore,
-    })).build(initial);
+function renderConditionalGroup(initial: number[],
+                                anchor: number,
+                                [optionsLess, childrenLess]: [VFormArrayOptions, VFormArrayChildren?],
+                                [optionsMore, childrenMore]: [VFormArrayOptions, VFormArrayChildren?]): VForm<number[]> {
+    return vForm((value: number[]) => {
+        const isLess = value.every(v => v < anchor);
+        return vArray(isLess ? optionsLess : optionsMore, (isLess ? childrenLess : childrenMore) || withItem(initial));
+    }).build(initial);
 }
 
 function renderDisabledConditionalGroup(initial: number[], anchor: number): VForm<number[]> {
-    return renderConditionalGroup(initial, anchor, { disabled: true }, { disabled: false });
+    return renderConditionalGroup(initial, anchor, [{ disabled: true }], [{ disabled: false }]);
 }
 
 function boxArrayFormBuilder(): VFormBuilder<Box[]> {
-    return vForm((boxes: Box[]) => vArray({
-        children: boxes.map(box => vGroup({
-            key: box.name,
-            children: {
-                name: vControl(),
-                weight: vControl(),
-                volume: vControl(),
-            },
-        })),
-    }))
+    return vForm((boxes: Box[]) => vArray(boxes.map(box => vGroup({ key: box.name }, {
+        name: vControl(),
+        weight: vControl(),
+        volume: vControl(),
+    }))));
 }
 
 describe('VFormArray', () => {
@@ -71,9 +64,7 @@ describe('VFormArray', () => {
         });
 
         it('should enable all internal controls, by default', () => {
-            const form = renderArray(fibonaci5, {
-                ...withItem(fibonaci5),
-            });
+            const form = renderArray(fibonaci5, {}, withItem(fibonaci5));
 
             expect(form.getControl('0').disabled).toBeFalse();
             expect(form.getControl('1').disabled).toBeFalse();
@@ -82,8 +73,7 @@ describe('VFormArray', () => {
         it('should disable all internal controls if "disabled" is true', () => {
             const form = renderArray(fibonaci5, {
                 disabled: true,
-                ...withItem(fibonaci5),
-            });
+            }, withItem(fibonaci5));
 
             expect(form.getControl('0').disabled).toBeTrue();
             expect(form.getControl('1').disabled).toBeTrue();
@@ -92,8 +82,7 @@ describe('VFormArray', () => {
         it('should disable all internal controls if "disabled" is true (regardless internal controls disabled flag)', () => {
             const form = renderArray(fibonaci5, {
                 disabled: true,
-                ...withItem(fibonaci5, () => ({ disabled: false })),
-            });
+            }, withItem(fibonaci5, () => ({ disabled: false })));
 
             expect(form.getControl('0').disabled).toBeTrue();
             expect(form.getControl('1').disabled).toBeTrue();
@@ -102,8 +91,7 @@ describe('VFormArray', () => {
         it('should leave "disabled" state for internal controls as they desire when "disabled" is false', () => {
             const form = renderArray(fibonaci5, {
                 disabled: false,
-                ...withItem(fibonaci5, (_, i) => ({ disabled: (i % 2) === 0 })),
-            });
+            }, withItem(fibonaci5, (_, i) => ({ disabled: (i % 2) === 0 })));
 
             expect(form.getControl('0').disabled).toBeTrue();
             expect(form.getControl('1').disabled).toBeFalse();
@@ -138,17 +126,13 @@ describe('VFormArray', () => {
         });
     
         it('should return only fields mapped to controls', () => {
-            const form = vForm(() => vArray({
-                ...withItem(fibonaci5),
-            })).build(fibonaci10);
+            const form = vForm(() => vArray(withItem(fibonaci5))).build(fibonaci10);
 
             expect(form.value).toEqual(fibonaci5);
         });
     
         it('should return all fields mapped to controls', () => {
-            const form = vForm(() => vArray({
-                ...withItem(fibonaci10),
-            })).build(fibonaci5);
+            const form = vForm(() => vArray(withItem(fibonaci10))).build(fibonaci5);
 
             expect(form.value).toEqual([...fibonaci5, undefined, undefined, undefined, undefined, undefined] as any[]);
         });
@@ -158,9 +142,7 @@ describe('VFormArray', () => {
         });
     
         it('should return value without disabled controls', () => {
-            expect(renderArray(fibonaci10, {
-                ...withItem(fibonaci10, (_, i) => ({ disabled: (i % 2) === 0 })),
-            }).value).toEqual([1, 2, 5, 13, 34]);
+            expect(renderArray(fibonaci10, {}, withItem(fibonaci10, (_, i) => ({ disabled: (i % 2) === 0 }))).value).toEqual([1, 2, 5, 13, 34]);
         });
     
         it('should return rawValue', () => {
@@ -172,9 +154,11 @@ describe('VFormArray', () => {
         });
     
         it('should return rawvalue regardless disabled controls', () => {
-            expect(renderArray(fibonaci10, {
-                ...withItem(fibonaci10, (_, i) => ({ disabled: (i % 2) === 0 })),
-            }).rawValue).toEqual(fibonaci10);
+            expect(renderArray(
+                fibonaci10,
+                {},
+                withItem(fibonaci10, (_, i) => ({ disabled: (i % 2) === 0 })),
+            ).rawValue).toEqual(fibonaci10);
         });
     });
 
@@ -273,7 +257,7 @@ describe('VFormArray', () => {
         });
 
         it('should do nothing if disabled flag was not modified in vform tree', () => {
-            const form = vForm(() => vArray({ disabled: true, ...withItem(fibonaci5) })).build(fibonaci5);
+            const form = vForm(() => vArray({ disabled: true }, withItem(fibonaci5))).build(fibonaci5);
     
             const tracker = trackControl(form.control);
     
@@ -286,14 +270,14 @@ describe('VFormArray', () => {
             const form = renderConditionalGroup(
                 fibonaci2_10,
                 50,
-                {
-                    disabled: true,
-                    ...withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 0 })),
-                },
-                {
-                    disabled: false,
-                    ...withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
-                });
+                [
+                    { disabled: true },
+                    withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 0 })),
+                ],
+                [
+                    { disabled: false },
+                    withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
+                ]);
     
             expect(form.control.disabled).toBeFalse();
     
@@ -308,14 +292,14 @@ describe('VFormArray', () => {
             const form = renderConditionalGroup(
                 fibonaci10,
                 50,
-                {
-                    disabled: true,
-                    ...withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 0 })),
-                },
-                {
-                    disabled: false,
-                    ...withItem(fibonaci2_10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
-                });
+                [
+                    { disabled: true },
+                    withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 0 })),
+                ],
+                [
+                    { disabled: false },
+                    withItem(fibonaci2_10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
+                ]);
     
             expect(form.control.disabled).toBeTrue();
     
@@ -330,12 +314,14 @@ describe('VFormArray', () => {
             const form = renderConditionalGroup(
                 fibonaci10,
                 50,
-                {
-                    ...withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 0 })),
-                },
-                {
-                    ...withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
-                });
+                [
+                    {},
+                    withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 0 })),
+                ],
+                [
+                    {},
+                    withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
+                ]);
     
             expect(form.getControl('0').disabled).toBeTrue();
             expect(form.getControl('1').disabled).toBeFalse();
@@ -347,7 +333,7 @@ describe('VFormArray', () => {
         });
 
         it('should assign validators', () => {
-            const form = renderConditionalGroup(fibonaci10, 50, {}, { validator: startedFrom0 });
+            const form = renderConditionalGroup(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
 
             expect(form.control.errors).toBeFalsy();
     
@@ -357,7 +343,7 @@ describe('VFormArray', () => {
         });
 
         it('should remove validators', () => {
-            const form = renderConditionalGroup(fibonaci2_10, 50, {}, { validator: startedFrom0 });
+            const form = renderConditionalGroup(fibonaci2_10, 50, [{}], [{ validator: startedFrom0 }]);
     
             expect(form.control.errors).toEqual({ zero: true });
     
@@ -367,7 +353,7 @@ describe('VFormArray', () => {
         });
 
         it('should change validators', () => {
-            const form = renderConditionalGroup(fibonaci10, 50, { validator: lengthLessThan10 }, { validator: [lengthLessThan10, startedFrom0] });
+            const form = renderConditionalGroup(fibonaci10, 50, [{ validator: lengthLessThan10 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
     
             expect(form.control.errors).toEqual({ length: true });
     
@@ -377,7 +363,7 @@ describe('VFormArray', () => {
         });
 
         it('should rerender control if value was changed in meantime', () => {
-            const form = renderConditionalGroup(fibonaci10, 50, {}, { validator: startedFrom0 });
+            const form = renderConditionalGroup(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
     
             form.control.setValue(fibonaci2_10);
     
@@ -391,8 +377,7 @@ describe('VFormArray', () => {
         it('should do nothing if validators were not changed', () => {
             const form = vForm(() => vArray({
                 validator: [lengthLessThan10, startedFrom0],
-                ...withItem(fibonaci5),
-            })).build(fibonaci5);
+            }, withItem(fibonaci5))).build(fibonaci5);
     
             const tracker = trackControl(form.control);
     
@@ -402,7 +387,7 @@ describe('VFormArray', () => {
         });
 
         it('should not recreate underlying FormControl', () => {
-            const form = renderConditionalGroup(fibonaci10, 50, { validator: startedFrom0 }, { validator: [lengthLessThan10, startedFrom0] });
+            const form = renderConditionalGroup(fibonaci10, 50, [{ validator: startedFrom0 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
     
             const control = form.control;
     
@@ -497,12 +482,10 @@ describe('VFormArray', () => {
             const node1 = vArray(withItem(fibonaci10));
             const node2 = vArray({
                 validator: moreThan10,
-                ...withItem(fibonaci10),
-            });
+            }, withItem(fibonaci10));
             const node3 = vArray({
                 validator: even,
-                ...withItem(fibonaci10)
-            });
+            }, withItem(fibonaci10));
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
             const form = vForm(fn).build(fibonaci10);

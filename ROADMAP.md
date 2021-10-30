@@ -7,9 +7,7 @@
 8. Write real-world sample
 9. There is no big sense in `getLastFormNode`. May be it is better to return `data` only
 10. Write tests for `getLastValidators`
-11. Support updateOnChange() mode by builder
 12. Support CI
-13. Make test to work for pre-Angular 12
+13. Check that library works on Angular pre-12
 14. Cover environment usage
 15. Write documentation
-16. Simplify basic vXXX() api for groups and arrays

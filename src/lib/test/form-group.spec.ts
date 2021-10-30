@@ -1,56 +1,51 @@
-import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupOptions, vGroup } from '..';
+import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, vGroup } from '..';
 import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia } from './test-mocks';
 import { trackControl } from './test-utils';
 
-function withVolume(options: VFormControlOptions = {}): VFormGroupOptions {
+function withVolume(options: VFormControlOptions = {}): VFormGroupChildren {
     return withWeightAndVolume({}, options);
 }
 
-function withDisabledVolume(): VFormGroupOptions {
+function withDisabledVolume(): VFormGroupChildren {
     return withVolume({ disabled: true });
 }
 
-function withWeightAndVolume(weight?: VFormControlOptions, volume?: VFormControlOptions): VFormGroupOptions {
+function withWeightAndVolume(weight?: VFormControlOptions, volume?: VFormControlOptions): VFormGroupChildren {
     return {
-        children: {
-            weight: vControl(weight),
-            volume: vControl(volume),
-        },
+        weight: vControl(weight),
+        volume: vControl(volume),
     };
 }
 
-function renderGroup(initial: Box, options?: VFormGroupOptions): VForm<Box> {
-    return vForm(() => vGroup({
-        ...withWeightAndVolume(),
-        ...options,
-    })).build(initial);
+function renderGroup(initial: Box, options: VFormGroupOptions = {}, children?: VFormGroupChildren): VForm<Box> {
+    return vForm(() => vGroup(options, children || withWeightAndVolume())).build(initial);
 }
 
-function renderConditionalGroup(initial: Box, anchor: number, optionsLess: VFormGroupOptions, optionsMore: VFormGroupOptions): VForm<Box> {
-    return vForm((value: Box) => vGroup({
-        ...withWeightAndVolume(),
-        ...value.volume! < anchor ? optionsLess : optionsMore,
-    })).build(initial);
+function renderConditionalGroup(initial: Box,
+                                anchor: number,
+                                [optionsLess, childrenLess]: [VFormGroupOptions, VFormGroupChildren?],
+                                [optionsMore, childrenMore]: [VFormGroupOptions, VFormGroupChildren?]): VForm<Box> {
+    return vForm((value: Box) => {
+        const isLess = value.volume! < anchor;
+        return vGroup(
+            isLess ? optionsLess : optionsMore,
+            (isLess ? childrenLess : childrenMore) || withWeightAndVolume(),
+        );
+    }).build(initial);
 }
 
 function renderDisabledConditionalGroup(initial: Box, anchor: number): VForm<Box> {
-    return renderConditionalGroup(initial, anchor, { disabled: true }, { disabled: false });
+    return renderConditionalGroup(initial, anchor, [{ disabled: true }], [{ disabled: false }]);
 }
 
 function flightFormBuilder(): VFormBuilder<Flight> {
     return vForm((value: Flight) => vGroup({
-        children: {
-            name: vControl(),
-            route: vArray({
-                children: value.route.map(node => vControl({ key: node })),
-            }),
-            cost: vGroup({
-                children: {
-                    price: vControl(),
-                    discount: vControl(),
-                },
-            }),
-        },
+        name: vControl(),
+        route: vArray(value.route.map(node => vControl({ key: node }))),
+        cost: vGroup({
+            price: vControl(),
+            discount: vControl(),
+        }),
     }))
 }
 
@@ -73,39 +68,36 @@ describe('VFormGroup', () => {
         });
 
         it('should enable all internal controls, by default', () => {
-            const form = renderGroup(parcel, {
-                ...withWeightAndVolume(),
-            });
+            const form = renderGroup(parcel, {}, withWeightAndVolume());
 
             expect(form.getControl('weight').disabled).toBeFalse();
             expect(form.getControl('volume').disabled).toBeFalse();
         });
 
         it('should disable all internal controls if "disabled" is true', () => {
-            const form = renderGroup(parcel, {
-                disabled: true,
-                ...withWeightAndVolume(),
-            });
+            const form = renderGroup(parcel, { disabled: true }, withWeightAndVolume());
 
             expect(form.getControl('weight').disabled).toBeTrue();
             expect(form.getControl('volume').disabled).toBeTrue();
         });
 
         it('should disable all internal controls if "disabled" is true (regardless internal controls disabled flag)', () => {
-            const form = renderGroup(parcel, {
-                disabled: true,
-                ...withWeightAndVolume({ disabled: false }, { disabled: false }),
-            });
+            const form = renderGroup(
+                parcel,
+                { disabled: true },
+                withWeightAndVolume({ disabled: false }, { disabled: false }),
+            );
 
             expect(form.getControl('weight').disabled).toBeTrue();
             expect(form.getControl('volume').disabled).toBeTrue();
         });
 
         it('should leave "disabled" state for internal controls as they desire when "disabled" is false', () => {
-            const form = renderGroup(parcel, {
-                disabled: false,
-                ...withWeightAndVolume({ disabled: true }, { disabled: false }),
-            });
+            const form = renderGroup(
+                parcel,
+                { disabled: false },
+                withWeightAndVolume({ disabled: true }, { disabled: false }),
+            );
 
             expect(form.getControl('weight').disabled).toBeTrue();
             expect(form.getControl('volume').disabled).toBeFalse();
@@ -158,7 +150,7 @@ describe('VFormGroup', () => {
         });
     
         it('should return value without disabled controls', () => {
-            expect(renderGroup(parcel, withDisabledVolume()).value).toEqual(parcelWithoutVolume);
+            expect(renderGroup(parcel, {}, withDisabledVolume()).value).toEqual(parcelWithoutVolume);
         });
     
         it('should return rawValue', () => {
@@ -170,7 +162,7 @@ describe('VFormGroup', () => {
         });
     
         it('should return rawvalue regardless disabled controls', () => {
-            expect(renderGroup(parcel, withDisabledVolume()).rawValue).toEqual(parcel);
+            expect(renderGroup(parcel, {}, withDisabledVolume()).rawValue).toEqual(parcel);
         });
     });
 
@@ -270,7 +262,7 @@ describe('VFormGroup', () => {
         });
 
         it('should do nothing if disabled flag was not modified in vform tree', () => {
-            const form = vForm(() => vGroup({ disabled: true, ...withWeightAndVolume() })).build(2);
+            const form = vForm(() => vGroup({ disabled: true }, withWeightAndVolume())).build(2);
     
             const tracker = trackControl(form.control);
     
@@ -283,14 +275,14 @@ describe('VFormGroup', () => {
             const form = renderConditionalGroup(
                 largeParcel,
                 50,
-                {
-                    disabled: true,
-                    ...withWeightAndVolume({ disabled: false }, { disabled: true }),
-                },
-                {
-                    disabled: false,
-                    ...withWeightAndVolume({ disabled: true }, { disabled: false }),
-                });
+                [
+                    { disabled: true },
+                    withWeightAndVolume({ disabled: false }, { disabled: true }),
+                ],
+                [
+                    { disabled: false },
+                    withWeightAndVolume({ disabled: true }, { disabled: false }),
+                ]);
     
             expect(form.control.disabled).toBeFalse();
     
@@ -305,14 +297,14 @@ describe('VFormGroup', () => {
             const form = renderConditionalGroup(
                 parcel,
                 50,
-                {
-                    disabled: true,
-                    ...withWeightAndVolume({ disabled: false }, { disabled: true }),
-                },
-                {
-                    disabled: false,
-                    ...withWeightAndVolume({ disabled: true }, { disabled: false }),
-                });
+                [
+                    { disabled: true },
+                    withWeightAndVolume({ disabled: false }, { disabled: true }),
+                ],
+                [
+                    { disabled: false },
+                    withWeightAndVolume({ disabled: true }, { disabled: false }),
+                ]);
     
             expect(form.control.disabled).toBeTrue();
     
@@ -327,12 +319,14 @@ describe('VFormGroup', () => {
             const form = renderConditionalGroup(
                 parcel,
                 50,
-                {
-                    ...withWeightAndVolume({ disabled: false }, { disabled: true }),
-                },
-                {
-                    ...withWeightAndVolume({ disabled: true }, { disabled: false }),
-                });
+                [
+                    {},
+                    withWeightAndVolume({ disabled: false }, { disabled: true }),
+                ],
+                [
+                    {},
+                    withWeightAndVolume({ disabled: true }, { disabled: false }),
+                ]);
     
             expect(form.getControl('weight').disabled).toBeFalse();
             expect(form.getControl('volume').disabled).toBeTrue();
@@ -344,7 +338,7 @@ describe('VFormGroup', () => {
         });
 
         it('should assign validators', () => {
-            const form = renderConditionalGroup(parcel, 50, {}, { validator: small });
+            const form = renderConditionalGroup(parcel, 50, [{}], [{ validator: small }]);
 
             expect(form.control.errors).toBeFalsy();
     
@@ -354,7 +348,7 @@ describe('VFormGroup', () => {
         });
 
         it('should remove validators', () => {
-            const form = renderConditionalGroup(largeParcel, 50, {}, { validator: small });
+            const form = renderConditionalGroup(largeParcel, 50, [{}], [{ validator: small }]);
     
             expect(form.control.errors).toEqual({ small: true });
     
@@ -364,7 +358,7 @@ describe('VFormGroup', () => {
         });
 
         it('should change validators', () => {
-            const form = renderConditionalGroup(heavyParcel, 50, { validator: light }, { validator: [small, light] });
+            const form = renderConditionalGroup(heavyParcel, 50, [{ validator: light }], [{ validator: [small, light] }]);
     
             expect(form.control.errors).toEqual({ light: true });
     
@@ -374,7 +368,7 @@ describe('VFormGroup', () => {
         });
 
         it('should rerender control if value was changed in meantime', () => {
-            const form = renderConditionalGroup(parcel, 50, {}, { validator: small });
+            const form = renderConditionalGroup(parcel, 50, [{}], [{ validator: small }]);
     
             form.control.setValue(largeParcel);
     
@@ -386,7 +380,7 @@ describe('VFormGroup', () => {
         });
 
         it('should do nothing if validators were not changed', () => {
-            const form = vForm(() => vGroup({ validator: [small, light], ...withWeightAndVolume() })).build(parcel);
+            const form = vForm(() => vGroup({ validator: [small, light] }, withWeightAndVolume())).build(parcel);
     
             const tracker = trackControl(form.control);
     
@@ -396,7 +390,7 @@ describe('VFormGroup', () => {
         });
 
         it('should not recreate underlying FormControl', () => {
-            const form = renderConditionalGroup(parcel, 50, { validator: small }, { validator: [small, light] });
+            const form = renderConditionalGroup(parcel, 50, [{ validator: small }], [{ validator: [small, light] }]);
     
             const control = form.control;
     
@@ -409,17 +403,19 @@ describe('VFormGroup', () => {
             const form = renderConditionalGroup(
                 parcel,
                 50,
-                {
-                    children: {
+                [
+                    {},
+                    {
                         weight: vControl(),
                     },
-                },
-                {
-                    children: {
+                ],
+                [
+                    {},
+                    {
                         weight: vControl(),
                         volume: vControl(),
                     },
-                });
+                ]);
     
             expect(form.hasControl('weight')).toBeTrue();
             expect(form.hasControl('volume')).toBeFalse();
@@ -435,17 +431,19 @@ describe('VFormGroup', () => {
             const form = renderConditionalGroup(
                 parcel,
                 50,
-                {
-                    children: {
+                [
+                    {},
+                    {
                         weight: vControl(),
                         volume: vControl(),
                     },
-                },
-                {
-                    children: {
+                ],
+                [
+                    {},
+                    {
                         weight: vControl(),
                     },
-                });
+                ]);
     
             expect(form.hasControl('weight')).toBeTrue();
             expect(form.hasControl('volume')).toBeTrue();

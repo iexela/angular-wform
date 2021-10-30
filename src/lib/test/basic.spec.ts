@@ -2,19 +2,13 @@ import { vArray, vControl, vForm, vGroup } from '..';
 import { belarusToAustralia, Flight } from './test-mocks';
 
 const flightFactory = (value: Flight) => vGroup({
-    children: {
-        name: vControl(),
-        route: vArray({
-            children: value.route.map(point => vControl({ key: point })),
-        }),
-        cost: vGroup({
-            children: {
-                price: vControl(),
-                discount: vControl(),
-            },
-        }),
-        time: vControl({ disabled: true }),
-    },
+    name: vControl(),
+    route: vArray(value.route.map(point => vControl({ key: point }))),
+    cost: vGroup({
+        price: vControl(),
+        discount: vControl(),
+    }),
+    time: vControl({ disabled: true }),
 });
 
 describe('basic', () => {

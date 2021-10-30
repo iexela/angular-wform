@@ -1,4 +1,5 @@
 import { ValidatorFn, Validators } from '@angular/forms';
+import { VFormNode } from '.';
 import { Maybe } from './common';
 import { VFormArray, VFormControl, VFormGroup, VFormNodeType, VValidatorNode } from './model';
 import { arrayify } from './utils';
@@ -11,8 +12,10 @@ type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator'>> & {
 };
 
 export type VFormControlOptions = MakeOptions<VFormControl> & { required?: boolean };
-export type VFormGroupOptions = MakeOptions<VFormGroup>;
-export type VFormArrayOptions = MakeOptions<VFormArray>;
+export type VFormGroupOptions = Omit<MakeOptions<VFormGroup>, 'children'>;
+export type VFormGroupChildren = Record<string, VFormNode>;
+export type VFormArrayOptions = Omit<MakeOptions<VFormArray>, 'children'>;
+export type VFormArrayChildren = VFormNode[];
 
 const EMPTY_DATA = Object.freeze({});
 
@@ -41,24 +44,35 @@ export function vControl(options?: VFormControlOptions): VFormControl {
     };
 }
 
-export function vGroup(options: VFormGroupOptions): VFormGroup {
+export function vGroup(children: VFormGroupChildren): VFormGroup;
+export function vGroup(options: VFormGroupOptions, children: VFormGroupChildren): VFormGroup;
+export function vGroup(optionsOrChildren: VFormGroupOptions | Record<string, VFormNode>,
+                       children?: VFormGroupChildren): VFormGroup {
+    const options: VFormGroupOptions = children ? optionsOrChildren as VFormGroupOptions : {};
+    children = children || optionsOrChildren as VFormGroupChildren;
+
     return {
         type: VFormNodeType.Group,
         disabled: false,
         data: EMPTY_DATA,
-        children: {},
         ...options,
-        validator: createValidator(options.validator),
+        validator: options && createValidator(options.validator),
+        children,
     };
 }
 
-export function vArray(options: VFormArrayOptions): VFormArray {
+export function vArray(children: VFormArrayChildren): VFormArray;
+export function vArray(options: VFormArrayOptions, children: VFormArrayChildren): VFormArray;
+export function vArray(optionsOrChildren: VFormArrayOptions | VFormArrayChildren, children?: VFormArrayChildren): VFormArray {
+    const options: VFormArrayOptions = children ? optionsOrChildren as VFormArrayOptions : {};
+    children = children || optionsOrChildren as VFormArrayChildren;
+
     return {
         type: VFormNodeType.Array,
         disabled: false,
         data: EMPTY_DATA,
-        children: [],
         ...options,
-        validator: createValidator(options.validator),
+        validator: options && createValidator(options.validator),
+        children,
     };
 }
