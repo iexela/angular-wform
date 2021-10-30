@@ -2,7 +2,7 @@ import { Maybe } from './common';
 import { VEnvFormNodeFactory, VEnvFormNodeType, VFormEnvironment } from './env-model';
 import { VForm } from './form';
 import { VFormNode, VFormNodeFactory } from './model';
-import { VValidationStrategy } from './reconcilation';
+import { VFormFlags, VValidationStrategy } from './reconcilation';
 import { mapValues, pickBy } from './utils';
 
 export interface VFormBuilderFactory {
@@ -15,14 +15,22 @@ export interface VEnvFormBuilderFactory<TNode> {
 }
 
 export class VFormBuilder<T> {
-    private _validationStrategy: VValidationStrategy = VValidationStrategy.Append;
+    private _flags: VFormFlags = {
+        validationStrategy: VValidationStrategy.Append,
+        updateOnChange: false,
+    }
 
     constructor(private _factory: VFormNodeFactory<T>) {
     }
 
     validationStrategy(strategy: VValidationStrategy): this {
-        this._validationStrategy = strategy;
+        this._flags.validationStrategy = strategy;
 
+        return this;
+    }
+
+    updateOnChange(): this {
+        this._flags.updateOnChange = true;
         return this;
     }
 
@@ -30,7 +38,7 @@ export class VFormBuilder<T> {
         return new VForm(
             this._factory,
             {
-                validationStrategy: this._validationStrategy,
+                ...this._flags,
             },
             value,
         );

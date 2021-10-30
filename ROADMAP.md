@@ -10,3 +10,6 @@
 11. Support updateOnChange() mode by builder
 12. Support CI
 13. Make test to work for pre-Angular 12
+14. Cover environment usage
+15. Write documentation
+16. Simplify basic vXXX() api for groups and arrays

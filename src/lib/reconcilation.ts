@@ -12,13 +12,14 @@ export enum VValidationStrategy {
     Replace,
 }
 
-export interface VReconcilationFlags {
+export interface VFormFlags {
     validationStrategy: VValidationStrategy;
+    updateOnChange: boolean;
 }
 
 export interface VReconcilationUpdateRequest {
     type: VReconcilationType.Update;
-    flags: VReconcilationFlags;
+    flags: VFormFlags;
     node: VFormNode;
     value: any;
     control?: AbstractControl;
@@ -26,7 +27,7 @@ export interface VReconcilationUpdateRequest {
 
 export interface VReconcilationPatchRequest {
     type: VReconcilationType.Patch;
-    flags: VReconcilationFlags;
+    flags: VFormFlags;
     node: VFormNodePatch;
     value: any;
     control: AbstractControl;
@@ -68,7 +69,7 @@ const canManageValidatorsIndividually = isAngularAtLeast(12, 2);
 class VRenderContext {
     private _disabled: boolean[] = [];
 
-    constructor(readonly flags: VReconcilationFlags) {}
+    constructor(readonly flags: VFormFlags) {}
 
     tryDisabled(disabled: boolean) {
         const disabledTop = this._disabled.length === 0 ? false : this._disabled[this._disabled.length - 1];

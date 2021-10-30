@@ -1,14 +1,15 @@
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 import { ProcedureFn } from './common';
 import { VFormNodeFactory, VFormNode, VFormPatcher as VFormNodePatcher } from './model';
-import { reconcile, VReconcilationFlags, VReconcilationType } from './reconcilation';
+import { reconcile, VFormFlags, VReconcilationRequest, VReconcilationType } from './reconcilation';
 import { calculateValue } from './utils';
 
 export class VForm<T> {
     private _node: VFormNode;
     private _control: AbstractControl;
     private _factory: VFormNodeFactory<T>;
-    private flags: VReconcilationFlags;
+    private flags: VFormFlags;
+    private _reconcilationInProgress = false;
 
     get control(): AbstractControl {
         return this._control;
@@ -30,7 +31,7 @@ export class VForm<T> {
         return this._control.invalid;
     }
 
-    constructor(factory: VFormNodeFactory<T>, flags: VReconcilationFlags, value: T) {
+    constructor(factory: VFormNodeFactory<T>, flags: VFormFlags, value: T) {
         this.flags = flags;
 
         const { node, control } = reconcile({
@@ -43,18 +44,24 @@ export class VForm<T> {
         this._factory = factory;
         this._node = node;
         this._control = control;
+
+        if (flags.updateOnChange) {
+            control.valueChanges.subscribe(() => {
+                if (!this._reconcilationInProgress) {
+                    this.update();
+                }
+            });
+        }
     }
 
     setValue(value: T): void {
-        const { node, control } = reconcile({
+        this._reconcile({
             type: VReconcilationType.Update,
             flags: this.flags,
             node: this._factory(value),
             value,
             control: this._control,
         });
-        this._node = node;
-        this._control = control;
     }
 
     resetValue(value: T): void {
@@ -111,28 +118,35 @@ export class VForm<T> {
     update(): void {
         const value = this.rawValue;
 
-        const { node, control } = reconcile({
+        this._reconcile({
             type: VReconcilationType.Update,
             flags: this.flags,
             node: this._factory(value),
             value,
             control: this._control,
         });
-        this._node = node;
-        this._control = control;
     }
 
     patch(patcher: VFormNodePatcher<T>): void {
         const value = this.rawValue;
 
-        const { node, control } = reconcile({
+        this._reconcile({
             type: VReconcilationType.Patch,
             flags: this.flags,
             node: patcher(value, this._node),
             value,
             control: this._control,
         });
-        this._node = node;
-        this._control = control;
+    }
+
+    private _reconcile(request: VReconcilationRequest): void {
+        this._reconcilationInProgress = true;
+        try {
+            const { node, control } = reconcile(request);
+            this._node = node;
+            this._control = control;
+        } finally {
+            this._reconcilationInProgress = false;
+        }
     }
 }
