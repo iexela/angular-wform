@@ -178,3 +178,7 @@ function indexate<T>(arr: T[], toKey: TransformFn<T, any>): Map<any, { index: nu
 
     return items;
 }
+
+export function hasField<T extends object, K extends keyof T>(obj: T, key: K): boolean {
+    return obj.hasOwnProperty(key);
+}

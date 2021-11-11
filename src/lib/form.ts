@@ -1,48 +1,65 @@
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs/operators';
 import { ProcedureFn } from './common';
-import { VFormNodeFactory, VFormNode, VFormPatcher as VFormNodePatcher } from './model';
-import { reconcile, VFormFlags, VReconcilationRequest, VReconcilationType } from './reconcilation';
+import { VFormNodeFactory, VFormPatcher as VFormNodePatcher } from './model';
+import { reconcile, VFormFlags, VReconcilationRequest } from './reconcilation';
 import { calculateValue } from './utils';
 
 export class VForm<T> {
-    private _control: AbstractControl;
+    private _control$$: BehaviorSubject<AbstractControl>;
     private _factory: VFormNodeFactory<T>;
     private flags: VFormFlags;
-    private _reconcilationInProgress = false;
+    private _reconcilationInProgress$$ = new BehaviorSubject(false);
+
+    readonly valueChanges: Observable<T>;
+    readonly rawValueChanges: Observable<T>;
 
     get control(): AbstractControl {
-        return this._control;
+        return this._control$$.value;
     }
 
     get value(): T {
-        return this._control.value;
+        return this.control.value;
     }
 
     get rawValue(): T {
-        return calculateValue(this._control);
+        return calculateValue(this.control);
     }
 
     get valid(): boolean {
-        return this._control.valid;
+        return this.control.valid;
     }
 
     get invalid(): boolean {
-        return this._control.invalid;
+        return this.control.invalid;
     }
 
     constructor(factory: VFormNodeFactory<T>, flags: VFormFlags, value: T) {
         this.flags = flags;
 
-        this._control = reconcile({
+        this._control$$ = new BehaviorSubject(reconcile({
             flags,
             node: factory(value),
-        });
+        }));
+
+        const nativeValueChanges = this._control$$.pipe(switchMap(control => control.valueChanges));
+
+        this.valueChanges = combineLatest([
+            nativeValueChanges,
+            this._reconcilationInProgress$$,
+        ]).pipe(
+            filter(([_, reconcilationInProgress]: [T, boolean]) => !reconcilationInProgress),
+            map(([value]) => value));
+
+        this.rawValueChanges = this.valueChanges.pipe(map(() => this.rawValue));
 
         this._factory = factory;
 
         if (flags.updateOnChange) {
-            this._control.valueChanges.subscribe(() => {
-                if (!this._reconcilationInProgress) {
+            nativeValueChanges.subscribe(() => {
+                if (!this._reconcilationInProgress$$.value) {
                     this.update();
                 }
             });
@@ -53,7 +70,7 @@ export class VForm<T> {
         this._reconcile({
             flags: this.flags,
             node: this._factory(value),
-            control: this._control,
+            control: this.control,
         });
     }
 
@@ -70,7 +87,7 @@ export class VForm<T> {
     }
 
     markAllAsTouched(): void {
-        this._control.markAllAsTouched();
+        this.control.markAllAsTouched();
     }
 
     markAllAsUntouched(): void {
@@ -91,11 +108,11 @@ export class VForm<T> {
             }
         }
     
-        onEach(this._control);
+        onEach(this.control);
     }
 
     getControl(path: string): AbstractControl {
-        const found = this._control.get(path);
+        const found = this.control.get(path);
 
         if (found == null) {
             throw new Error(`Control was not found: ${path}`);
@@ -105,7 +122,7 @@ export class VForm<T> {
     }
 
     hasControl(path: string): boolean {
-        return this._control.get(path) != null;
+        return this.control.get(path) != null;
     }
 
     update(): void {
@@ -114,24 +131,24 @@ export class VForm<T> {
         this._reconcile({
             flags: this.flags,
             node: this._factory(value),
-            control: this._control,
+            control: this.control,
         });
     }
 
     patch(patcher: VFormNodePatcher): void {
         this._reconcile({
             flags: this.flags,
-            node: patcher(this._control),
-            control: this._control,
+            node: patcher(this.control),
+            control: this.control,
         });
     }
 
     private _reconcile(request: VReconcilationRequest): void {
-        this._reconcilationInProgress = true;
+        this._reconcilationInProgress$$.next(true);
         try {
-            this._control = reconcile(request);
+            this._control$$.next(reconcile(request));
         } finally {
-            this._reconcilationInProgress = false;
+            this._reconcilationInProgress$$.next(false);
         }
     }
 }

@@ -2,7 +2,7 @@ import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Valida
 import { VFormControl } from '.';
 import { Maybe, Nullable } from './common';
 import { VFormArray, VFormGroup, VFormNode, VFormNodeType, VValidatorNode, VValidatorNodeType } from './model';
-import { arrayDiff, arrayDiffUnordered, arrayify, flatMap, isAngularAtLeast, mapValues, objectDiff } from './utils';
+import { arrayDiff, arrayDiffUnordered, arrayify, flatMap, hasField, isAngularAtLeast, mapValues, objectDiff } from './utils';
 
 export enum VReconcilationType {
     Update, Patch
@@ -131,6 +131,8 @@ function processControl(ctx: VRenderContext, node: VFormControl, control?: Abstr
             disabled: node.disabled,
         }, validator.compiled);
 
+        processTinyFlags(node, newControl);
+
         registerRenderResult(newControl, { node, validator });
 
         return newControl;
@@ -154,6 +156,8 @@ function processControl(ctx: VRenderContext, node: VFormControl, control?: Abstr
     if (control.value !== node.value) {
         control.setValue(node.value);
     }
+
+    processTinyFlags(node, control);
 
     registerRenderResult(control, { node: node, validator });
 
@@ -562,3 +566,22 @@ function createValidator(node: VValidatorNode): ValidatorFn | ValidatorFn[] {
         return node.mixer(flatMap(node.children, child => arrayify(createValidator(child))));
     }
 }
+
+function processTinyFlags(node: VFormControl, control: FormControl): void {
+    if (hasField(node, 'touched') && node.touched !== control.touched) {
+        if (node.touched) {
+            control.markAsTouched();
+        } else {
+            control.markAsUntouched();
+        }
+    }
+
+    if (hasField(node, 'dirty') && node.dirty !== control.dirty) {
+        if (node.dirty) {
+            control.markAsDirty();
+        } else {
+            control.markAsPristine();
+        }
+    }
+}
+

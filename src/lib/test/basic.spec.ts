@@ -1,5 +1,5 @@
-import { vArray, vControl, vForm, vGroup } from '..';
-import { belarusToAustralia, Flight } from './test-mocks';
+import { vArray, vControl, vForm, vGroup, VValidators } from '..';
+import { belarusToAustralia, Box, elephant, Flight, mouse } from './test-mocks';
 
 const flightFactory = (value: Flight) => vGroup(null, {
     name: vControl(value.name),
@@ -93,6 +93,34 @@ describe('basic', () => {
                 time: 120,
             });
             expect(factory).toHaveBeenCalledTimes(2);
+        });
+    });
+
+    describe('valueChanges', () => {
+        it('should emit once emit value once for each reconcile operation', () => {
+            const subscriber = jasmine.createSpy('subscriber')
+            const rawSubscriber = jasmine.createSpy('raw-subscriber')
+
+            const form = vForm((value: Box) => vGroup(null, {
+                name: vControl(value.name),
+                weight: vControl(value.weight, {
+                    disabled: value.volume! > 100,
+                    validator: value.name === 'mouse' ? VValidators.max(10) : VValidators.max(10000),
+                }),
+                volume: vControl(value.volume, {
+                    disabled: value.weight! < 10,
+                }),
+            })).build(mouse);
+
+            form.valueChanges.subscribe(subscriber);
+            form.rawValueChanges.subscribe(rawSubscriber);
+
+            form.setValue(elephant);
+
+            const { weight, ...elephantWithoutVolume } = elephant;
+
+            expect(subscriber).toHaveBeenCalledOnceWith(elephantWithoutVolume);
+            expect(rawSubscriber).toHaveBeenCalledOnceWith(elephant);
         });
     });
 });

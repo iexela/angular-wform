@@ -46,6 +46,8 @@ export interface VFormNodeBase {
 
 export interface VFormControl extends VFormNodeBase {
     type: VFormNodeType.Control;
+    dirty?: boolean;
+    touched?: boolean;
     value: any;
 }
 

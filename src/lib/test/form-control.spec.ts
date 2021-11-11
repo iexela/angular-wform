@@ -74,6 +74,42 @@ describe('VFormControl', () => {
 
             expect(form.value).toBe(2);
         });
+
+        it('should not mark control as dirty if corresponding tiny flag is not set', () => {
+            const form = renderNumber(2, {});
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should not mark control as dirty if corresponding tiny flag is set to false', () => {
+            const form = renderNumber(2, { dirty: false });
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should mark control as dirty if corresponding tiny flag is set to true', () => {
+            const form = renderNumber(2, { dirty: true });
+
+            expect(form.control.dirty).toBeTrue();
+        });
+
+        it('should not mark control as touched if corresponding tiny flag is not set', () => {
+            const form = renderNumber(2, {});
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should not mark control as touched if corresponding tiny flag is set to false', () => {
+            const form = renderNumber(2, { touched: false });
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should mark control as touched if corresponding tiny flag is set to true', () => {
+            const form = renderNumber(2, { touched: true });
+
+            expect(form.control.touched).toBeTrue();
+        });
     });
 
     describe('value getters', () => {
@@ -230,6 +266,90 @@ describe('VFormControl', () => {
             form.setValue(10);
 
             expect(form.value).toBe(11);
+        });
+
+        it('should not update dirty flag if corresponding tiny flag is not set', () => {
+            const form = renderConditionalNumber(2, 5, {}, {});
+
+            form.setValue(7);
+
+            expect(form.control.dirty).toBeFalse();
+
+            form.control.markAsDirty();
+
+            form.setValue(9);
+
+            expect(form.control.dirty).toBeTrue();
+        });
+
+        it('should unset dirty flag if corresponding tiny flag is set to false', () => {
+            const form = renderConditionalNumber(2, 5, {}, { dirty: false });
+
+            form.setValue(7);
+
+            expect(form.control.dirty).toBeFalse();
+
+            form.control.markAsDirty();
+
+            form.setValue(9);
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should mark control as dirty if corresponding tiny flag is set to true', () => {
+            const form = renderConditionalNumber(2, 5, {}, { dirty: true });
+
+            form.setValue(7);
+
+            expect(form.control.dirty).toBeTrue();
+
+            form.control.markAsPristine();
+
+            form.setValue(9);
+
+            expect(form.control.dirty).toBeTrue();
+        });
+
+        it('should not update touched flag if corresponding tiny flag is not set', () => {
+            const form = renderConditionalNumber(2, 5, {}, {});
+
+            form.setValue(7);
+
+            expect(form.control.touched).toBeFalse();
+
+            form.control.markAsTouched();
+
+            form.setValue(9);
+
+            expect(form.control.touched).toBeTrue();
+        });
+
+        it('should unset touched flag if corresponding tiny flag is set to false', () => {
+            const form = renderConditionalNumber(2, 5, {}, { touched: false });
+
+            form.setValue(7);
+
+            expect(form.control.touched).toBeFalse();
+
+            form.control.markAsTouched();
+
+            form.setValue(9);
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should mark control as dirty if corresponding tiny flag is set to true', () => {
+            const form = renderConditionalNumber(2, 5, {}, { dirty: true });
+
+            form.setValue(7);
+
+            expect(form.control.dirty).toBeTrue();
+
+            form.control.markAsUntouched();
+
+            form.setValue(9);
+
+            expect(form.control.dirty).toBeTrue();
         });
 
         it('should not recreate underlying FormControl', () => {
