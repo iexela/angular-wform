@@ -129,7 +129,10 @@ function processControl(ctx: VRenderContext, node: VFormControl, control?: Abstr
         const newControl = new FormControl({
             value: node.value,
             disabled: node.disabled,
-        }, validator.compiled);
+        }, {
+            validators: validator.compiled,
+            updateOn: node.updateOn,
+        });
 
         processTinyFlags(node, newControl);
 
@@ -171,7 +174,10 @@ function processGroup(ctx: VRenderContext, node: VFormGroup, control?: FormGroup
         const validator = processValidators(ctx, node.validator);
         const group = new FormGroup(
             mapValues(node.children, child => processNode(ctx, child)),
-            validator.compiled,
+            {
+                validators: validator.compiled,
+                updateOn: node.updateOn,
+            },
         );
 
         if (node.disabled) {
@@ -226,7 +232,10 @@ function processArray(ctx: VRenderContext, node: VFormArray, control?: FormArray
 
         const array = new FormArray(
             node.children.map(child => processNode(ctx, child)),
-            validator.compiled,
+            {
+                validators: validator.compiled,
+                updateOn: node.updateOn,
+            },
         );
 
         if (node.disabled) {

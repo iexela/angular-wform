@@ -1,4 +1,4 @@
-import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, vGroup } from '..';
+import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, VFormHooks, vGroup } from '..';
 import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia } from './test-mocks';
 import { trackControl } from './test-utils';
 
@@ -129,6 +129,28 @@ describe('VFormGroup', () => {
             const form = flightFormBuilder().build(belarusToAustralia);
 
             expect(form.value).toEqual(belarusToAustralia);
+        });
+
+        it('should set updateOn flag to "change", by default', () => {
+            const form = renderGroup(parcel, {});
+
+            expect(form.control.updateOn).toBe(VFormHooks.Change);
+            expect(form.getControl('volume').updateOn).toBe(VFormHooks.Change);
+        });
+
+        it('should allow to set updateOn flag', () => {
+            const form = renderGroup(parcel, { updateOn: VFormHooks.Blur });
+
+            expect(form.control.updateOn).toBe(VFormHooks.Blur);
+            expect(form.getControl('volume').updateOn).toBe(VFormHooks.Blur);
+        });
+
+        it('should allow to redeclare updateOn flag on child level', () => {
+            const form = renderGroup(parcel, { updateOn: VFormHooks.Blur }, withWeightAndVolume(parcel, {}, { updateOn: VFormHooks.Submit }));
+
+            expect(form.control.updateOn).toBe(VFormHooks.Blur);
+            expect(form.getControl('weight').updateOn).toBe(VFormHooks.Blur);
+            expect(form.getControl('volume').updateOn).toBe(VFormHooks.Submit);
         });
     });
 
@@ -462,6 +484,18 @@ describe('VFormGroup', () => {
             form.setValue(belarusToRussia);
 
             expect(form.value).toEqual(belarusToRussia);
+        });
+
+        it('should not update "updateOn" flag', () => {
+            const form = renderConditionalGroup(
+                parcel,
+                50,
+                [{ updateOn: VFormHooks.Change }],
+                [{ updateOn: VFormHooks.Blur }]);
+
+            form.setValue(largeParcel);
+            
+            expect(form.control.updateOn).toBe(VFormHooks.Change);
         });
     });
 

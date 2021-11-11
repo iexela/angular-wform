@@ -1,7 +1,6 @@
 2. Write tests for specific validators
 3. Add support of async validators
 4. Think how to simplify patch implementation
-6. Add support of updateOn field
 7. Restore node from control when node does not exist
 8. Write real-world sample
 10. Write tests for `getLastValidators`

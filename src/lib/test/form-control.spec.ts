@@ -1,4 +1,4 @@
-import { getLastFormNode, vControl, VForm, vForm, VFormControlOptions } from '..';
+import { getLastFormNode, vControl, VForm, vForm, VFormControlOptions, VFormHooks } from '..';
 import { trackControl } from './test-utils';
 import { even, moreThan10 } from './test-mocks';
 
@@ -109,6 +109,18 @@ describe('VFormControl', () => {
             const form = renderNumber(2, { touched: true });
 
             expect(form.control.touched).toBeTrue();
+        });
+
+        it('should set updateOn flag to "change", by default', () => {
+            const form = renderNumber(2, {});
+
+            expect(form.control.updateOn).toBe(VFormHooks.Change);
+        });
+
+        it('should allow to set updateOn flag', () => {
+            const form = renderNumber(2, { updateOn: VFormHooks.Blur });
+
+            expect(form.control.updateOn).toBe(VFormHooks.Blur);
         });
     });
 
@@ -360,6 +372,14 @@ describe('VFormControl', () => {
             form.setValue(7);
     
             expect(form.control).toBe(control);
+        });
+
+        it('should not update "updateOn" flag', () => {
+            const form = renderConditionalNumber(2, 5, { updateOn: VFormHooks.Change }, { updateOn: VFormHooks.Blur });
+
+            form.setValue(7);
+            
+            expect(form.control.updateOn).toBe(VFormHooks.Change);
         });
     });
 

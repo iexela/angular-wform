@@ -1,4 +1,4 @@
-import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayChildren, VFormArrayOptions, VFormBuilder, VFormControlOptions, vGroup, vValidator } from '..';
+import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayChildren, VFormArrayOptions, VFormBuilder, VFormControlOptions, VFormHooks, vGroup, vValidator } from '..';
 import { Box, elephant, even, krokodile, moreThan10, mouse } from './test-mocks';
 import { trackControl } from './test-utils';
 
@@ -23,7 +23,7 @@ function renderArray(initial: number[], options: VFormArrayOptions = {}, childre
     return vForm((current: number[]) => vArray(options, children || withItem(current))).build(initial);
 }
 
-function renderConditionalGroup(initial: number[],
+function renderConditionalArray(initial: number[],
                                 anchor: number,
                                 [optionsLess, childrenLess]: [VFormArrayOptions, VFormArrayChildren?],
                                 [optionsMore, childrenMore]: [VFormArrayOptions, VFormArrayChildren?]): VForm<number[]> {
@@ -34,7 +34,7 @@ function renderConditionalGroup(initial: number[],
 }
 
 function renderDisabledConditionalGroup(initial: number[], anchor: number): VForm<number[]> {
-    return renderConditionalGroup(initial, anchor, [{ disabled: true }], [{ disabled: false }]);
+    return renderConditionalArray(initial, anchor, [{ disabled: true }], [{ disabled: false }]);
 }
 
 function boxArrayFormBuilder(): VFormBuilder<Box[]> {
@@ -117,6 +117,31 @@ describe('VFormArray', () => {
 
         it('should not validate disabled control', () => {
             expect(renderArray(fibonaci10, { validator: lengthLessThan10, disabled: true }).control.errors).toBeFalsy();
+        });
+
+        it('should set updateOn flag to "change", by default', () => {
+            const form = renderArray(fibonaci5, {});
+
+            expect(form.control.updateOn).toBe(VFormHooks.Change);
+            expect(form.getControl('1').updateOn).toBe(VFormHooks.Change);
+        });
+
+        it('should allow to set updateOn flag', () => {
+            const form = renderArray(fibonaci5, { updateOn: VFormHooks.Blur });
+
+            expect(form.control.updateOn).toBe(VFormHooks.Blur);
+            expect(form.getControl('1').updateOn).toBe(VFormHooks.Blur);
+        });
+
+        it('should allow to redeclare updateOn flag on child level', () => {
+            const form = renderArray(
+                fibonaci5,
+                { updateOn: VFormHooks.Blur },
+                withItem(fibonaci5, (_, i) => (i === 1 ? { updateOn: VFormHooks.Submit } : {})));
+
+            expect(form.control.updateOn).toBe(VFormHooks.Blur);
+            expect(form.getControl('0').updateOn).toBe(VFormHooks.Blur);
+            expect(form.getControl('1').updateOn).toBe(VFormHooks.Submit);
         });
     });
 
@@ -267,7 +292,7 @@ describe('VFormArray', () => {
         });
 
         it('should disable internal controls if "disabled" flag was switched to true (regardles of "disabled" flag of internal controls)', () => {
-            const form = renderConditionalGroup(
+            const form = renderConditionalArray(
                 fibonaci2_10,
                 50,
                 [
@@ -289,7 +314,7 @@ describe('VFormArray', () => {
         });
 
         it('should respect "disabled" state of internal controls if "disabled" flag was switched to false', () => {
-            const form = renderConditionalGroup(
+            const form = renderConditionalArray(
                 fibonaci10,
                 50,
                 [
@@ -311,7 +336,7 @@ describe('VFormArray', () => {
         });
 
         it('should switch state of internal controls (if any) if "disabled" flag is set to false', () => {
-            const form = renderConditionalGroup(
+            const form = renderConditionalArray(
                 fibonaci10,
                 50,
                 [
@@ -333,7 +358,7 @@ describe('VFormArray', () => {
         });
 
         it('should assign validators', () => {
-            const form = renderConditionalGroup(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
+            const form = renderConditionalArray(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
 
             expect(form.control.errors).toBeFalsy();
     
@@ -343,7 +368,7 @@ describe('VFormArray', () => {
         });
 
         it('should remove validators', () => {
-            const form = renderConditionalGroup(fibonaci2_10, 50, [{}], [{ validator: startedFrom0 }]);
+            const form = renderConditionalArray(fibonaci2_10, 50, [{}], [{ validator: startedFrom0 }]);
     
             expect(form.control.errors).toEqual({ zero: true });
     
@@ -353,7 +378,7 @@ describe('VFormArray', () => {
         });
 
         it('should change validators', () => {
-            const form = renderConditionalGroup(fibonaci10, 50, [{ validator: lengthLessThan10 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
+            const form = renderConditionalArray(fibonaci10, 50, [{ validator: lengthLessThan10 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
     
             expect(form.control.errors).toEqual({ length: true });
     
@@ -363,7 +388,7 @@ describe('VFormArray', () => {
         });
 
         it('should rerender control if value was changed in meantime', () => {
-            const form = renderConditionalGroup(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
+            const form = renderConditionalArray(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
     
             form.control.setValue(fibonaci2_10);
     
@@ -387,7 +412,7 @@ describe('VFormArray', () => {
         });
 
         it('should not recreate underlying FormControl', () => {
-            const form = renderConditionalGroup(fibonaci10, 50, [{ validator: startedFrom0 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
+            const form = renderConditionalArray(fibonaci10, 50, [{ validator: startedFrom0 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
     
             const control = form.control;
     
@@ -474,6 +499,18 @@ describe('VFormArray', () => {
             expect(form.getControl('0')).toBe(elephantControl);
             expect(form.getControl('1')).toBeTruthy();
             expect(form.getControl('1')).not.toBe(krokodileControl);
+        });
+
+        it('should not update "updateOn" flag', () => {
+            const form = renderConditionalArray(
+                fibonaci10,
+                50,
+                [{ updateOn: VFormHooks.Change }],
+                [{ updateOn: VFormHooks.Blur }]);
+    
+            form.setValue(fibonaci2_10);
+            
+            expect(form.control.updateOn).toBe(VFormHooks.Change);
         });
     });
 

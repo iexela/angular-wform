@@ -36,11 +36,18 @@ export enum VFormNodeType {
     Control, Group, Array
 }
 
+export enum VFormHooks {
+    Change = 'change',
+    Blur = 'blur',
+    Submit = 'submit',
+}
+
 export interface VFormNodeBase {
     key?: any;
     type: VFormNodeType;
     disabled: boolean;
     validator?: VValidatorNode;
+    updateOn?: VFormHooks;
     data: Record<string, any>;
 }
 
