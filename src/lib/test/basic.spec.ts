@@ -1,20 +1,20 @@
 import { vArray, vControl, vForm, vGroup } from '..';
 import { belarusToAustralia, Flight } from './test-mocks';
 
-const flightFactory = (value: Flight) => vGroup({
-    name: vControl(),
-    route: vArray(value.route.map(point => vControl({ key: point }))),
-    cost: vGroup({
-        price: vControl(),
-        discount: vControl(),
+const flightFactory = (value: Flight) => vGroup(null, {
+    name: vControl(value.name),
+    route: vArray(null, value.route.map(point => vControl(point))),
+    cost: vGroup(null, {
+        price: vControl(value.cost.price),
+        discount: vControl(value.cost.discount),
     }),
-    time: vControl({ disabled: true }),
+    time: vControl(undefined, { disabled: true }),
 });
 
 describe('basic', () => {
     describe('virtual function', () => {
         it('should accept initial value', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
+            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl(1));
             vForm(fn).build(1 as number);
     
             expect(fn.calls.count()).toBe(1);
@@ -22,7 +22,7 @@ describe('basic', () => {
         });
     
         it('should accept value passed into "setValue" method', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
+            const fn = jasmine.createSpy('virtual-fn').and.callFake(vControl);
             const form = vForm(fn).build(1 as number);
     
             form.setValue(5);
@@ -32,7 +32,7 @@ describe('basic', () => {
         });
     
         it('should accept current value if "update" is called', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
+            const fn = jasmine.createSpy('virtual-fn').and.callFake(vControl);
             const form = vForm(fn).build(1 as number);
     
             form.update();
@@ -42,7 +42,7 @@ describe('basic', () => {
         });
     
         it('should not be called if value was changed using "control.setValue"', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
+            const fn = jasmine.createSpy('virtual-fn').and.callFake(vControl);
             const form = vForm(fn).build(1 as number);
     
             form.control.setValue(5);

@@ -1,4 +1,4 @@
-import { ValidatorFn } from '@angular/forms';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 
 export enum VValidatorNodeType {
     Compound, Simple, Factory
@@ -46,6 +46,7 @@ export interface VFormNodeBase {
 
 export interface VFormControl extends VFormNodeBase {
     type: VFormNodeType.Control;
+    value: any;
 }
 
 export interface VFormGroup extends VFormNodeBase {
@@ -60,30 +61,12 @@ export interface VFormArray extends VFormNodeBase {
 
 export type VFormNode = VFormControl | VFormGroup | VFormArray;
 
-export type VFormNodePatchBase = Partial<VFormNodeBase>;
-
-export interface VFormControlPatch extends VFormNodePatchBase {
-    type: VFormNodeType.Control;
-}
-
-export interface VFormGroupPatch extends VFormNodePatchBase {
-    type: VFormNodeType.Group;
-    children?: Record<string, VFormNode>;
-}
-
-export interface VFormArrayPatch extends VFormNodePatchBase {
-    type: VFormNodeType.Array;
-    children?: VFormNode[];
-}
-
-export type VFormNodePatch = VFormControlPatch | VFormGroupPatch | VFormArrayPatch;
-
 export interface VFormNodeFactory<T> {
     (value: T): VFormNode;
 }
 
-export interface VFormPatcher<T> {
-    (value: T, node: VFormNode): VFormNodePatch;
+export interface VFormPatcher {
+    (control: AbstractControl): VFormNode;
 }
 
 export function isValidatorNode(value: any): value is VValidatorNode {

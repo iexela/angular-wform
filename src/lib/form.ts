@@ -5,7 +5,6 @@ import { reconcile, VFormFlags, VReconcilationRequest, VReconcilationType } from
 import { calculateValue } from './utils';
 
 export class VForm<T> {
-    private _node: VFormNode;
     private _control: AbstractControl;
     private _factory: VFormNodeFactory<T>;
     private flags: VFormFlags;
@@ -34,19 +33,15 @@ export class VForm<T> {
     constructor(factory: VFormNodeFactory<T>, flags: VFormFlags, value: T) {
         this.flags = flags;
 
-        const { node, control } = reconcile({
-            type: VReconcilationType.Update,
+        this._control = reconcile({
             flags,
             node: factory(value),
-            value
         });
 
         this._factory = factory;
-        this._node = node;
-        this._control = control;
 
         if (flags.updateOnChange) {
-            control.valueChanges.subscribe(() => {
+            this._control.valueChanges.subscribe(() => {
                 if (!this._reconcilationInProgress) {
                     this.update();
                 }
@@ -56,10 +51,8 @@ export class VForm<T> {
 
     setValue(value: T): void {
         this._reconcile({
-            type: VReconcilationType.Update,
             flags: this.flags,
             node: this._factory(value),
-            value,
             control: this._control,
         });
     }
@@ -119,22 +112,16 @@ export class VForm<T> {
         const value = this.rawValue;
 
         this._reconcile({
-            type: VReconcilationType.Update,
             flags: this.flags,
             node: this._factory(value),
-            value,
             control: this._control,
         });
     }
 
-    patch(patcher: VFormNodePatcher<T>): void {
-        const value = this.rawValue;
-
+    patch(patcher: VFormNodePatcher): void {
         this._reconcile({
-            type: VReconcilationType.Patch,
             flags: this.flags,
-            node: patcher(value, this._node),
-            value,
+            node: patcher(this._control),
             control: this._control,
         });
     }
@@ -142,9 +129,7 @@ export class VForm<T> {
     private _reconcile(request: VReconcilationRequest): void {
         this._reconcilationInProgress = true;
         try {
-            const { node, control } = reconcile(request);
-            this._node = node;
-            this._control = control;
+            this._control = reconcile(request);
         } finally {
             this._reconcilationInProgress = false;
         }

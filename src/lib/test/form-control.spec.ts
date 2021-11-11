@@ -3,11 +3,11 @@ import { trackControl } from './test-utils';
 import { even, moreThan10 } from './test-mocks';
 
 function renderNumber(n: number, options?: VFormControlOptions): VForm<number> {
-    return vForm(() => vControl(options)).build(n);
+    return vForm((value) => vControl(value, options)).build(n);
 }
 
 function renderConditionalNumber(initial: number, anchor: number, optionsLess: VFormControlOptions, optionsMore: VFormControlOptions): VForm<number> {
-    return vForm((value: number) => vControl(value < anchor ? optionsLess : optionsMore)).build(initial);
+    return vForm((value: number) => vControl(value, value < anchor ? optionsLess : optionsMore)).build(initial);
 }
 
 function renderDisabledConditionalNumber(initial: number, anchor: number): VForm<number> {
@@ -67,6 +67,12 @@ describe('VFormControl', () => {
 
         it('should not validate disabled control', () => {
             expect(renderNumber(null as any, { required: true, disabled: true }).control.errors).toBeFalsy();
+        });
+
+        it('should render value passed into vnode', () => {
+            const form = vForm((value: number) => vControl(value + 1)).build(1 as number);
+
+            expect(form.value).toBe(2);
         });
     });
 
@@ -157,7 +163,7 @@ describe('VFormControl', () => {
         });
 
         it('should do nothing if disabled flag was not modified in vform tree', () => {
-            const form = vForm(() => vControl({ disabled: true })).build(2);
+            const form = vForm((v: number) => vControl(v, { disabled: true })).build(2);
     
             const tracker = trackControl(form.control);
     
@@ -209,13 +215,21 @@ describe('VFormControl', () => {
         });
 
         it('should do nothing if validators were not changed', () => {
-            const form = vForm(() => vControl({ required: true, validator: [moreThan10, even] })).build(1);
+            const form = vForm((v: number) => vControl(v, { required: true, validator: [moreThan10, even] })).build(1);
     
             const tracker = trackControl(form.control);
     
             form.update();
     
             expect(tracker.changed).toBeFalse();
+        });
+
+        it('should update value by value passed into vnode', () => {
+            const form = vForm((value: number) => vControl(value + 1)).build(1 as number);
+
+            form.setValue(10);
+
+            expect(form.value).toBe(11);
         });
 
         it('should not recreate underlying FormControl', () => {
@@ -231,9 +245,9 @@ describe('VFormControl', () => {
 
     describe('getLastFormNode', () => {
         it('should return node from the latest render operation', () => {
-            const node1 = vControl();
-            const node2 = vControl({ validator: moreThan10 });
-            const node3 = vControl({ validator: even });
+            const node1 = vControl(1);
+            const node2 = vControl(2, { validator: moreThan10 });
+            const node3 = vControl(3, { validator: even });
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
             const form = vForm(fn).build(1);

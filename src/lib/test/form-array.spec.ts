@@ -7,7 +7,7 @@ function defaultItemRenderer<T>(value: T, index: number): VFormControlOptions {
 }
 
 function withItem<T>(items: T[], fn: (value: T, index: number) => VFormControlOptions = defaultItemRenderer): VFormArrayChildren {
-    return (items || []).map((item, index) => vControl(fn(item, index)));
+    return (items || []).map((item, index) => vControl(items[index], fn(item, index)));
 }
 
 const fibonaci5 = [0, 1, 1, 2, 3];
@@ -20,7 +20,7 @@ const lengthLessThan10 = vValidator(control => control.value.length >= 10 ? { le
 const startedFrom0 = vValidator(control => control.value[0] !== 0 ? { zero: true } : null);
 
 function renderArray(initial: number[], options: VFormArrayOptions = {}, children?: VFormArrayChildren): VForm<number[]> {
-    return vForm(() => vArray(options, children || withItem(initial))).build(initial);
+    return vForm((current: number[]) => vArray(options, children || withItem(current))).build(initial);
 }
 
 function renderConditionalGroup(initial: number[],
@@ -29,7 +29,7 @@ function renderConditionalGroup(initial: number[],
                                 [optionsMore, childrenMore]: [VFormArrayOptions, VFormArrayChildren?]): VForm<number[]> {
     return vForm((value: number[]) => {
         const isLess = value.every(v => v < anchor);
-        return vArray(isLess ? optionsLess : optionsMore, (isLess ? childrenLess : childrenMore) || withItem(initial));
+        return vArray(isLess ? optionsLess : optionsMore, (isLess ? childrenLess : childrenMore) || withItem(value));
     }).build(initial);
 }
 
@@ -38,10 +38,10 @@ function renderDisabledConditionalGroup(initial: number[], anchor: number): VFor
 }
 
 function boxArrayFormBuilder(): VFormBuilder<Box[]> {
-    return vForm((boxes: Box[]) => vArray(boxes.map(box => vGroup({ key: box.name }, {
-        name: vControl(),
-        weight: vControl(),
-        volume: vControl(),
+    return vForm((boxes: Box[]) => vArray(null, boxes.map(box => vGroup({ key: box.name }, {
+        name: vControl(box.name),
+        weight: vControl(box.weight),
+        volume: vControl(box.volume),
     }))));
 }
 
@@ -126,15 +126,15 @@ describe('VFormArray', () => {
         });
     
         it('should return only fields mapped to controls', () => {
-            const form = vForm(() => vArray(withItem(fibonaci5))).build(fibonaci10);
+            const form = vForm(() => vArray(null, withItem(fibonaci5))).build(fibonaci10);
 
             expect(form.value).toEqual(fibonaci5);
         });
     
         it('should return all fields mapped to controls', () => {
-            const form = vForm(() => vArray(withItem(fibonaci10))).build(fibonaci5);
+            const form = vForm(() => vArray(null, withItem(fibonaci10))).build(fibonaci5);
 
-            expect(form.value).toEqual([...fibonaci5, undefined, undefined, undefined, undefined, undefined] as any[]);
+            expect(form.value).toEqual(fibonaci10);
         });
     
         it('should return value if "disabled"', () => {
@@ -185,7 +185,7 @@ describe('VFormArray', () => {
         });
     
         it('should not update control if unrelated field was added', () => {
-            const form = renderArray(fibonaci5);
+            const form = renderArray(fibonaci5, {}, withItem(fibonaci5));
     
             const tracker = trackControl(form.control);
     
@@ -479,7 +479,7 @@ describe('VFormArray', () => {
 
     describe('getLastFormNode', () => {
         it('should return node from the latest render operation', () => {
-            const node1 = vArray(withItem(fibonaci10));
+            const node1 = vArray(null, withItem(fibonaci10));
             const node2 = vArray({
                 validator: moreThan10,
             }, withItem(fibonaci10));
