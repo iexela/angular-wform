@@ -38,14 +38,22 @@ export function vCompoundValidator<T>(mixer: VValidatorMixer<T>): (...validators
     };
 }
 
-export const andValidators = vCompoundValidator(validators =>
-    control => validators.reduce((errors, validator) => errors || validator(control), null as ReturnType<ValidatorFn>));
+export const andValidators = vCompoundValidator(validators => {
+    if (validators.length === 0) {
+        return validators;
+    }
+    return control => validators.reduce((errors, validator) => errors || validator(control), null as ReturnType<ValidatorFn>);
+});
 
-export const orValidators = vCompoundValidator(validators =>
-    control => {
+export const orValidators = vCompoundValidator(validators => {
+    if (validators.length === 0) {
+        return validators;
+    }
+    return control => {
         const errors = validators.map(validator => validator(control));
         return errors.every(Boolean) ? mergeErrors(errors) : null;
-    });
+    };
+});
     
 export const composeValidators = vCompoundValidator(validators => validators);
 

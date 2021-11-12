@@ -1,6 +1,8 @@
 import { AbstractControl, FormControl, ValidatorFn, Validators } from '@angular/forms';
-import { vCompoundValidator, vControl, vForm, vValidator, vValidatorFactory } from '..';
+import { vCompoundValidator, vControl, vForm, vValidator, vValidatorFactory, VValidatorNode, VValidators } from '..';
+import { Nullable } from '../common';
 import { VValidationStrategy } from '../reconcilation';
+import { even, moreThan10 } from './test-mocks';
 
 const TEST_VALUE = Object.freeze({});
 
@@ -47,6 +49,11 @@ function hasControlValidator(control: AbstractControl, validator: ValidatorFn): 
     }
 
     return errorsToFindKeys.every(key => foundErrorsKeys.includes(key));
+}
+
+function controlWithValidator(node: VValidatorNode): AbstractControl {
+    const form = vForm((value) => vControl(value, { validator: node })).build(null);
+    return form.control;
 }
 
 type V3 = (a: number, b: string, c: boolean) => ValidatorFn;
@@ -453,10 +460,6 @@ describe('validators', () => {
         });
     });
 
-    describe('basic validators', () => {
-
-    });
-
     describe('side effects', () => {
         describe(`${VValidationStrategy[VValidationStrategy.Append]} strategy`, () => {
             it('should restore removed validator', () => {
@@ -591,6 +594,120 @@ describe('validators', () => {
                 expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
                 expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
                 expect(hasControlValidator(form.control, testValidator3)).toBeFalse();
+            });
+        });
+    });
+
+    describe('instances', () => {
+        describe('compose', () => {
+            it('should not assign validator when there is no child validator', () => {
+                const no = controlWithValidator(VValidators.compose());
+                expect(no.validator).toBeFalsy();
+            });
+
+            it('should return results of the single assigned validator', () => {
+                const single = controlWithValidator(VValidators.compose(even));
+
+                single.setValue(1);
+                expect(single.errors).toEqual({ even: true });
+
+                single.setValue(2);
+                expect(single.errors).toBeFalsy();
+            });
+
+            it('should successed if all validators are successed', () => {
+                const many = controlWithValidator(VValidators.compose(even, moreThan10));
+
+                many.setValue(100);
+                expect(many.errors).toBeFalsy();
+            });
+
+            it('should fail and return merged results of all assigned validators, if at least one validator is failed', () => {
+                const many = controlWithValidator(VValidators.compose(even, moreThan10));
+
+                many.setValue(5);
+                expect(many.errors).toEqual({ even: true, min: true });
+
+                many.setValue(4);
+                expect(many.errors).toEqual({ min: true });
+
+                many.setValue(55);
+                expect(many.errors).toEqual({ even: true });
+            });
+        });
+
+        describe('and', () => {
+            it('should not assign validator when there is no child validator', () => {
+                const no = controlWithValidator(VValidators.and());
+                expect(no.validator).toBeFalsy();
+            });
+
+            it('should return results of the single assigned validator', () => {
+                const single = controlWithValidator(VValidators.and(even));
+
+                single.setValue(1);
+                expect(single.errors).toEqual({ even: true });
+
+                single.setValue(2);
+                expect(single.errors).toBeFalsy();
+            });
+
+            it('should return results of the first failed validator', () => {
+                const many = controlWithValidator(VValidators.and(even, moreThan10));
+
+                many.setValue(5);
+                expect(many.errors).toEqual({ even: true });
+
+                many.setValue(4);
+                expect(many.errors).toEqual({ min: true });
+
+                many.setValue(55);
+                expect(many.errors).toEqual({ even: true });
+
+            });
+
+            it('should successed if no any and validator is failed', () => {
+                const many = controlWithValidator(VValidators.and(even, moreThan10));
+
+                many.setValue(100);
+                expect(many.errors).toBeFalsy();
+            });
+        });
+
+        describe('or', () => {
+            it('should not assign validator when there is no child validator', () => {
+                const no = controlWithValidator(VValidators.or());
+                expect(no.validator).toBeFalsy();
+            });
+
+            it('should return results of the single assigned validator', () => {
+                const single = controlWithValidator(VValidators.or(even));
+
+                single.setValue(1);
+                expect(single.errors).toEqual({ even: true });
+
+                single.setValue(2);
+                expect(single.errors).toBeFalsy();
+            });
+
+            it('should successed if at least one validator is successed', () => {
+                const many = controlWithValidator(VValidators.or(even, moreThan10));
+
+                many.setValue(4);
+                expect(many.errors).toBeFalsy();
+
+                many.setValue(55);
+                expect(many.errors).toBeFalsy();
+
+                many.setValue(100);
+                expect(many.errors).toBeFalsy();
+            });
+
+            it('should fail and return merged results if all validators are failed', () => {
+                const many = controlWithValidator(VValidators.or(even, moreThan10));
+
+                many.setValue(5);
+                expect(many.errors).toEqual({ even: true, min: true });
             });
         });
     });
