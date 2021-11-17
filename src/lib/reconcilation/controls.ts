@@ -5,6 +5,7 @@ import { VRenderContext } from './render-context';
 import { arrayDiff, arrayDiffUnordered, arrayify, flatMap, hasField, isAngularAtLeast, mapValues, objectDiff } from '../utils';
 import { getLastFormNode, registerRenderResult } from './registry';
 import { processValidators } from './validators';
+import { processAsyncValidators } from './validators-async';
 
 function restoreFormNode(control: AbstractControl): VFormNode {
     // TODO: consider the case when control is not managed by vform
@@ -12,7 +13,6 @@ function restoreFormNode(control: AbstractControl): VFormNode {
 }
 
 export function processNode(ctx: VRenderContext, node: VFormNode, control?: AbstractControl): AbstractControl {
-    // TODO: add node.asyncValidators handling
     switch (node.type) {
         case VFormNodeType.Control:
             return processControl(ctx, node, control);
@@ -28,17 +28,19 @@ export function processNode(ctx: VRenderContext, node: VFormNode, control?: Abst
 function processControl(ctx: VRenderContext, node: VFormControl, control?: AbstractControl): AbstractControl {
     if (!node || !control) {
         const validator = processValidators(ctx, node.validator);
+        const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
         const newControl = new FormControl({
             value: node.value,
             disabled: node.disabled,
         }, {
+            asyncValidators: asyncValidator.compiled,
             validators: validator.compiled,
             updateOn: node.updateOn,
         });
 
         processTinyFlags(node, newControl);
 
-        registerRenderResult(newControl, { node, validator });
+        registerRenderResult(newControl, { node, validator, asyncValidator });
 
         return newControl;
     }
@@ -57,6 +59,7 @@ function processControl(ctx: VRenderContext, node: VFormControl, control?: Abstr
     }
 
     const validator = processValidators(ctx, node.validator, control);
+    const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
 
     if (control.value !== node.value) {
         control.setValue(node.value);
@@ -64,7 +67,7 @@ function processControl(ctx: VRenderContext, node: VFormControl, control?: Abstr
 
     processTinyFlags(node, control);
 
-    registerRenderResult(control, { node: node, validator });
+    registerRenderResult(control, { node: node, validator, asyncValidator });
 
     return control;
 }
@@ -74,10 +77,12 @@ function processGroup(ctx: VRenderContext, node: VFormGroup, control?: FormGroup
         ctx.push(node);
 
         const validator = processValidators(ctx, node.validator);
+        const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
         const group = new FormGroup(
             mapValues(node.children, child => processNode(ctx, child)),
             {
                 validators: validator.compiled,
+                asyncValidators: asyncValidator.compiled,
                 updateOn: node.updateOn,
             },
         );
@@ -86,7 +91,7 @@ function processGroup(ctx: VRenderContext, node: VFormGroup, control?: FormGroup
             group.disable();
         }
 
-        registerRenderResult(group, { node, validator });
+        registerRenderResult(group, { node, validator, asyncValidator });
 
         ctx.pop();
 
@@ -118,8 +123,9 @@ function processGroup(ctx: VRenderContext, node: VFormGroup, control?: FormGroup
     }
 
     const validator = processValidators(ctx, node.validator, control);
+    const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
 
-    registerRenderResult(control, { node: node, validator });
+    registerRenderResult(control, { node: node, validator, asyncValidator });
 
     ctx.pop();
 
@@ -131,11 +137,13 @@ function processArray(ctx: VRenderContext, node: VFormArray, control?: FormArray
         ctx.push(node);
 
         const validator = processValidators(ctx, node.validator);
+        const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
 
         const array = new FormArray(
             node.children.map(child => processNode(ctx, child)),
             {
                 validators: validator.compiled,
+                asyncValidators: asyncValidator.compiled,
                 updateOn: node.updateOn,
             },
         );
@@ -144,7 +152,7 @@ function processArray(ctx: VRenderContext, node: VFormArray, control?: FormArray
             array.disable();
         }
 
-        registerRenderResult(array, { node, validator });
+        registerRenderResult(array, { node, validator, asyncValidator });
 
         ctx.pop();
 
@@ -200,8 +208,9 @@ function processArray(ctx: VRenderContext, node: VFormArray, control?: FormArray
     }
 
     const validator = processValidators(ctx, node.validator, control);
+    const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
 
-    registerRenderResult(control, { node: node, validator });
+    registerRenderResult(control, { node: node, validator, asyncValidator });
 
     ctx.pop();
 

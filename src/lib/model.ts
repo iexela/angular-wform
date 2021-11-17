@@ -1,4 +1,6 @@
-import { AbstractControl, ValidatorFn } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
+
+// Validators
 
 export enum VValidatorNodeType {
     Compound, Simple, Factory
@@ -6,7 +8,7 @@ export enum VValidatorNodeType {
 
 export interface VValidatorFactory {
     (...args: any[]): ValidatorFn;
-};
+}
 
 export interface VValidatorMixer<T> {
     (validators: ValidatorFn[]): ValidatorFn | ValidatorFn[];
@@ -32,6 +34,42 @@ export interface VFactoryValidatorNode {
 
 export type VValidatorNode = VCompoundValidatorNode | VSimpleValidatorNode | VFactoryValidatorNode;
 
+// Async validators
+
+export enum VAsyncValidatorNodeType {
+    Compound, Simple, Factory
+}
+
+export interface VAsyncValidatorFactory {
+    (...args: any[]): AsyncValidatorFn;
+}
+
+export interface VAsyncValidatorMixer<T> {
+    (validators: AsyncValidatorFn[]): AsyncValidatorFn | AsyncValidatorFn[];
+}
+
+export interface VAsyncCompoundValidatorNode {
+    type: VAsyncValidatorNodeType.Compound;
+    mixer: VAsyncValidatorMixer<any>;
+    children: VAsyncValidatorNode[];
+}
+
+export interface VAsyncSimpleValidatorNode {
+    type: VAsyncValidatorNodeType.Simple;
+    validator: AsyncValidatorFn;
+    locals?: any[];
+}
+
+export interface VAsyncFactoryValidatorNode {
+    type: VAsyncValidatorNodeType.Factory;
+    factory: VAsyncValidatorFactory;
+    args: any[];
+}
+
+export type VAsyncValidatorNode = VAsyncCompoundValidatorNode | VAsyncSimpleValidatorNode | VAsyncFactoryValidatorNode;
+
+// Form nodes
+
 export enum VFormNodeType {
     Control, Group, Array
 }
@@ -47,6 +85,7 @@ export interface VFormNodeBase {
     type: VFormNodeType;
     disabled: boolean;
     validator?: VValidatorNode;
+    asyncValidator?: VAsyncValidatorNode;
     updateOn?: VFormHooks;
     data: Record<string, any>;
 }
@@ -81,3 +120,8 @@ export interface VFormPatcher {
 export function isValidatorNode(value: any): value is VValidatorNode {
     return !!VValidatorNodeType[value['type']];
 }
+
+export function isAsyncValidatorNode(value: any): value is VAsyncValidatorNode {
+    return !!VAsyncValidatorNodeType[value['type']];
+}
+

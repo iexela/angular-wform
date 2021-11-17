@@ -1,10 +1,11 @@
 import { AbstractControl } from '@angular/forms';
 import { VFormNode } from '..';
-import { createValidatorBundle, ValidatorBundle } from './internal-model';
+import { AsyncValidatorBundle, createAsyncValidatorBundle, createValidatorBundle, ValidatorBundle } from './internal-model';
 
 export interface VRenderResult {
     node: VFormNode;
     validator: ValidatorBundle;
+    asyncValidator: AsyncValidatorBundle;
 }
 
 const results = new WeakMap<AbstractControl, VRenderResult>();
@@ -31,4 +32,14 @@ export function getLastValidatorBundle(control: AbstractControl): ValidatorBundl
     }
 
     return result.validator;
+}
+
+export function getLastAsyncValidatorBundle(control: AbstractControl): AsyncValidatorBundle {
+    const result = results.get(control);
+
+    if (!result) {
+        return createAsyncValidatorBundle([]);
+    }
+
+    return result.asyncValidator;
 }
