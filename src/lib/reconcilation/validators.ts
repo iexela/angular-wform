@@ -21,50 +21,37 @@ export function processValidators(ctx: VRenderContext, node?: VValidatorNode, co
     const lastNode = getLastFormNode(control).validator;
     const lastValidatorBundle = getLastValidatorBundle(control);
 
-    if (areValidatorsChanged(lastNode, node)) {
-        const validatorBundle = applyValidators({
-            strategy: ctx.flags.validationStrategy,
-            control,
-            lastValidatorBundle,
-            nextValidators: createValidators(node),
-        });
-        control.updateValueAndValidity();
-        return validatorBundle;
-    } else {
-        return applyValidators({
-            strategy: ctx.flags.validationStrategy,
-            control,
-            lastValidatorBundle,
-            nextValidators: lastValidatorBundle.children,
-        });
-    }
+    return applyValidators(
+        ctx,
+        ctx.flags.validationStrategy,
+        control,
+        lastValidatorBundle,
+        areValidatorsChanged(lastNode, node) ? createValidators(node) : lastValidatorBundle.children,
+    );
 }
 
-interface ApplyValidatorsOptions {
-    strategy: VValidationStrategy;
-    control: AbstractControl;
-    lastValidatorBundle: ValidatorBundle;
-    nextValidators: ValidatorFn[];
-}
-
-function applyValidators({ strategy, control, lastValidatorBundle, nextValidators }: ApplyValidatorsOptions): ValidatorBundle {
+function applyValidators(ctx: VRenderContext,
+                         strategy: VValidationStrategy,
+                         control: AbstractControl,
+                         lastValidatorBundle: ValidatorBundle,
+                         nextValidators: ValidatorFn[]): ValidatorBundle {
     switch (strategy) {
         case VValidationStrategy.Append:
             if (canManageValidatorsIndividually) {
-                return appendValidatorsIndividually(control as Control12ValidatorsApi, lastValidatorBundle, nextValidators);
+                return appendValidatorsIndividually(ctx, control as Control12ValidatorsApi, lastValidatorBundle, nextValidators);
             } else if (canAccessListOfValidators) {
-                return appendValidatorsInBulk(control, lastValidatorBundle, nextValidators);
+                return appendValidatorsInBulk(ctx, control, lastValidatorBundle, nextValidators);
             } else {
-                return appendValidatorsByComposing(control, lastValidatorBundle, nextValidators);
+                return appendValidatorsByComposing(ctx, control, lastValidatorBundle, nextValidators);
             }
         case VValidationStrategy.Replace:
-            return replaceValidators(control, lastValidatorBundle, nextValidators);
+            return replaceValidators(ctx, control, lastValidatorBundle, nextValidators);
         default:
             throw new Error(`Unsupported validation strategy: '${VValidationStrategy[strategy]}'`);
     }
 }
 
-function appendValidatorsIndividually(control: Control12ValidatorsApi, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+function appendValidatorsIndividually(ctx: VRenderContext, control: Control12ValidatorsApi, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const hasCompiledValidator = lastValidatorBundle.compiled && control.hasValidator(lastValidatorBundle.compiled);
@@ -72,18 +59,22 @@ function appendValidatorsIndividually(control: Control12ValidatorsApi, lastValid
     const areValidatorsModified = added.length > 0 || removed.length > 0;
 
     if (lastValidatorBundle.compiled && !hasCompiledValidator) {
+        ctx.markValidatorsChanged();
         lastValidatorBundle.compiled.dispose();
     }
 
     if (hasValidators) {
         if (!hasCompiledValidator) {
+            ctx.markValidatorsChanged();
             const bundle = createValidatorBundle(added.concat(common));
             control.addValidators(bundle.compiled!);
             return bundle;
         } else if (areValidatorsModified) {
+            ctx.markValidatorsChanged();
             return modifyValidatorBundle(lastValidatorBundle, added.concat(common));
         }
     } else if (hasCompiledValidator) {
+        ctx.markValidatorsChanged();
         lastValidatorBundle.compiled!.dispose();
         control.removeValidators(lastValidatorBundle.compiled!);
         return createValidatorBundle([]);
@@ -92,7 +83,7 @@ function appendValidatorsIndividually(control: Control12ValidatorsApi, lastValid
     return lastValidatorBundle;
 }
 
-function appendValidatorsInBulk(control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+function appendValidatorsInBulk(ctx: VRenderContext, control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const validators = getControlValidators(control);
@@ -101,18 +92,22 @@ function appendValidatorsInBulk(control: AbstractControl, lastValidatorBundle: V
     const areValidatorsModified = added.length > 0 || removed.length > 0;
 
     if (lastValidatorBundle.compiled && !hasCompiledValidator) {
+        ctx.markValidatorsChanged();
         lastValidatorBundle.compiled.dispose();
     }
 
     if (hasValidators) {
         if (!hasCompiledValidator) {
+            ctx.markValidatorsChanged();
             const bundle = createValidatorBundle(added.concat(common));
             control.setValidators([...validators, bundle.compiled!]);
             return bundle;
         } else if (areValidatorsModified) {
+            ctx.markValidatorsChanged();
             return modifyValidatorBundle(lastValidatorBundle, added.concat(common));
         }
     } else if (hasCompiledValidator) {
+        ctx.markValidatorsChanged();
         lastValidatorBundle.compiled!.dispose();
         control.setValidators(validators.filter(v => v !== lastValidatorBundle.compiled));
         return createValidatorBundle([]);
@@ -121,7 +116,7 @@ function appendValidatorsInBulk(control: AbstractControl, lastValidatorBundle: V
     return lastValidatorBundle;
 }
 
-function appendValidatorsByComposing(control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+function appendValidatorsByComposing(ctx: VRenderContext, control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
@@ -129,18 +124,22 @@ function appendValidatorsByComposing(control: AbstractControl, lastValidatorBund
     const areValidatorsModified = added.length > 0 || removed.length > 0;
 
     if (lastValidatorBundle.compiled && !hasCompiledValidator) {
+        ctx.markValidatorsChanged();
         lastValidatorBundle.compiled.dispose();
     }
 
     if (hasValidators) {
         if (!hasCompiledValidator) {
+            ctx.markValidatorsChanged();
             const bundle = createValidatorBundle(added.concat(common).concat(arrayify(control.validator)));
             control.validator = bundle.compiled || null;
             return bundle;
         } else if (areValidatorsModified) {
+            ctx.markValidatorsChanged();
             return modifyValidatorBundle(lastValidatorBundle, added.concat(common));
         }
     } else if (hasCompiledValidator) {
+        ctx.markValidatorsChanged();
         lastValidatorBundle.compiled!.dispose();
         control.validator = null;
         return createValidatorBundle([]);
@@ -149,7 +148,7 @@ function appendValidatorsByComposing(control: AbstractControl, lastValidatorBund
     return lastValidatorBundle;
 }
 
-function replaceValidators(control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+function replaceValidators(ctx: VRenderContext, control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
@@ -157,23 +156,30 @@ function replaceValidators(control: AbstractControl, lastValidatorBundle: Valida
     const areValidatorsModified = added.length > 0 || removed.length > 0;
 
     if (lastValidatorBundle.compiled && !hasCompiledValidator) {
+        ctx.markValidatorsChanged();
         lastValidatorBundle.compiled.dispose();
     }
 
     if (hasValidators) {
         if (!hasCompiledValidator) {
+            ctx.markValidatorsChanged();
             const bundle = createValidatorBundle(added.concat(common));
             control.validator = bundle.compiled || null;
             return bundle;
         } else if (areValidatorsModified) {
+            ctx.markValidatorsChanged();
             lastValidatorBundle.compiled!.setValidators(added.concat(common));
             return lastValidatorBundle;
         }
     } else {
         if (hasCompiledValidator) {
+            ctx.markValidatorsChanged();
             lastValidatorBundle.compiled!.dispose();
         }
-        control.validator = null;
+        if (control.validator) {
+            ctx.markValidatorsChanged();
+            control.validator = null;
+        }
         return createValidatorBundle([]);
     }
 

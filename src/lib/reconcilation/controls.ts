@@ -63,7 +63,11 @@ function processControl(ctx: VRenderContext, node: VFormControl, control?: Abstr
 
     if (control.value !== node.value) {
         control.setValue(node.value);
+    } else if (ctx.validatorsChanged) {
+        control.updateValueAndValidity();
     }
+    
+    ctx.unmarkValidatorsChanged();
 
     processTinyFlags(node, control);
 
@@ -124,6 +128,11 @@ function processGroup(ctx: VRenderContext, node: VFormGroup, control?: FormGroup
 
     const validator = processValidators(ctx, node.validator, control);
     const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
+    
+    if (ctx.validatorsChanged) {
+        control.updateValueAndValidity();
+        ctx.unmarkValidatorsChanged();
+    }
 
     registerRenderResult(control, { node: node, validator, asyncValidator });
 
@@ -209,6 +218,11 @@ function processArray(ctx: VRenderContext, node: VFormArray, control?: FormArray
 
     const validator = processValidators(ctx, node.validator, control);
     const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
+    
+    if (ctx.validatorsChanged) {
+        control.updateValueAndValidity();
+        ctx.unmarkValidatorsChanged();
+    }
 
     registerRenderResult(control, { node: node, validator, asyncValidator });
 

@@ -6,4 +6,3 @@
 13. Check that library works on Angular pre-12
 14. Cover environment usage
 15. Write documentation
-16. Should we update control state after set of validators/async validators was restored
