@@ -1,10 +1,17 @@
 import { vValidator } from '..';
+import { vValidatorAsync } from '../validators';
 
 export const moreThan10 = vValidator(control => control.value <= 10 ? { min: true } : null);
 export const even = vValidator(control => (control.value % 2) === 1 ? { even: true } : null);
 
 export const small = vValidator(control => control.value.volume >= 80 ? { small: true } : null);
 export const light = vValidator(control => control.value.weight >= 80 ? { light: true } : null);
+
+export const moreThan10Async = vValidatorAsync(control => Promise.resolve(control.value <= 10 ? { min: true } : null));
+export const evenAsync = vValidatorAsync(control => Promise.resolve((control.value % 2) === 1 ? { even: true } : null));
+
+export const smallAsync = vValidatorAsync(control => Promise.resolve(control.value.volume >= 80 ? { small: true } : null));
+export const lightAsync = vValidatorAsync(control => Promise.resolve(control.value.weight >= 80 ? { light: true } : null));
 
 export interface Box {
     name?: string;

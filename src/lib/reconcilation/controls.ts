@@ -31,7 +31,7 @@ function processControl(ctx: VRenderContext, node: VFormControl, control?: Abstr
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
         const newControl = new FormControl({
             value: node.value,
-            disabled: node.disabled,
+            disabled: ctx.tryDisabled(node.disabled),
         }, {
             asyncValidators: asyncValidator.compiled,
             validators: validator.compiled,
@@ -87,9 +87,9 @@ function processGroup(ctx: VRenderContext, node: VFormGroup, control?: FormGroup
             },
         );
 
-        if (node.disabled) {
-            group.disable();
-        }
+        // if (ctx.tryDisabled(node.disabled)) {
+        //     group.disable();
+        // }
 
         registerRenderResult(group, { node, validator, asyncValidator });
 
@@ -148,9 +148,9 @@ function processArray(ctx: VRenderContext, node: VFormArray, control?: FormArray
             },
         );
 
-        if (node.disabled) {
-            array.disable();
-        }
+        // if (ctx.tryDisabled(node.disabled)) {
+        //     array.disable();
+        // }
 
         registerRenderResult(array, { node, validator, asyncValidator });
 

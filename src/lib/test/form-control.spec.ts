@@ -1,6 +1,7 @@
 import { getLastFormNode, vControl, VForm, vForm, VFormControlOptions, VFormHooks } from '..';
-import { trackControl } from './test-utils';
-import { even, moreThan10 } from './test-mocks';
+import { andTick, trackControl } from './test-utils';
+import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
+import { fakeAsync, tick } from '@angular/core/testing';
 
 function renderNumber(n: number, options?: VFormControlOptions): VForm<number> {
     return vForm((value) => vControl(value, options)).build(n);
@@ -32,42 +33,79 @@ describe('VFormControl', () => {
             expect(renderNumber(1, { disabled: false }).control.disabled).toBeFalse();
         });
 
-        it('should not assign any validators by default', () => {
-            expect(renderNumber(1).control.validator).toBeFalsy();
+        describe('validator', () => {
+            it('should not assign any validators by default', () => {
+                expect(renderNumber(1).control.validator).toBeFalsy();
+            });
+    
+            it('should assign required validator if "required" is true', () => {
+                expect(renderNumber(null as any, { required: true }).control.errors).toEqual({ required: true });
+            });
+    
+            it('should assign provided validator', () => {
+                const options = { validator: moreThan10 };
+                expect(renderNumber(1, options).control.errors).toEqual({ min: true });
+                expect(renderNumber(100, options).control.errors).toBeFalsy();
+            });
+    
+            it('should return merged validation result', () => {
+                const options = { validator: [moreThan10, even] };
+                expect(renderNumber(1, options).control.errors).toEqual({ min: true, even: true });
+                expect(renderNumber(4, options).control.errors).toEqual({ min: true });
+                expect(renderNumber(13, options).control.errors).toEqual({ even: true });
+                expect(renderNumber(100, options).control.errors).toBeFalsy();
+            });
+    
+            it('should prefer required validator over all other validators', () => {
+                const options = {
+                    required: true,
+                    validator: moreThan10,
+                };
+    
+                expect(renderNumber(null as any, options).control.errors).toEqual({ required: true });
+                expect(renderNumber(1, options).control.errors).toEqual({ min: true });
+                expect(renderNumber(100, options).control.errors).toBeFalsy();
+            });
+    
+            it('should not validate disabled control', () => {
+                expect(renderNumber(null as any, { required: true, disabled: true }).control.errors).toBeFalsy();
+            });
         });
 
-        it('should assign required validator if "required" is true', () => {
-            expect(renderNumber(null as any, { required: true }).control.errors).toEqual({ required: true });
+        describe('async validator', () => {
+            it('should not assign any async validators by default', () => {
+                expect(renderNumber(1).control.asyncValidator).toBeFalsy();
+            });
+    
+            it('should assign provided async validator', fakeAsync(() => {
+                const options = { asyncValidator: moreThan10Async };
+
+                expect(andTick(renderNumber(1, options)).control.errors).toEqual({ min: true });
+                expect(andTick(renderNumber(100, options)).control.errors).toBeFalsy();
+            }));
+    
+            it('should return merged async validation result', fakeAsync(() => {
+                const options = { asyncValidator: [moreThan10Async, evenAsync] };
+                expect(andTick(renderNumber(1, options)).control.errors).toEqual({ min: true, even: true });
+                expect(andTick(renderNumber(4, options)).control.errors).toEqual({ min: true });
+                expect(andTick(renderNumber(13, options)).control.errors).toEqual({ even: true });
+                expect(andTick(renderNumber(100, options)).control.errors).toBeFalsy();
+            }));
+    
+            it('should not run async validator for disabled control', fakeAsync(() => {
+                const form = renderNumber(null as any, { asyncValidator: moreThan10Async, disabled: true });
+                tick();
+                expect(form.control.errors).toBeFalsy();
+            }));
         });
 
-        it('should assign provided validator', () => {
-            const options = { validator: moreThan10 };
-            expect(renderNumber(1, options).control.errors).toEqual({ min: true });
-            expect(renderNumber(100, options).control.errors).toBeFalsy();
-        });
-
-        it('should return merged validation result', () => {
-            const options = { validator: [moreThan10, even] };
-            expect(renderNumber(1, options).control.errors).toEqual({ min: true, even: true });
-            expect(renderNumber(4, options).control.errors).toEqual({ min: true });
-            expect(renderNumber(13, options).control.errors).toEqual({ even: true });
-            expect(renderNumber(100, options).control.errors).toBeFalsy();
-        });
-
-        it('should prefer required validator over all other validators', () => {
-            const options = {
-                required: true,
-                validator: moreThan10,
-            };
-
-            expect(renderNumber(null as any, options).control.errors).toEqual({ required: true });
-            expect(renderNumber(1, options).control.errors).toEqual({ min: true });
-            expect(renderNumber(100, options).control.errors).toBeFalsy();
-        });
-
-        it('should not validate disabled control', () => {
-            expect(renderNumber(null as any, { required: true, disabled: true }).control.errors).toBeFalsy();
-        });
+        it('should allow both sync and async validators', fakeAsync(() => {
+            const options = { validator: moreThan10, asyncValidator: evenAsync };
+            expect(andTick(renderNumber(1, options)).control.errors).toEqual({ min: true });
+            expect(andTick(renderNumber(4, options)).control.errors).toEqual({ min: true });
+            expect(andTick(renderNumber(13, options)).control.errors).toEqual({ even: true });
+            expect(andTick(renderNumber(100, options)).control.errors).toBeFalsy();
+        }));
 
         it('should render value passed into vnode', () => {
             const form = vForm((value: number) => vControl(value + 1)).build(1 as number);
@@ -220,56 +258,132 @@ describe('VFormControl', () => {
             expect(tracker.changed).toBeFalse();
         });
 
-        it('should assign validators', () => {
-            const form = renderConditionalNumber(2, 5, {}, { validator: moreThan10 });
+        describe('validator', () => {
+            it('should assign validators', () => {
+                const form = renderConditionalNumber(2, 5, {}, { validator: moreThan10 });
+        
+                expect(form.control.errors).toBeFalsy();
+        
+                form.setValue(7);
+        
+                expect(form.control.errors).toEqual({ min: true });
+            });
     
-            expect(form.control.errors).toBeFalsy();
+            it('should remove validators', () => {
+                const form = renderConditionalNumber(7, 5, {}, { validator: moreThan10 });
+        
+                expect(form.control.errors).toEqual({ min: true });
+        
+                form.setValue(2);
+        
+                expect(form.control.errors).toBeFalsy();
+            });
     
-            form.setValue(7);
+            it('should change validators', () => {
+                const form = renderConditionalNumber(1, 5, { validator: moreThan10 }, { validator: [moreThan10, even] });
+        
+                expect(form.control.errors).toEqual({ min: true });
+        
+                form.setValue(7);
+        
+                expect(form.control.errors).toEqual({ min: true, even: true });
+            });
     
-            expect(form.control.errors).toEqual({ min: true });
+            it('should rerender control if value was changed in meantime', () => {
+                const form = renderConditionalNumber(2, 5, {}, { validator: moreThan10 });
+        
+                form.control.setValue(7);
+        
+                expect(form.control.errors).toBeFalsy();
+        
+                form.update();
+    
+                expect(form.control.errors).toEqual({ min: true });
+            });
+    
+            it('should do nothing if validators were not changed', () => {
+                const form = vForm((v: number) => vControl(v, { required: true, validator: [moreThan10, even] })).build(1);
+        
+                const tracker = trackControl(form.control);
+        
+                form.update();
+        
+                expect(tracker.changed).toBeFalse();
+            });
         });
 
-        it('should remove validators', () => {
-            const form = renderConditionalNumber(7, 5, {}, { validator: moreThan10 });
-    
-            expect(form.control.errors).toEqual({ min: true });
-    
-            form.setValue(2);
-    
-            expect(form.control.errors).toBeFalsy();
-        });
+        describe('async validator', () => {
+            it('should assign async validators', fakeAsync(() => {
+                const form = renderConditionalNumber(2, 5, {}, { asyncValidator: moreThan10Async });
+        
+                tick();
 
-        it('should change validators', () => {
-            const form = renderConditionalNumber(1, 5, { validator: moreThan10 }, { validator: [moreThan10, even] });
-    
-            expect(form.control.errors).toEqual({ min: true });
-    
-            form.setValue(7);
-    
-            expect(form.control.errors).toEqual({ min: true, even: true });
-        });
+                expect(form.control.errors).toBeFalsy();
+        
+                form.setValue(7);
+        
+                tick();
 
-        it('should rerender control if value was changed in meantime', () => {
-            const form = renderConditionalNumber(2, 5, {}, { validator: moreThan10 });
+                expect(form.control.errors).toEqual({ min: true });
+            }));
     
-            form.control.setValue(7);
-    
-            expect(form.control.errors).toBeFalsy();
-    
-            form.update();
+            it('should remove async validators', fakeAsync(() => {
+                const form = renderConditionalNumber(7, 5, {}, { asyncValidator: moreThan10Async });
+        
+                tick();
 
-            expect(form.control.errors).toEqual({ min: true });
-        });
+                expect(form.control.errors).toEqual({ min: true });
+        
+                form.setValue(2);
 
-        it('should do nothing if validators were not changed', () => {
-            const form = vForm((v: number) => vControl(v, { required: true, validator: [moreThan10, even] })).build(1);
+                tick();
+        
+                expect(form.control.errors).toBeFalsy();
+            }));
     
-            const tracker = trackControl(form.control);
+            it('should change async validators', fakeAsync(() => {
+                const form = renderConditionalNumber(1, 5, { validator: moreThan10 }, { validator: [moreThan10, even] });
+        
+                tick();
+
+                expect(form.control.errors).toEqual({ min: true });
+        
+                form.setValue(7);
+
+                tick();
+        
+                expect(form.control.errors).toEqual({ min: true, even: true });
+            }));
     
-            form.update();
+            it('should rerender control if value was changed in meantime', fakeAsync(() => {
+                const form = renderConditionalNumber(2, 5, {}, { validator: moreThan10 });
+        
+                tick();
+
+                form.control.setValue(7);
+        
+                expect(form.control.errors).toBeFalsy();
+        
+                form.update();
     
-            expect(tracker.changed).toBeFalse();
+                tick();
+
+                expect(form.control.errors).toEqual({ min: true });
+            }));
+    
+            it('should do nothing if async validators were not changed', fakeAsync(() => {
+                const form = vForm((v: number) => vControl(v, { required: true, validator: [moreThan10, even] })).build(1);
+        
+                tick();
+
+                const tracker = trackControl(form.control);
+        
+                form.update();
+        
+                tick();
+
+                expect(tracker.changed).toBeFalse();
+            }));
         });
 
         it('should update value by value passed into vnode', () => {

@@ -1,6 +1,7 @@
+import { fakeAsync, tick } from '@angular/core/testing';
 import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, VFormHooks, vGroup } from '..';
-import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia } from './test-mocks';
-import { trackControl } from './test-utils';
+import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia, smallAsync, lightAsync } from './test-mocks';
+import { andTick, trackControl } from './test-utils';
 
 function withVolume(box: Box, options: VFormControlOptions = {}): VFormGroupChildren {
     return withWeightAndVolume(box, {}, options);
@@ -103,27 +104,63 @@ describe('VFormGroup', () => {
             expect(form.getControl('volume').disabled).toBeFalse();
         });
 
-        it('should not assign any validators by default', () => {
-            expect(renderGroup(parcel).control.validator).toBeFalsy();
+        describe('validator', () => {
+            it('should not assign any validators by default', () => {
+                expect(renderGroup(parcel).control.validator).toBeFalsy();
+            });
+    
+            it('should assign provided validator', () => {
+                const options = { validator: small };
+                expect(renderGroup(largeParcel, options).control.errors).toEqual({ small: true });
+                expect(renderGroup(parcel, options).control.errors).toBeFalsy();
+            });
+    
+            it('should return merged validation result', () => {
+                const options = { validator: [small, light] };
+                expect(renderGroup(heavyAndLargeParcel, options).control.errors).toEqual({ light: true, small: true });
+                expect(renderGroup(heavyParcel, options).control.errors).toEqual({ light: true });
+                expect(renderGroup(largeParcel, options).control.errors).toEqual({ small: true });
+                expect(renderGroup(parcel, options).control.errors).toBeFalsy();
+            });
+    
+            it('should not validate disabled control', () => {
+                expect(renderGroup(largeParcel, { validator: small, disabled: true }).control.errors).toBeFalsy();
+            });
         });
 
-        it('should assign provided validator', () => {
-            const options = { validator: small };
-            expect(renderGroup(largeParcel, options).control.errors).toEqual({ small: true });
-            expect(renderGroup(parcel, options).control.errors).toBeFalsy();
+        describe('async validator', () => {
+            it('should not assign any async validators by default', () => {
+                expect(renderGroup(parcel).control.asyncValidator).toBeFalsy();
+            });
+    
+            it('should assign provided async validator', fakeAsync(() => {
+                const options = { asyncValidator: smallAsync };
+                expect(andTick(renderGroup(largeParcel, options)).control.errors).toEqual({ small: true });
+                expect(andTick(renderGroup(parcel, options)).control.errors).toBeFalsy();
+            }));
+    
+            it('should return merged async validation result', fakeAsync(() => {
+                const options = { asyncValidator: [smallAsync, lightAsync] };
+                expect(andTick(renderGroup(heavyAndLargeParcel, options)).control.errors).toEqual({ light: true, small: true });
+                expect(andTick(renderGroup(heavyParcel, options)).control.errors).toEqual({ light: true });
+                expect(andTick(renderGroup(largeParcel, options)).control.errors).toEqual({ small: true });
+                expect(andTick(renderGroup(parcel, options)).control.errors).toBeFalsy();
+            }));
+    
+            it('should not run async validator for disabled control', fakeAsync(() => {
+                const form = renderGroup(largeParcel, { asyncValidator: smallAsync, disabled: true });
+                tick();
+                expect(form.control.errors).toBeFalsy();
+            }));
         });
 
-        it('should return merged validation result', () => {
-            const options = { validator: [small, light] };
-            expect(renderGroup(heavyAndLargeParcel, options).control.errors).toEqual({ light: true, small: true });
-            expect(renderGroup(heavyParcel, options).control.errors).toEqual({ light: true });
-            expect(renderGroup(largeParcel, options).control.errors).toEqual({ small: true });
-            expect(renderGroup(parcel, options).control.errors).toBeFalsy();
-        });
-
-        it('should not validate disabled control', () => {
-            expect(renderGroup(largeParcel, { validator: small, disabled: true }).control.errors).toBeFalsy();
-        });
+        it('should allow both sync and async validators', fakeAsync(() => {
+            const options = { validator: small, asyncValidator: lightAsync };
+            expect(andTick(renderGroup(heavyAndLargeParcel, options)).control.errors).toEqual({ small: true });
+            expect(andTick(renderGroup(heavyParcel, options)).control.errors).toEqual({ light: true });
+            expect(andTick(renderGroup(largeParcel, options)).control.errors).toEqual({ small: true });
+            expect(andTick(renderGroup(parcel, options)).control.errors).toBeFalsy();
+        }));
 
         it('should render nested vform containers', () => {
             const form = flightFormBuilder().build(belarusToAustralia);
@@ -359,56 +396,132 @@ describe('VFormGroup', () => {
             expect(form.getControl('volume').disabled).toBeFalse();
         });
 
-        it('should assign validators', () => {
-            const form = renderConditionalGroup(parcel, 50, [{}], [{ validator: small }]);
-
-            expect(form.control.errors).toBeFalsy();
+        describe('validator', () => {
+            it('should assign validators', () => {
+                const form = renderConditionalGroup(parcel, 50, [{}], [{ validator: small }]);
     
-            form.setValue(largeParcel);
-
-            expect(form.control.errors).toEqual({ small: true });
+                expect(form.control.errors).toBeFalsy();
+        
+                form.setValue(largeParcel);
+    
+                expect(form.control.errors).toEqual({ small: true });
+            });
+    
+            it('should remove validators', () => {
+                const form = renderConditionalGroup(largeParcel, 50, [{}], [{ validator: small }]);
+        
+                expect(form.control.errors).toEqual({ small: true });
+        
+                form.setValue(parcel);
+        
+                expect(form.control.errors).toBeFalsy();
+            });
+    
+            it('should change validators', () => {
+                const form = renderConditionalGroup(heavyParcel, 50, [{ validator: light }], [{ validator: [small, light] }]);
+        
+                expect(form.control.errors).toEqual({ light: true });
+        
+                form.setValue(heavyAndLargeParcel);
+        
+                expect(form.control.errors).toEqual({ light: true, small: true });
+            });
+    
+            it('should rerender control if value was changed in meantime', () => {
+                const form = renderConditionalGroup(parcel, 50, [{}], [{ validator: small }]);
+        
+                form.control.setValue(largeParcel);
+        
+                expect(form.control.errors).toBeFalsy();
+        
+                form.update();
+    
+                expect(form.control.errors).toEqual({ small: true });
+            });
+    
+            it('should do nothing if validators were not changed', () => {
+                const form = vForm(() => vGroup({ validator: [small, light] }, withWeightAndVolume(parcel))).build(parcel);
+        
+                const tracker = trackControl(form.control);
+        
+                form.update();
+        
+                expect(tracker.changed).toBeFalse();
+            });
         });
 
-        it('should remove validators', () => {
-            const form = renderConditionalGroup(largeParcel, 50, [{}], [{ validator: small }]);
+        describe('async validator', () => {
+            it('should assign async validators', fakeAsync(() => {
+                const form = renderConditionalGroup(parcel, 50, [{}], [{ asyncValidator: smallAsync }]);
     
-            expect(form.control.errors).toEqual({ small: true });
-    
-            form.setValue(parcel);
-    
-            expect(form.control.errors).toBeFalsy();
-        });
+                tick();
 
-        it('should change validators', () => {
-            const form = renderConditionalGroup(heavyParcel, 50, [{ validator: light }], [{ validator: [small, light] }]);
+                expect(form.control.errors).toBeFalsy();
+        
+                form.setValue(largeParcel);
     
-            expect(form.control.errors).toEqual({ light: true });
-    
-            form.setValue(heavyAndLargeParcel);
-    
-            expect(form.control.errors).toEqual({ light: true, small: true });
-        });
+                tick();
 
-        it('should rerender control if value was changed in meantime', () => {
-            const form = renderConditionalGroup(parcel, 50, [{}], [{ validator: small }]);
+                expect(form.control.errors).toEqual({ small: true });
+            }));
     
-            form.control.setValue(largeParcel);
-    
-            expect(form.control.errors).toBeFalsy();
-    
-            form.update();
+            it('should remove async validators', fakeAsync(() => {
+                const form = renderConditionalGroup(largeParcel, 50, [{}], [{ asyncValidator: smallAsync }]);
+        
+                tick();
 
-            expect(form.control.errors).toEqual({ small: true });
-        });
+                expect(form.control.errors).toEqual({ small: true });
+        
+                form.setValue(parcel);
+        
+                tick();
 
-        it('should do nothing if validators were not changed', () => {
-            const form = vForm(() => vGroup({ validator: [small, light] }, withWeightAndVolume(parcel))).build(parcel);
+                expect(form.control.errors).toBeFalsy();
+            }));
     
-            const tracker = trackControl(form.control);
+            it('should change async validators', fakeAsync(() => {
+                const form = renderConditionalGroup(heavyParcel, 50, [{ asyncValidator: lightAsync }], [{ asyncValidator: [smallAsync, lightAsync] }]);
+        
+                tick();
+
+                expect(form.control.errors).toEqual({ light: true });
+        
+                form.setValue(heavyAndLargeParcel);
+        
+                tick();
+
+                expect(form.control.errors).toEqual({ light: true, small: true });
+            }));
     
-            form.update();
+            it('should rerender control if value was changed in meantime', fakeAsync(() => {
+                const form = renderConditionalGroup(parcel, 50, [{}], [{ asyncValidator: smallAsync }]);
+        
+                form.control.setValue(largeParcel);
+
+                tick();
+        
+                expect(form.control.errors).toBeFalsy();
+        
+                form.update();
+
+                tick();
     
-            expect(tracker.changed).toBeFalse();
+                expect(form.control.errors).toEqual({ small: true });
+            }));
+    
+            it('should do nothing if async validators were not changed', fakeAsync(() => {
+                const form = vForm(() => vGroup({ asyncValidator: [smallAsync, lightAsync] }, withWeightAndVolume(parcel))).build(parcel);
+        
+                tick();
+
+                const tracker = trackControl(form.control);
+        
+                form.update();
+
+                tick();
+        
+                expect(tracker.changed).toBeFalse();
+            }));
         });
 
         it('should not recreate underlying FormControl', () => {

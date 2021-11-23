@@ -1,14 +1,16 @@
-import { ValidatorFn, Validators } from '@angular/forms';
-import { VFormNode } from '.';
+import { AsyncValidatorFn, ValidatorFn, Validators } from '@angular/forms';
+import { VAsyncValidatorNode, VFormNode } from '.';
 import { Maybe, Nilable } from './common';
 import { VFormArray, VFormControl, VFormGroup, VFormNodeType, VValidatorNode } from './model';
 import { arrayify } from './utils';
-import { andValidators, composeValidators, vValidator } from './validators';
+import { andValidators, composeAsyncValidators, composeValidators, vValidator } from './validators';
 
 type AnyValidator = ValidatorFn | VValidatorNode | (ValidatorFn | VValidatorNode)[];
+type AnyAsyncValidator = AsyncValidatorFn | VAsyncValidatorNode | (AsyncValidatorFn | VAsyncValidatorNode)[];
 
-type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator'>> & {
+type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator' | 'asyncValidator'>> & {
     validator?: AnyValidator,
+    asyncValidator?: AnyAsyncValidator,
 };
 
 export type VFormControlOptions = Omit<MakeOptions<VFormControl>, 'value'> & { required?: boolean };
@@ -34,6 +36,10 @@ function createValidator(validator?: AnyValidator): Maybe<VValidatorNode> {
     return validator ? composeValidators(...arrayify(validator)) : undefined;
 }
 
+function createAsyncValidator(validator?: AnyAsyncValidator): Maybe<VAsyncValidatorNode> {
+    return validator ? composeAsyncValidators(...arrayify(validator)) : undefined;
+}
+
 export function vControl(value: any, options?: VFormControlOptions): VFormControl {
     return {
         type: VFormNodeType.Control,
@@ -43,6 +49,7 @@ export function vControl(value: any, options?: VFormControlOptions): VFormContro
         ...options,
         value,
         validator: options && createControlValidator(options),
+        asyncValidator: options && createAsyncValidator(options.asyncValidator),
     };
 }
 
@@ -53,6 +60,7 @@ export function vGroup(options: Nilable<VFormGroupOptions> = {}, children: VForm
         data: EMPTY_DATA,
         ...options,
         validator: options && createValidator(options.validator) || undefined,
+        asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
         children,
     };
 }
@@ -64,6 +72,7 @@ export function vArray(options: Nilable<VFormArrayOptions> = {}, children: VForm
         data: EMPTY_DATA,
         ...options,
         validator: options && createValidator(options.validator) || undefined,
+        asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
         children,
     };
 }

@@ -1,6 +1,8 @@
+import { fakeAsync, tick } from '@angular/core/testing';
 import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayChildren, VFormArrayOptions, VFormBuilder, VFormControlOptions, VFormHooks, vGroup, vValidator } from '..';
+import { vValidatorAsync } from '../validators';
 import { Box, elephant, even, krokodile, moreThan10, mouse } from './test-mocks';
-import { trackControl } from './test-utils';
+import { andTick, trackControl } from './test-utils';
 
 function defaultItemRenderer<T>(value: T, index: number): VFormControlOptions {
     return { key: index };
@@ -18,6 +20,9 @@ const fibonaci2_10 = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
 
 const lengthLessThan10 = vValidator(control => control.value.length >= 10 ? { length: true } : null);
 const startedFrom0 = vValidator(control => control.value[0] !== 0 ? { zero: true } : null);
+
+const lengthLessThan10Async = vValidatorAsync(control => Promise.resolve(control.value.length >= 10 ? { length: true } : null));
+const startedFrom0Async = vValidatorAsync(control => Promise.resolve(control.value[0] !== 0 ? { zero: true } : null));
 
 function renderArray(initial: number[], options: VFormArrayOptions = {}, children?: VFormArrayChildren): VForm<number[]> {
     return vForm((current: number[]) => vArray(options, children || withItem(current))).build(initial);
@@ -97,27 +102,61 @@ describe('VFormArray', () => {
             expect(form.getControl('1').disabled).toBeFalse();
         });
 
-        it('should not assign any validators by default', () => {
-            expect(renderArray(fibonaci5).control.validator).toBeFalsy();
+        describe('validator', () => {
+            it('should not assign any validators by default', () => {
+                expect(renderArray(fibonaci5).control.validator).toBeFalsy();
+            });
+    
+            it('should assign provided validator', () => {
+                const options = { validator: lengthLessThan10 };
+                expect(renderArray(fibonaci10, options).control.errors).toEqual({ length: true });
+                expect(renderArray(fibonaci5, options).control.errors).toBeFalsy();
+            });
+    
+            it('should return merged validation result', () => {
+                const options = { validator: [lengthLessThan10, startedFrom0] };
+                expect(renderArray(fibonaci2_10, options).control.errors).toEqual({ zero: true, length: true });
+                expect(renderArray(fibonaci2_5, options).control.errors).toEqual({ zero: true });
+                expect(renderArray(fibonaci10, options).control.errors).toEqual({ length: true });
+                expect(renderArray(fibonaci5, options).control.errors).toBeFalsy();
+            });
+    
+            it('should not validate disabled control', () => {
+                expect(renderArray(fibonaci10, { validator: lengthLessThan10, disabled: true }).control.errors).toBeFalsy();
+            });
         });
 
-        it('should assign provided validator', () => {
-            const options = { validator: lengthLessThan10 };
-            expect(renderArray(fibonaci10, options).control.errors).toEqual({ length: true });
-            expect(renderArray(fibonaci5, options).control.errors).toBeFalsy();
+        describe('async validator', () => {
+            it('should not assign any async validators by default', () => {
+                expect(renderArray(fibonaci5).control.asyncValidator).toBeFalsy();
+            });
+    
+            it('should assign provided async validator', fakeAsync(() => {
+                const options = { asyncValidator: lengthLessThan10Async };
+                expect(andTick(renderArray(fibonaci10, options)).control.errors).toEqual({ length: true });
+                expect(andTick(renderArray(fibonaci5, options).control.errors)).toBeFalsy();
+            }));
+    
+            it('should return merged async validation result', fakeAsync(() => {
+                const options = { asyncValidator: [lengthLessThan10Async, startedFrom0Async] };
+                expect(andTick(renderArray(fibonaci2_10, options)).control.errors).toEqual({ zero: true, length: true });
+                expect(andTick(renderArray(fibonaci2_5, options)).control.errors).toEqual({ zero: true });
+                expect(andTick(renderArray(fibonaci10, options)).control.errors).toEqual({ length: true });
+                expect(andTick(renderArray(fibonaci5, options)).control.errors).toBeFalsy();
+            }));
+    
+            it('should not run async validator for disabled control', fakeAsync(() => {
+                expect(andTick(renderArray(fibonaci10, { asyncValidator: lengthLessThan10Async, disabled: true })).control.errors).toBeFalsy();
+            }));
         });
 
-        it('should return merged validation result', () => {
-            const options = { validator: [lengthLessThan10, startedFrom0] };
-            expect(renderArray(fibonaci2_10, options).control.errors).toEqual({ zero: true, length: true });
-            expect(renderArray(fibonaci2_5, options).control.errors).toEqual({ zero: true });
-            expect(renderArray(fibonaci10, options).control.errors).toEqual({ length: true });
-            expect(renderArray(fibonaci5, options).control.errors).toBeFalsy();
-        });
-
-        it('should not validate disabled control', () => {
-            expect(renderArray(fibonaci10, { validator: lengthLessThan10, disabled: true }).control.errors).toBeFalsy();
-        });
+        it('should allow both sync and async validators', fakeAsync(() => {
+            const options = { validator: lengthLessThan10, asyncValidator: startedFrom0Async };
+            expect(andTick(renderArray(fibonaci2_10, options)).control.errors).toEqual({ length: true });
+            expect(andTick(renderArray(fibonaci2_5, options)).control.errors).toEqual({ zero: true });
+            expect(andTick(renderArray(fibonaci10, options)).control.errors).toEqual({ length: true });
+            expect(andTick(renderArray(fibonaci5, options)).control.errors).toBeFalsy();
+        }));
 
         it('should set updateOn flag to "change", by default', () => {
             const form = renderArray(fibonaci5, {});
@@ -357,60 +396,138 @@ describe('VFormArray', () => {
             expect(form.getControl('1').disabled).toBeTrue();
         });
 
-        it('should assign validators', () => {
-            const form = renderConditionalArray(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
-
-            expect(form.control.errors).toBeFalsy();
+        describe('validator', () => {
+            it('should assign validators', () => {
+                const form = renderConditionalArray(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
     
-            form.setValue(fibonaci2_10);
-
-            expect(form.control.errors).toEqual({ zero: true });
+                expect(form.control.errors).toBeFalsy();
+        
+                form.setValue(fibonaci2_10);
+    
+                expect(form.control.errors).toEqual({ zero: true });
+            });
+    
+            it('should remove validators', () => {
+                const form = renderConditionalArray(fibonaci2_10, 50, [{}], [{ validator: startedFrom0 }]);
+        
+                expect(form.control.errors).toEqual({ zero: true });
+        
+                form.setValue(fibonaci10);
+        
+                expect(form.control.errors).toBeFalsy();
+            });
+    
+            it('should change validators', () => {
+                const form = renderConditionalArray(fibonaci10, 50, [{ validator: lengthLessThan10 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
+        
+                expect(form.control.errors).toEqual({ length: true });
+        
+                form.setValue(fibonaci2_10);
+        
+                expect(form.control.errors).toEqual({ length: true, zero: true });
+            });
+    
+            it('should rerender control if value was changed in meantime', () => {
+                const form = renderConditionalArray(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
+        
+                form.control.setValue(fibonaci2_10);
+        
+                expect(form.control.errors).toBeFalsy();
+        
+                form.update();
+    
+                expect(form.control.errors).toEqual({ zero: true });
+            });
+    
+            it('should do nothing if validators were not changed', () => {
+                const form = vForm(() => vArray({
+                    validator: [lengthLessThan10, startedFrom0],
+                }, withItem(fibonaci5))).build(fibonaci5);
+        
+                const tracker = trackControl(form.control);
+        
+                form.update();
+        
+                expect(tracker.changed).toBeFalse();
+            });
         });
 
-        it('should remove validators', () => {
-            const form = renderConditionalArray(fibonaci2_10, 50, [{}], [{ validator: startedFrom0 }]);
+        describe('async validator', () => {
+            it('should assign async validators', fakeAsync(() => {
+                const form = renderConditionalArray(fibonaci10, 50, [{}], [{ asyncValidator: startedFrom0Async }]);
     
-            expect(form.control.errors).toEqual({ zero: true });
+                tick();
+
+                expect(form.control.errors).toBeFalsy();
+        
+                form.setValue(fibonaci2_10);
+
+                tick();
     
-            form.setValue(fibonaci10);
+                expect(form.control.errors).toEqual({ zero: true });
+            }));
     
-            expect(form.control.errors).toBeFalsy();
+            it('should remove async validators', fakeAsync(() => {
+                const form = renderConditionalArray(fibonaci2_10, 50, [{}], [{ asyncValidator: startedFrom0Async }]);
+        
+                tick();
+
+                expect(form.control.errors).toEqual({ zero: true });
+        
+                form.setValue(fibonaci10);
+        
+                tick();
+
+                expect(form.control.errors).toBeFalsy();
+            }));
+    
+            it('should change async validators', fakeAsync(() => {
+                const form = renderConditionalArray(fibonaci10, 50, [{ asyncValidator: lengthLessThan10Async }], [{ asyncValidator: [lengthLessThan10Async, startedFrom0Async] }]);
+        
+                tick();
+
+                expect(form.control.errors).toEqual({ length: true });
+        
+                form.setValue(fibonaci2_10);
+        
+                tick();
+
+                expect(form.control.errors).toEqual({ length: true, zero: true });
+            }));
+    
+            it('should rerender control if value was changed in meantime', fakeAsync(() => {
+                const form = renderConditionalArray(fibonaci10, 50, [{}], [{ asyncValidator: startedFrom0Async }]);
+        
+                form.control.setValue(fibonaci2_10);
+
+                tick();
+        
+                expect(form.control.errors).toBeFalsy();
+        
+                form.update();
+
+                tick();
+    
+                expect(form.control.errors).toEqual({ zero: true });
+            }));
+    
+            it('should do nothing if async validators were not changed', fakeAsync(() => {
+                const form = vForm(() => vArray({
+                    asyncValidator: [lengthLessThan10Async, startedFrom0Async],
+                }, withItem(fibonaci5))).build(fibonaci5);
+        
+                tick();
+        
+                const tracker = trackControl(form.control);
+        
+                form.update();
+
+                tick();
+        
+                expect(tracker.changed).toBeFalse();
+            }));
         });
-
-        it('should change validators', () => {
-            const form = renderConditionalArray(fibonaci10, 50, [{ validator: lengthLessThan10 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
     
-            expect(form.control.errors).toEqual({ length: true });
-    
-            form.setValue(fibonaci2_10);
-    
-            expect(form.control.errors).toEqual({ length: true, zero: true });
-        });
-
-        it('should rerender control if value was changed in meantime', () => {
-            const form = renderConditionalArray(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
-    
-            form.control.setValue(fibonaci2_10);
-    
-            expect(form.control.errors).toBeFalsy();
-    
-            form.update();
-
-            expect(form.control.errors).toEqual({ zero: true });
-        });
-
-        it('should do nothing if validators were not changed', () => {
-            const form = vForm(() => vArray({
-                validator: [lengthLessThan10, startedFrom0],
-            }, withItem(fibonaci5))).build(fibonaci5);
-    
-            const tracker = trackControl(form.control);
-    
-            form.update();
-    
-            expect(tracker.changed).toBeFalse();
-        });
-
         it('should not recreate underlying FormControl', () => {
             const form = renderConditionalArray(fibonaci10, 50, [{ validator: startedFrom0 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
     
