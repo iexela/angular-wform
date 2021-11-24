@@ -2,7 +2,8 @@ import { Maybe } from './common';
 import { VEnvFormNodeFactory, VEnvFormNodeType, VFormEnvironment } from './env-model';
 import { VForm } from './form';
 import { VFormNode, VFormNodeFactory } from './model';
-import { VFormFlags, VValidationStrategy } from './reconcilation';
+import { VFormOptions, VValidationStrategy } from './reconcilation';
+import { VKeyGenerator } from './reconcilation/model';
 import { mapValues, pickBy } from './utils';
 
 export interface VFormBuilderFactory {
@@ -14,23 +15,35 @@ export interface VEnvFormBuilderFactory<TNode> {
     <T>(factory: VEnvFormNodeFactory<T, TNode>): VFormBuilder<T>;
 }
 
+let nextId: number = 1;
+
+function uniqueKeyGenerator(): string {
+    return `restored.${nextId++}`;
+}
+
 export class VFormBuilder<T> {
-    private _flags: VFormFlags = {
+    private _options: VFormOptions = {
         validationStrategy: VValidationStrategy.Append,
         updateOnChange: false,
+        keyGenerator: uniqueKeyGenerator,
     }
 
     constructor(private _factory: VFormNodeFactory<T>) {
     }
 
     validationStrategy(strategy: VValidationStrategy): this {
-        this._flags.validationStrategy = strategy;
+        this._options.validationStrategy = strategy;
 
         return this;
     }
 
     updateOnChange(): this {
-        this._flags.updateOnChange = true;
+        this._options.updateOnChange = true;
+        return this;
+    }
+
+    keyExtractor(generator: VKeyGenerator): this {
+        this._options.keyGenerator = generator;
         return this;
     }
 
@@ -38,7 +51,7 @@ export class VFormBuilder<T> {
         return new VForm(
             this._factory,
             {
-                ...this._flags,
+                ...this._options,
             },
             value,
         );

@@ -1,5 +1,6 @@
 import { AbstractControl } from '@angular/forms';
 import { VFormNode } from '..';
+import { Maybe } from '../common';
 import { AsyncValidatorBundle, createAsyncValidatorBundle, createValidatorBundle, ValidatorBundle } from './internal-model';
 
 export interface VRenderResult {
@@ -14,6 +15,16 @@ export function registerRenderResult(control: AbstractControl, result: VRenderRe
     results.set(control, result);
 }
 
+export function getLastFormNodeOrNothing(control: AbstractControl): Maybe<VFormNode> {
+    const result = results.get(control);
+
+    if (!result) {
+        return;
+    }
+
+    return result.node;
+}
+
 export function getLastFormNode(control: AbstractControl): VFormNode {
     const result = results.get(control);
 
@@ -24,7 +35,7 @@ export function getLastFormNode(control: AbstractControl): VFormNode {
     return result.node;
 }
 
-export function getLastValidatorBundle(control: AbstractControl): ValidatorBundle {
+export function getLastValidatorBundleOrCreate(control: AbstractControl): ValidatorBundle {
     const result = results.get(control);
 
     if (!result) {

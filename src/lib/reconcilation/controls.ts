@@ -1,31 +1,27 @@
-import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { Nullable } from '../common';
-import { VFormArray, VFormControl, VFormGroup, VFormNode, VFormNodeType, VValidatorNode, VValidatorNodeType } from '../model';
+import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
+import { Maybe } from '../common';
+import { VFormArray, VFormControl, VFormGroup, VFormNode, VFormNodeType } from '../model';
+import { arrayDiff, hasField, mapValues, objectDiff } from '../utils';
+import { VPathElement } from './model';
+import { getLastFormNodeOrNothing, registerRenderResult } from './registry';
 import { VRenderContext } from './render-context';
-import { arrayDiff, arrayDiffUnordered, arrayify, flatMap, hasField, isAngularAtLeast, mapValues, objectDiff } from '../utils';
-import { getLastFormNode, registerRenderResult } from './registry';
 import { processValidators } from './validators';
 import { processAsyncValidators } from './validators-async';
 
-function restoreFormNode(control: AbstractControl): VFormNode {
-    // TODO: consider the case when control is not managed by vform
-    return getLastFormNode(control);
-}
-
-export function processNode(ctx: VRenderContext, node: VFormNode, control?: AbstractControl): AbstractControl {
+export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNode, control?: AbstractControl): AbstractControl {
     switch (node.type) {
         case VFormNodeType.Control:
-            return processControl(ctx, node, control);
+            return processControl(ctx, name, node, control);
         case VFormNodeType.Group:
-            return processGroup(ctx, node, control as FormGroup);
+            return processGroup(ctx, name, node, control as FormGroup);
         case VFormNodeType.Array:
-            return processArray(ctx, node, control as FormArray);
+            return processArray(ctx, name, node, control as FormArray);
         default:
             throw Error(`Unsupported node type`);
     }
 }
 
-function processControl(ctx: VRenderContext, node: VFormControl, control?: AbstractControl): AbstractControl {
+function processControl(ctx: VRenderContext, _name: Maybe<VPathElement>, node: VFormControl, control?: AbstractControl): AbstractControl {
     if (!node || !control) {
         const validator = processValidators(ctx, node.validator);
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
@@ -76,14 +72,14 @@ function processControl(ctx: VRenderContext, node: VFormControl, control?: Abstr
     return control;
 }
 
-function processGroup(ctx: VRenderContext, node: VFormGroup, control?: FormGroup): AbstractControl {
+function processGroup(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormGroup, control?: FormGroup): AbstractControl {
     if (!control) {
-        ctx.push(node);
+        ctx.push(name, node);
 
         const validator = processValidators(ctx, node.validator);
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
         const group = new FormGroup(
-            mapValues(node.children, child => processNode(ctx, child)),
+            mapValues(node.children, (child, key) => processNode(ctx, key, child)),
             {
                 validators: validator.compiled,
                 asyncValidators: asyncValidator.compiled,
@@ -106,21 +102,21 @@ function processGroup(ctx: VRenderContext, node: VFormGroup, control?: FormGroup
         throw Error('Changing of node type is not supported');
     }
 
-    ctx.push(node);
+    ctx.push(name, node);
 
     const nextDisabled = ctx.tryDisabled(node.disabled);
     if (control.disabled !== nextDisabled && !nextDisabled) {
         control.enable();
     }
 
-    const currentChildrenNodes = mapValues(control.controls, restoreFormNode);
+    const currentChildrenNodes = mapValues(control.controls, (control, key) => getFormNode(ctx, key, control));
     const { added, removed, updated } = objectDiff(currentChildrenNodes, node.children);
     added.forEach(key => control.setControl(
         key,
-        processNode(ctx, node.children[key]),
+        processNode(ctx, key, node.children[key]),
     ));
     removed.forEach(key => control.removeControl(key));
-    updated.forEach(key => processNode(ctx, node.children[key], control.controls[key]));
+    updated.forEach(key => processNode(ctx, key, node.children[key], control.controls[key]));
 
     if (control.disabled !== nextDisabled && nextDisabled) {
         control.disable();
@@ -141,15 +137,15 @@ function processGroup(ctx: VRenderContext, node: VFormGroup, control?: FormGroup
     return control;
 }
 
-function processArray(ctx: VRenderContext, node: VFormArray, control?: FormArray): AbstractControl {
+function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormArray, control?: FormArray): AbstractControl {
     if (!control) {
-        ctx.push(node);
+        ctx.push(name, node);
 
         const validator = processValidators(ctx, node.validator);
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
 
         const array = new FormArray(
-            node.children.map(child => processNode(ctx, child)),
+            node.children.map((child, i) => processNode(ctx, i, child)),
             {
                 validators: validator.compiled,
                 asyncValidators: asyncValidator.compiled,
@@ -172,14 +168,14 @@ function processArray(ctx: VRenderContext, node: VFormArray, control?: FormArray
         throw Error('Changing of node type is not supported');
     }
 
-    ctx.push(node);
+    ctx.push(name, node);
 
     const nextDisabled = ctx.tryDisabled(node.disabled);
     if (control.disabled !== nextDisabled && !nextDisabled) {
         control.enable();
     }
 
-    const currentChildrenNodes = control.controls.map(restoreFormNode);
+    const currentChildrenNodes = control.controls.map((control, i) => getFormNode(ctx, i, control));
     const { added, removed, updated, indexUpdated } = arrayDiff(currentChildrenNodes, node.children, child => child.key);
 
     const indexToControl: { [index: number]: AbstractControl } = {};
@@ -193,12 +189,12 @@ function processArray(ctx: VRenderContext, node: VFormArray, control?: FormArray
     removed.reverse().forEach(index => control.removeAt(index));
     added.forEach(index => control.insert(
         index,
-        processNode(ctx, node.children[index]),
+        processNode(ctx, index, node.children[index]),
     ));
     updated.forEach(({ previous, next }) => {
         const nextControl = indexToControl[previous];
 
-        processNode(ctx, node.children[next], nextControl);
+        processNode(ctx, next, node.children[next], nextControl);
 
         if (control.controls[next] !== nextControl) {
             control.setControl(next, nextControl);
@@ -249,3 +245,44 @@ function processTinyFlags(node: VFormControl, control: FormControl): void {
     }
 }
 
+function getFormNode(ctx: VRenderContext, name: Maybe<VPathElement>, control: AbstractControl): VFormNode {
+    const node = getLastFormNodeOrNothing(control);
+    if (node) {
+        return node;
+    }
+
+    return restoreFormNode(ctx, name, control);
+}
+
+function restoreFormNode(ctx: VRenderContext, name: Maybe<VPathElement>, control: AbstractControl): VFormNode {
+    if (control instanceof FormControl) {
+        return {
+            type: VFormNodeType.Control,
+            updateOn: control.updateOn,
+            value: control.value,
+            disabled: control.disabled,
+            key: ctx.options.keyGenerator(ctx.pathTo(name), control.value),
+            data: {},
+        } as VFormControl;
+    } else if (control instanceof FormGroup) {
+        return {
+            type: VFormNodeType.Group,
+            updateOn: control.updateOn,
+            disabled: control.disabled,
+            children: mapValues(control.controls, (control, key) => restoreFormNode(ctx, key, control)),
+            key: ctx.options.keyGenerator(ctx.pathTo(name), control.value),
+            data: {},
+        } as VFormGroup;
+    } else if (control instanceof FormArray) {
+        return {
+            type: VFormNodeType.Array,
+            updateOn: control.updateOn,
+            disabled: control.disabled,
+            children: control.controls.map((control, i) => restoreFormNode(ctx, i, control)),
+            key: ctx.options.keyGenerator(ctx.pathTo(name), control.value),
+            data: {},
+        } as VFormArray;
+    }
+
+    throw Error(`Unknown type of control: ${control}`);
+}

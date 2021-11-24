@@ -4,13 +4,13 @@ import { combineLatest } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 import { ProcedureFn } from './common';
 import { VFormNodeFactory, VFormPatcher as VFormNodePatcher } from './model';
-import { reconcile, VFormFlags, VReconcilationRequest } from './reconcilation';
+import { reconcile, VFormOptions, VReconcilationRequest } from './reconcilation';
 import { calculateValue } from './utils';
 
 export class VForm<T> {
     private _control$$: BehaviorSubject<AbstractControl>;
     private _factory: VFormNodeFactory<T>;
-    private flags: VFormFlags;
+    private _options: VFormOptions;
     private _reconcilationInProgress$$ = new BehaviorSubject(false);
 
     readonly valueChanges: Observable<T>;
@@ -36,11 +36,11 @@ export class VForm<T> {
         return this.control.invalid;
     }
 
-    constructor(factory: VFormNodeFactory<T>, flags: VFormFlags, value: T) {
-        this.flags = flags;
+    constructor(factory: VFormNodeFactory<T>, options: VFormOptions, value: T) {
+        this._options = options;
 
         this._control$$ = new BehaviorSubject(reconcile({
-            flags,
+            options,
             node: factory(value),
         }));
 
@@ -57,7 +57,7 @@ export class VForm<T> {
 
         this._factory = factory;
 
-        if (flags.updateOnChange) {
+        if (options.updateOnChange) {
             nativeValueChanges.subscribe(() => {
                 if (!this._reconcilationInProgress$$.value) {
                     this.update();
@@ -68,7 +68,7 @@ export class VForm<T> {
 
     setValue(value: T): void {
         this._reconcile({
-            flags: this.flags,
+            options: this._options,
             node: this._factory(value),
             control: this.control,
         });
@@ -129,7 +129,7 @@ export class VForm<T> {
         const value = this.rawValue;
 
         this._reconcile({
-            flags: this.flags,
+            options: this._options,
             node: this._factory(value),
             control: this.control,
         });
@@ -137,7 +137,7 @@ export class VForm<T> {
 
     patch(patcher: VFormNodePatcher): void {
         this._reconcile({
-            flags: this.flags,
+            options: this._options,
             node: patcher(this.control),
             control: this.control,
         });

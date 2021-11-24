@@ -10,13 +10,20 @@ export enum VValidationStrategy {
     Replace,
 }
 
-export interface VFormFlags {
+export type VPathElement = string | number;
+
+export interface VKeyGenerator {
+    (path: VPathElement[], value: any): any;
+}
+
+export interface VFormOptions {
     validationStrategy: VValidationStrategy;
     updateOnChange: boolean;
+    keyGenerator: VKeyGenerator;
 }
 
 export interface VReconcilationRequest {
-    flags: VFormFlags;
+    options: VFormOptions;
     node: VFormNode;
     control?: AbstractControl;
 }

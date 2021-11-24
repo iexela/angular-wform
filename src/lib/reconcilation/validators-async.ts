@@ -23,7 +23,7 @@ export function processAsyncValidators(ctx: VRenderContext, node?: VAsyncValidat
 
     return applyValidators(
         ctx,
-        ctx.flags.validationStrategy,
+        ctx.options.validationStrategy,
         control,
         lastValidatorBundle,
         areValidatorsChanged(lastNode, node) ? createValidators(node) : lastValidatorBundle.children,

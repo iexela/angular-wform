@@ -5,7 +5,8 @@ import { VRenderContext } from './render-context';
 
 export function reconcile(request: VReconcilationRequest): AbstractControl {
     return processNode(
-        new VRenderContext(request.flags),
+        new VRenderContext(request.options),
+        undefined,
         request.node,
         request.control,
     );

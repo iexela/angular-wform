@@ -1,14 +1,17 @@
+import { Maybe } from '../common';
 import { VFormArray, VFormGroup } from '../model';
-import { VFormFlags } from '../reconcilation';
+import { VFormOptions } from '../reconcilation';
+import { VPathElement } from './model';
 
 export class VRenderContext {
     validatorsChanged = false;
-
+    
+    private _currentPath: VPathElement[] = [];
     private _disabled: boolean[] = [];
 
-    constructor(readonly flags: VFormFlags) {}
+    constructor(readonly options: VFormOptions) {}
 
-    tryDisabled(disabled: boolean) {
+    tryDisabled(disabled: boolean): boolean {
         const disabledTop = this._disabled.length === 0 ? false : this._disabled[this._disabled.length - 1];
 
         return disabledTop ? true : disabled;
@@ -22,11 +25,22 @@ export class VRenderContext {
         this.validatorsChanged = false;
     }
 
-    push(node: VFormGroup | VFormArray): void {
+    push(name: Maybe<VPathElement>, node: VFormGroup | VFormArray): void {
+        if (name != null) {
+            this._currentPath.push(name);
+        }
         this._disabled.push(this.tryDisabled(node.disabled));
     }
 
     pop(): void {
+        this._currentPath.pop();
         this._disabled.pop();
+    }
+
+    pathTo(name?: VPathElement): VPathElement[] {
+        if (name == null) {
+            return this._currentPath.concat();
+        }
+        return this._currentPath.concat(name);
     }
 }
