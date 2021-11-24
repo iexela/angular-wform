@@ -1,7 +1,7 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
 import { Maybe } from '../common';
 import { VFormArray, VFormControl, VFormGroup, VFormNode, VFormNodeType } from '../model';
-import { arrayDiff, hasField, mapValues, objectDiff } from '../utils';
+import { arrayDiff, getControlTypeName, hasField, mapValues, objectDiff } from '../utils';
 import { VPathElement } from './model';
 import { getLastFormNodeOrNothing, registerRenderResult } from './registry';
 import { VRenderContext } from './render-context';
@@ -17,11 +17,11 @@ export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node
         case VFormNodeType.Array:
             return processArray(ctx, name, node, control as FormArray);
         default:
-            throw Error(`Unsupported node type`);
+            throw Error(`Unsupported node type: ${ctx.pathTo(name)}`);
     }
 }
 
-function processControl(ctx: VRenderContext, _name: Maybe<VPathElement>, node: VFormControl, control?: AbstractControl): AbstractControl {
+function processControl(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormControl, control?: AbstractControl): AbstractControl {
     if (!node || !control) {
         const validator = processValidators(ctx, node.validator);
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
@@ -42,7 +42,7 @@ function processControl(ctx: VRenderContext, _name: Maybe<VPathElement>, node: V
     }
 
     if (node.type !== VFormNodeType.Control || !(control instanceof FormControl)) {
-        throw Error('Changing of node type is not supported');
+        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Control, node.type, control);
     }
 
     const nextDisabled = ctx.tryDisabled(node.disabled);
@@ -99,7 +99,7 @@ function processGroup(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     }
 
     if (node.type !== VFormNodeType.Group || !(control instanceof FormGroup)) {
-        throw Error('Changing of node type is not supported');
+        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Group, node.type, control);
     }
 
     ctx.push(name, node);
@@ -165,7 +165,7 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     }
 
     if (node.type !== VFormNodeType.Array || !(control instanceof FormArray)) {
-        throw Error('Changing of node type is not supported');
+        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Array, node.type, control);
     }
 
     ctx.push(name, node);
@@ -284,5 +284,12 @@ function restoreFormNode(ctx: VRenderContext, name: Maybe<VPathElement>, control
         } as VFormArray;
     }
 
-    throw Error(`Unknown type of control: ${control}`);
+    throw Error(`Unknown type of control: ${ctx.pathTo(name)}, ${control}`);
+}
+
+function makeNodeTypeModifiedError(path: VPathElement[], currentType: VFormNodeType, newType: VFormNodeType, control: AbstractControl): Error {
+    throw Error(`Changing of node type is not supported: ${path},
+                 currentType = ${VFormNodeType[currentType]},
+                 newType = ${VFormNodeType[newType]},
+                 control = ${getControlTypeName(control)}`);
 }

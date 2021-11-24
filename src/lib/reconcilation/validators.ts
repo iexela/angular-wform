@@ -47,7 +47,7 @@ function applyValidators(ctx: VRenderContext,
         case VValidationStrategy.Replace:
             return replaceValidators(ctx, control, lastValidatorBundle, nextValidators);
         default:
-            throw new Error(`Unsupported validation strategy: '${VValidationStrategy[strategy]}'`);
+            throw Error(`Unsupported validation strategy: '${VValidationStrategy[strategy]}'`);
     }
 }
 

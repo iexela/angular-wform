@@ -32,6 +32,16 @@ export function mapControls<T>(control: AbstractControl, transform: TransformFn<
     }
 }
 
+export function getControlTypeName(control: AbstractControl): string {
+    if (control instanceof FormGroup) {
+        return 'FormGroup';
+    } else if (control instanceof FormArray) {
+        return 'FormArray';
+    } else {
+        return 'FormControl';
+    }
+}
+
 export function calculateValue(control: AbstractControl): any {
     return mapControls(control, child => child.value);
 }
