@@ -1,5 +1,6 @@
-import { vArray, vControl, vForm, vGroup, VValidators } from '..';
-import { belarusToAustralia, Box, elephant, Flight, mouse } from './test-mocks';
+import { FormGroup } from '@angular/forms';
+import { getLastFormNode, vArray, vControl, vForm, vGroup, VValidators } from '..';
+import { belarusToAustralia, Box, createTaxControl, elephant, Flight, mouse, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
 const flightFactory = (value: Flight) => vGroup(null, {
     name: vControl(value.name),
@@ -96,8 +97,48 @@ describe('basic', () => {
         });
     });
 
+    describe('keyGenerator', () => {
+        // jasmine.createSpy().and.returnValues([1, 2, 3])
+
+        it('key generator does not generate key for existing controls', () => {
+            const keyGenerator = jasmine.createSpy();
+            const form = vForm(() =>
+                vGroup(null, { abc: vTaxModel }),
+            ).keyGenerator(keyGenerator).build(false);
+
+            expect(keyGenerator).not.toHaveBeenCalled();
+        });
+
+        it('key generator generates key for each restored control', () => {
+            const keyGenerator = jasmine.createSpy().and.returnValues([1, 2, 3, 4, 5]);
+            const form = vForm((flag) =>
+                vGroup(null, flag
+                        ? { abc: vTaxModel, tax: vTaxModelWithKeys }
+                        : { abc: vTaxModel }),
+            ).keyGenerator(keyGenerator).build(false);
+
+            const group = form.control as FormGroup;
+            group.setControl('tax', createTaxControl());
+
+            form.setValue(true);
+
+            expect(keyGenerator).toHaveBeenCalledTimes(5);
+            expect(keyGenerator).toHaveBeenCalledWith(['tax'], { tax1: 123, tax2: [ 4, 5 ] });
+            expect(keyGenerator).toHaveBeenCalledWith(['tax', 'tax1'], 123);
+            expect(keyGenerator).toHaveBeenCalledWith(['tax', 'tax2'], [ 4, 5 ]);
+            expect(keyGenerator).toHaveBeenCalledWith(['tax', 'tax2', 0], 4);
+            expect(keyGenerator).toHaveBeenCalledWith(['tax', 'tax2', 1], 5);
+            expect(getLastFormNode(form.getControl('tax')!).key).toBe(1);
+            expect(getLastFormNode(form.getControl('tax.tax1')!).key).toBe(2);
+            expect(getLastFormNode(form.getControl('tax.tax2')!).key).toBe(3);
+            expect(getLastFormNode(form.getControl('tax.tax2.0')!).key).toBe(4);
+            expect(getLastFormNode(form.getControl('tax.tax2.1')!).key).toBe(5);
+            
+        });
+    });
+
     describe('valueChanges', () => {
-        it('should emit once emit value once for each reconcile operation', () => {
+        it('should emit value once for each reconcile operation', () => {
             const subscriber = jasmine.createSpy('subscriber')
             const rawSubscriber = jasmine.createSpy('raw-subscriber')
 

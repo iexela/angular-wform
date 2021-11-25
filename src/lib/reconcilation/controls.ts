@@ -109,7 +109,7 @@ function processGroup(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         control.enable();
     }
 
-    const currentChildrenNodes = mapValues(control.controls, (control, key) => getFormNode(ctx, key, control));
+    const currentChildrenNodes = mapValues(control.controls, (control, key) => getFormNodeWithKey(ctx, key, control));
     const { added, removed, updated } = objectDiff(currentChildrenNodes, node.children);
     added.forEach(key => control.setControl(
         key,
@@ -175,7 +175,7 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         control.enable();
     }
 
-    const currentChildrenNodes = control.controls.map((control, i) => getFormNode(ctx, i, control));
+    const currentChildrenNodes = control.controls.map((control, i) => getFormNodeWithKey(ctx, i, control));
     const { added, removed, updated, indexUpdated } = arrayDiff(currentChildrenNodes, node.children, child => child.key);
 
     const indexToControl: { [index: number]: AbstractControl } = {};
@@ -245,46 +245,19 @@ function processTinyFlags(node: VFormControl, control: FormControl): void {
     }
 }
 
-function getFormNode(ctx: VRenderContext, name: Maybe<VPathElement>, control: AbstractControl): VFormNode {
+interface VKeyOnlyFormNode {
+    key: any;
+}
+
+function getFormNodeWithKey(ctx: VRenderContext, name: Maybe<VPathElement>, control: AbstractControl): VFormNode | VKeyOnlyFormNode {
     const node = getLastFormNodeOrNothing(control);
     if (node) {
         return node;
     }
 
-    return restoreFormNode(ctx, name, control);
-}
-
-function restoreFormNode(ctx: VRenderContext, name: Maybe<VPathElement>, control: AbstractControl): VFormNode {
-    if (control instanceof FormControl) {
-        return {
-            type: VFormNodeType.Control,
-            updateOn: control.updateOn,
-            value: control.value,
-            disabled: control.disabled,
-            key: ctx.options.keyGenerator(ctx.pathTo(name), control.value),
-            data: {},
-        } as VFormControl;
-    } else if (control instanceof FormGroup) {
-        return {
-            type: VFormNodeType.Group,
-            updateOn: control.updateOn,
-            disabled: control.disabled,
-            children: mapValues(control.controls, (control, key) => restoreFormNode(ctx, key, control)),
-            key: ctx.options.keyGenerator(ctx.pathTo(name), control.value),
-            data: {},
-        } as VFormGroup;
-    } else if (control instanceof FormArray) {
-        return {
-            type: VFormNodeType.Array,
-            updateOn: control.updateOn,
-            disabled: control.disabled,
-            children: control.controls.map((control, i) => restoreFormNode(ctx, i, control)),
-            key: ctx.options.keyGenerator(ctx.pathTo(name), control.value),
-            data: {},
-        } as VFormArray;
-    }
-
-    throw Error(`Unknown type of control: ${ctx.pathTo(name)}, ${control}`);
+    return {
+        key: ctx.options.keyGenerator(ctx.pathTo(name), control.value),
+    };
 }
 
 function makeNodeTypeModifiedError(path: VPathElement[], currentType: VFormNodeType, newType: VFormNodeType, control: AbstractControl): Error {

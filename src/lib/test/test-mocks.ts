@@ -1,4 +1,5 @@
-import { vValidator } from '..';
+import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
+import { vArray, vControl, vGroup, vValidator } from '..';
 import { vValidatorAsync } from '../validators';
 
 export const moreThan10 = vValidator(control => control.value <= 10 ? { min: true } : null);
@@ -99,3 +100,25 @@ export const belarusToRussia = {
         discount: 20,
     },
 };
+
+export const taxData = {
+    tax1: 123,
+    tax2: [4, 5],
+}
+
+export const vTaxModel = vGroup(null, {
+    tax1: vControl(123),
+    tax2: vArray(null, [vControl(4), vControl(5)])
+});
+
+export const vTaxModelWithKeys = vGroup({ key: 1 }, {
+    tax1: vControl(123, { key: 2 }),
+    tax2: vArray({ key: 3 }, [vControl(4, { key: 4 }), vControl(5, { key: 5 })])
+});
+
+export function createTaxControl(): AbstractControl {
+    return new FormGroup({
+        tax1: new FormControl(123),
+        tax2: new FormArray([new FormControl(4), new FormControl(5)])
+    })
+}

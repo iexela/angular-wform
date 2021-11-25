@@ -515,4 +515,118 @@ describe('VFormControl', () => {
             expect(getLastFormNode(form.control)).toBe(node3);
         });
     });
+
+    describe('side effects', () => {
+        it('should restore enabled state', () => {
+            const form = renderNumber(1);
+
+            form.control.disable();
+
+            expect(form.control.disabled).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.disabled).toBeFalse();
+        });
+
+        it('should restore disabled state', () => {
+            const form = renderNumber(1, { disabled: true });
+
+            form.control.enable();
+
+            expect(form.control.disabled).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.disabled).toBeTrue();
+        });
+
+        it('should do nothing if touched state is not specified', () => {
+            const form = renderNumber(1);
+
+            form.control.markAsTouched()
+
+            expect(form.control.touched).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.touched).toBeTrue();
+
+            form.control.markAsUntouched();
+
+            expect(form.control.touched).toBeFalse();
+
+            form.update();
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should restore untouched state', () => {
+            const form = renderNumber(1, { touched: false });
+
+            form.control.markAsTouched()
+
+            expect(form.control.touched).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should restore touched state', () => {
+            const form = renderNumber(1, { touched: true });
+
+            form.control.markAsUntouched();
+
+            expect(form.control.touched).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.touched).toBeTrue();
+        });
+
+        it('should do nothing if dirty state is not specified', () => {
+            const form = renderNumber(1);
+
+            form.control.markAsDirty()
+
+            expect(form.control.dirty).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeTrue();
+
+            form.control.markAsPristine();
+
+            expect(form.control.dirty).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should restore pristine state', () => {
+            const form = renderNumber(1, { dirty: false });
+
+            form.control.markAsDirty()
+
+            expect(form.control.dirty).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should restore dirty state', () => {
+            const form = renderNumber(1, { dirty: true });
+
+            form.control.markAsPristine();
+
+            expect(form.control.dirty).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeTrue();
+        });
+    });
 });

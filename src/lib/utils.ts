@@ -174,10 +174,11 @@ function indexate<T>(arr: T[], toKey: TransformFn<T, any>): Map<any, { index: nu
     const items = new Map();
 
     arr.forEach((item, i) => {
-        const key = toKey(item);
+        let key = toKey(item);
 
         if (key == null) {
-            throw new Error(`Key cannot be undefined or null for array item node: ${i}`);
+            console.warn(`Key is undefined or null for array item node: ${i}`);
+            key = getKeyByIndex(i);
         }
         if (items.has(key)) {
             throw new Error(`Duplicated key: ${key}`);
@@ -187,6 +188,18 @@ function indexate<T>(arr: T[], toKey: TransformFn<T, any>): Map<any, { index: nu
     });
 
     return items;
+}
+
+const cachedKeys: { [index: number]: string } = {};
+
+function getKeyByIndex(i: number): string {
+    let key = cachedKeys[i];
+
+    if (key == null) {
+        cachedKeys[i] = key = `_index_.${i}`;
+    }
+    
+    return key;
 }
 
 export function hasField<T extends object, K extends keyof T>(obj: T, key: K): boolean {

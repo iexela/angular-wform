@@ -1,7 +1,8 @@
 import { fakeAsync, tick } from '@angular/core/testing';
+import { FormArray } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayChildren, VFormArrayOptions, VFormBuilder, VFormControlOptions, VFormHooks, vGroup, vValidator } from '..';
 import { vValidatorAsync } from '../validators';
-import { Box, elephant, even, krokodile, moreThan10, mouse } from './test-mocks';
+import { Box, createTaxControl, elephant, even, krokodile, moreThan10, mouse, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
 function defaultItemRenderer<T>(value: T, index: number): VFormControlOptions {
@@ -44,6 +45,14 @@ function renderDisabledConditionalGroup(initial: number[], anchor: number): VFor
 
 function boxArrayFormBuilder(): VFormBuilder<Box[]> {
     return vForm((boxes: Box[]) => vArray(null, boxes.map(box => vGroup({ key: box.name }, {
+        name: vControl(box.name),
+        weight: vControl(box.weight),
+        volume: vControl(box.volume),
+    }))));
+}
+
+function boxArrayFormBuilderWithoutKeys(): VFormBuilder<Box[]> {
+    return vForm((boxes: Box[]) => vArray(null, boxes.map(box => vGroup(null, {
         name: vControl(box.name),
         weight: vControl(box.weight),
         volume: vControl(box.volume),
@@ -618,6 +627,30 @@ describe('VFormArray', () => {
             expect(form.getControl('1')).not.toBe(krokodileControl);
         });
 
+        it('should update array controls by key if it is specified', () => {
+            const form = boxArrayFormBuilder().build([krokodile, elephant]);
+
+            const krokodileControl = form.getControl('0');
+            const elephantControl = form.getControl('1');
+
+            form.setValue([elephant, krokodile]);
+
+            expect(krokodileControl.value).toEqual(krokodile);
+            expect(elephantControl.value).toEqual(elephant);
+        });
+
+        it('should update array controls in order if key is not specified', () => {
+            const form = boxArrayFormBuilderWithoutKeys().build([krokodile, elephant]);
+
+            const krokodileControl = form.getControl('0');
+            const elephantControl = form.getControl('1');
+
+            form.setValue([elephant, krokodile]);
+
+            expect(krokodileControl.value).toEqual(elephant);
+            expect(elephantControl.value).toEqual(krokodile);
+        });
+
         it('should not update "updateOn" flag', () => {
             const form = renderConditionalArray(
                 fibonaci10,
@@ -651,6 +684,81 @@ describe('VFormArray', () => {
 
             form.update();
             expect(getLastFormNode(form.control)).toBe(node3);
+        });
+    });
+
+    describe('side effects', () => {
+        it('should restore enabled state', () => {
+            const form = renderArray(fibonaci10);
+
+            form.control.disable();
+
+            expect(form.control.disabled).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.disabled).toBeFalse();
+        });
+
+        it('should restore disabled state', () => {
+            const form = renderArray(fibonaci10, { disabled: true });
+
+            form.control.enable();
+
+            expect(form.control.disabled).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.disabled).toBeTrue();
+        });
+
+        it('should remove not specified controls', () => {
+            const form = renderArray(fibonaci5, {}, withItem(fibonaci5));
+
+            const array = form.control as FormArray;
+            const taxControl = createTaxControl();
+
+            array.insert(0, taxControl);
+
+            expect(array.length).toBe(6);
+            expect(array.get('0')).toBe(taxControl);
+
+            form.update();
+
+            expect(array.length).toBe(5);
+            expect(array.get('0')).not.toBe(taxControl);
+        });
+
+        it('should leave control if it was specified', () => {
+            const form = renderConditionalArray(
+                fibonaci10,
+                50,
+                [
+                    {},
+                    withItem(fibonaci10),
+                ],
+                [
+                    {},
+                    [
+                        vTaxModel,
+                        ...withItem(fibonaci2_10),
+                    ],
+                ]);
+
+                const array = form.control as FormArray;
+                const taxControl = createTaxControl();
+
+                array.insert(0, taxControl);
+    
+                expect(array.length).toBe(11);
+                expect(array.get('0')).toBe(taxControl);
+                
+                form.setValue(fibonaci2_10);
+                
+                expect(array.length).toBe(11);
+                expect(array.get('0')).toBe(taxControl);
+                expect(taxControl.value).toEqual(taxData);
+            
         });
     });
 });

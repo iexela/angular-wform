@@ -45,7 +45,6 @@ export function vControl(value: any, options?: VFormControlOptions): VFormContro
         type: VFormNodeType.Control,
         disabled: false,
         data: EMPTY_DATA,
-        key: value,
         ...options,
         value,
         validator: options && createControlValidator(options),

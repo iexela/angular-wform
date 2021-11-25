@@ -15,17 +15,15 @@ export interface VEnvFormBuilderFactory<TNode> {
     <T>(factory: VEnvFormNodeFactory<T, TNode>): VFormBuilder<T>;
 }
 
-let nextId: number = 1;
-
-function uniqueKeyGenerator(): string {
-    return `restored.${nextId++}`;
+function nilKeyGenerator(): undefined {
+    return;
 }
 
 export class VFormBuilder<T> {
     private _options: VFormOptions = {
         validationStrategy: VValidationStrategy.Append,
         updateOnChange: false,
-        keyGenerator: uniqueKeyGenerator,
+        keyGenerator: nilKeyGenerator,
     }
 
     constructor(private _factory: VFormNodeFactory<T>) {
@@ -42,7 +40,7 @@ export class VFormBuilder<T> {
         return this;
     }
 
-    keyExtractor(generator: VKeyGenerator): this {
+    keyGenerator(generator: VKeyGenerator): this {
         this._options.keyGenerator = generator;
         return this;
     }

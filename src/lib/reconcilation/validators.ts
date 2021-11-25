@@ -4,7 +4,7 @@ import { arrayDiffUnordered, arrayify, flatMap } from '../utils';
 import { canAccessListOfValidators, canManageValidatorsIndividually } from './flags';
 import { createValidatorBundle, ValidatorBundle } from './internal-model';
 import { VValidationStrategy } from './model';
-import { getLastFormNode, getLastValidatorBundleOrCreate } from './registry';
+import { getLastFormNodeOrNothing, getLastValidatorBundleOrCreate } from './registry';
 import { VRenderContext } from './render-context';
 
 interface Control12ValidatorsApi {
@@ -18,7 +18,7 @@ export function processValidators(ctx: VRenderContext, node?: VValidatorNode, co
         return createValidatorBundle(createValidators(node));
     }
 
-    const lastNode = getLastFormNode(control).validator;
+    const lastNode = getLastFormNodeOrNothing(control)?.validator;
     const lastValidatorBundle = getLastValidatorBundleOrCreate(control);
 
     return applyValidators(

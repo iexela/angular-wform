@@ -1,6 +1,7 @@
 import { fakeAsync, tick } from '@angular/core/testing';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, VFormHooks, vGroup } from '..';
-import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia, smallAsync, lightAsync } from './test-mocks';
+import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia, smallAsync, lightAsync, createTaxControl, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
 function withVolume(box: Box, options: VFormControlOptions = {}): VFormGroupChildren {
@@ -628,6 +629,79 @@ describe('VFormGroup', () => {
 
             form.update();
             expect(getLastFormNode(form.control)).toBe(node3);
+        });
+    });
+
+    describe('side effects', () => {
+        it('should restore enabled state', () => {
+            const form = renderGroup(parcel);
+
+            form.control.disable();
+
+            expect(form.control.disabled).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.disabled).toBeFalse();
+        });
+
+        it('should restore disabled state', () => {
+            const form = renderGroup(parcel, { disabled: true });
+
+            form.control.enable();
+
+            expect(form.control.disabled).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.disabled).toBeTrue();
+        });
+
+        it('should remove not specified controls', () => {
+            const form = renderGroup(parcel);
+
+            const group = form.control as FormGroup;
+
+            expect(group.get('tax')).toBeFalsy();
+
+            group.setControl('tax', createTaxControl());
+
+            expect(group.get('tax')).toBeTruthy();
+
+            form.update();
+
+            expect(group.get('tax')).toBeFalsy();
+        });
+
+        it('should leave control if it was specified', () => {
+            const form = renderConditionalGroup(
+                parcel,
+                50,
+                [
+                    {},
+                    withWeightAndVolume(parcel)],
+                [
+                    {},
+                    {
+                        ...withWeightAndVolume(largeParcel),
+                        tax: vTaxModel,
+                    },
+                ]);
+
+                const group = form.control as FormGroup;
+                
+                expect(group.get('tax')).toBeFalsy();
+
+                const taxControl = createTaxControl();
+
+                group.setControl('tax', taxControl);
+    
+                expect(group.get('tax')).toBeTruthy();
+    
+                form.setValue(largeParcel);
+    
+                expect(group.get('tax')).toBe(taxControl);
+                expect(taxControl.value).toEqual(taxData);
         });
     });
 });
