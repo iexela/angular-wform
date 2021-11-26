@@ -26,7 +26,7 @@ const lengthLessThan10Async = vValidatorAsync(control => Promise.resolve(control
 const startedFrom0Async = vValidatorAsync(control => Promise.resolve(control.value[0] !== 0 ? { zero: true } : null));
 
 function renderArray(initial: number[], options: VFormArrayOptions = {}, children?: VFormArrayChildren): VForm<number[]> {
-    return vForm((current: number[]) => vArray(options, children || withItem(current))).build(initial);
+    return vForm((current: number[]) => vArray(options, children || withItem(current))).lenient().build(initial);
 }
 
 function renderConditionalArray(initial: number[],
@@ -36,7 +36,7 @@ function renderConditionalArray(initial: number[],
     return vForm((value: number[]) => {
         const isLess = value.every(v => v < anchor);
         return vArray(isLess ? optionsLess : optionsMore, (isLess ? childrenLess : childrenMore) || withItem(value));
-    }).build(initial);
+    }).lenient().build(initial);
 }
 
 function renderDisabledConditionalGroup(initial: number[], anchor: number): VForm<number[]> {

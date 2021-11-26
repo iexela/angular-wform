@@ -24,6 +24,7 @@ export class VFormBuilder<T> {
         validationStrategy: VValidationStrategy.Append,
         updateOnChange: false,
         keyGenerator: nilKeyGenerator,
+        strict: true,
     }
 
     constructor(private _factory: VFormNodeFactory<T>) {
@@ -42,6 +43,11 @@ export class VFormBuilder<T> {
 
     keyGenerator(generator: VKeyGenerator): this {
         this._options.keyGenerator = generator;
+        return this;
+    }
+
+    lenient(lenient: boolean = true): this {
+        this._options.strict = !lenient;
         return this;
     }
 

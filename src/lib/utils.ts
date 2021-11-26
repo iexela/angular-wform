@@ -117,9 +117,9 @@ export interface ArrayDiffUnorderedResult<T> {
     common: T[];
 }
 
-export function arrayDiff<T>(a: T[], b: T[], toKey: TransformFn<T, any>): ArrayDiffResult {
-    const aIndex = indexate(a, toKey);
-    const bIndex = indexate(b, toKey);
+export function arrayDiff<T>(a: T[], b: T[], toKey: TransformFn<T, any>, ctx?: any[]): ArrayDiffResult {
+    const aIndex = indexate(a, toKey, ctx);
+    const bIndex = indexate(b, toKey, ctx);
 
     const added = filterIterator(
         bIndex.keys(),
@@ -170,18 +170,20 @@ function filterIterator<T>(iterator: IterableIterator<T>, predicate: PredicateFn
     return result;
 }
 
-function indexate<T>(arr: T[], toKey: TransformFn<T, any>): Map<any, { index: number; value: T }> {
+function indexate<T>(arr: T[], toKey: TransformFn<T, any>, errorCtx?: any[]): Map<any, { index: number; value: T }> {
     const items = new Map();
 
     arr.forEach((item, i) => {
         let key = toKey(item);
 
         if (key == null) {
-            console.warn(`Key is undefined or null for array item node: ${i}`);
+            const path = errorCtx?.join('.');
+            console.warn(`Key is undefined or null for the array item node: ${path ? path + '.' : ''}${i}`);
             key = getKeyByIndex(i);
         }
         if (items.has(key)) {
-            throw new Error(`Duplicated key: ${key}`);
+            const path = errorCtx?.join('.');
+            throw new Error(`Items has the same key (${key}): ${path ? path + '.' : ''}{${items.get(key).index}, ${i}}`);
         }
 
         items.set(key, { index: i, value: item });

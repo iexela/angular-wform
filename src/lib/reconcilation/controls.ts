@@ -17,7 +17,7 @@ export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node
         case VFormNodeType.Array:
             return processArray(ctx, name, node, control as FormArray);
         default:
-            throw Error(`Unsupported node type: ${ctx.pathTo(name)}`);
+            throw Error(`Unsupported node type: ${ctx.pathTo(name).join('.')}`);
     }
 }
 
@@ -41,8 +41,8 @@ function processControl(ctx: VRenderContext, name: Maybe<VPathElement>, node: VF
         return newControl;
     }
 
-    if (node.type !== VFormNodeType.Control || !(control instanceof FormControl)) {
-        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Control, node.type, control);
+    if (!(control instanceof FormControl)) {
+        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Control, control);
     }
 
     const nextDisabled = ctx.tryDisabled(node.disabled);
@@ -98,8 +98,8 @@ function processGroup(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         return group;
     }
 
-    if (node.type !== VFormNodeType.Group || !(control instanceof FormGroup)) {
-        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Group, node.type, control);
+    if (!(control instanceof FormGroup)) {
+        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Group, control);
     }
 
     ctx.push(name, node);
@@ -164,8 +164,8 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         return array;
     }
 
-    if (node.type !== VFormNodeType.Array || !(control instanceof FormArray)) {
-        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Array, node.type, control);
+    if (!(control instanceof FormArray)) {
+        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Array, control);
     }
 
     ctx.push(name, node);
@@ -176,7 +176,11 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     }
 
     const currentChildrenNodes = control.controls.map((control, i) => getFormNodeWithKey(ctx, i, control));
-    const { added, removed, updated, indexUpdated } = arrayDiff(currentChildrenNodes, node.children, child => child.key);
+    const { added, removed, updated, indexUpdated } = arrayDiff(
+        currentChildrenNodes,
+        node.children,
+        child => child.key,
+        ctx.pathTo());
 
     const indexToControl: { [index: number]: AbstractControl } = {};
     updated.forEach(({ previous }) => {
@@ -255,14 +259,22 @@ function getFormNodeWithKey(ctx: VRenderContext, name: Maybe<VPathElement>, cont
         return node;
     }
 
+    if (ctx.options.strict) {
+        throw Error(`Unexpected control found: ${ctx.pathTo(name).join('.')}
+                    Since vform works in strict mode, unmanaged controls are not allowed.
+                    You need to do one of the following
+                    * Get rid of adding unmanaged controls
+                    * If you really need to add controls manually, try to use vNative/vPortal
+                    * Switch off strict mode`);
+    }
+
     return {
         key: ctx.options.keyGenerator(ctx.pathTo(name), control.value),
     };
 }
 
-function makeNodeTypeModifiedError(path: VPathElement[], currentType: VFormNodeType, newType: VFormNodeType, control: AbstractControl): Error {
-    throw Error(`Changing of node type is not supported: ${path},
-                 currentType = ${VFormNodeType[currentType]},
-                 newType = ${VFormNodeType[newType]},
+function makeNodeTypeModifiedError(path: VPathElement[], requestedType: VFormNodeType, control: AbstractControl): Error {
+    throw Error(`Changing of node type is not supported: ${path.join('.')},
+                 requestedType = ${VFormNodeType[requestedType]},
                  control = ${getControlTypeName(control)}`);
 }

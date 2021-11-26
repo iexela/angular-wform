@@ -20,7 +20,7 @@ function withWeightAndVolume(box: Box, weight?: VFormControlOptions, volume?: VF
 }
 
 function renderGroup(initial: Box, options: VFormGroupOptions = {}, children?: VFormGroupChildren): VForm<Box> {
-    return vForm((current: Box) => vGroup(options, children || withWeightAndVolume(current))).build(initial);
+    return vForm((current: Box) => vGroup(options, children || withWeightAndVolume(current))).lenient().build(initial);
 }
 
 function renderConditionalGroup(initial: Box,
@@ -33,7 +33,7 @@ function renderConditionalGroup(initial: Box,
             isLess ? optionsLess : optionsMore,
             (isLess ? childrenLess : childrenMore) || withWeightAndVolume(value),
         );
-    }).build(initial);
+    }).lenient().build(initial);
 }
 
 function renderDisabledConditionalGroup(initial: Box, anchor: number): VForm<Box> {

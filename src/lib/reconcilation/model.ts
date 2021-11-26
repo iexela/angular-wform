@@ -20,6 +20,7 @@ export interface VFormOptions {
     validationStrategy: VValidationStrategy;
     updateOnChange: boolean;
     keyGenerator: VKeyGenerator;
+    strict: boolean;
 }
 
 export interface VReconcilationRequest {

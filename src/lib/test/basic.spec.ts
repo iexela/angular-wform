@@ -1,5 +1,5 @@
-import { FormGroup } from '@angular/forms';
-import { getLastFormNode, vArray, vControl, vForm, vGroup, VValidators } from '..';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { getLastFormNode, vArray, vControl, vForm, VFormNodeType, vGroup, VValidators } from '..';
 import { belarusToAustralia, Box, createTaxControl, elephant, Flight, mouse, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
 const flightFactory = (value: Flight) => vGroup(null, {
@@ -11,6 +11,10 @@ const flightFactory = (value: Flight) => vGroup(null, {
     }),
     time: vControl(undefined, { disabled: true }),
 });
+
+function errorHasMessage(...strs: string[]): RegExp {
+    return new RegExp(strs.map(str => str.replace(/\.|\{\}/g, ch => `\\${ch}`)).join('(.|\n)*'), 'm');
+}
 
 describe('basic', () => {
     describe('virtual function', () => {
@@ -98,11 +102,9 @@ describe('basic', () => {
     });
 
     describe('keyGenerator', () => {
-        // jasmine.createSpy().and.returnValues([1, 2, 3])
-
         it('key generator does not generate key for existing controls', () => {
             const keyGenerator = jasmine.createSpy();
-            const form = vForm(() =>
+            vForm(() =>
                 vGroup(null, { abc: vTaxModel }),
             ).keyGenerator(keyGenerator).build(false);
 
@@ -115,7 +117,7 @@ describe('basic', () => {
                 vGroup(null, flag
                         ? { abc: vTaxModel, tax: vTaxModelWithKeys }
                         : { abc: vTaxModel }),
-            ).keyGenerator(keyGenerator).build(false);
+            ).keyGenerator(keyGenerator).lenient().build(false);
 
             const group = form.control as FormGroup;
             group.setControl('tax', createTaxControl());
@@ -162,6 +164,161 @@ describe('basic', () => {
 
             expect(subscriber).toHaveBeenCalledOnceWith(elephantWithoutVolume);
             expect(rawSubscriber).toHaveBeenCalledOnceWith(elephant);
+        });
+    });
+
+    describe('errors', () => {
+        it('"getControl" should throw error if control does not exist', () => {
+            const form = vForm(() => vGroup(null, {
+                nested: vGroup(null, {
+                    arr: vArray(null, [
+                        vControl(1),
+                        vGroup(null, {
+                            field: vControl('abc'),
+                        }),
+                    ]),
+                }),
+            })).build({});
+
+            expect(form.getControl('nested.arr.1.field').value).toBe('abc');
+            expect(() => form.getControl('a.b.c.0')).toThrowError(errorHasMessage('a.b.c.0'));
+            expect(() => form.getControl('unexisting')).toThrowError(errorHasMessage('unexisting'));
+            expect(() => form.getControl('0')).toThrowError(errorHasMessage('0'));
+            expect(() => form.getControl('nested.arr.1.field2')).toThrowError(errorHasMessage('nested.arr.1.field2'));
+        });
+
+        it('"array reconcilation" should throw error if several items have the same key', () => {
+            const form = vForm(() => vGroup(null, {
+                group: vGroup(null, {
+                    nested: vArray(null, [
+                        vControl(1, { key: 'abracadabra' }),
+                        vControl(2, { key: 'abracadabra' }),
+                    ]),
+                }),
+            })).build({});
+            
+            expect(() => form.update()).toThrowError(errorHasMessage('abracadabra', 'group.nested.{0, 1}'));
+        });
+
+        it('"render operation" should throw error if type of vnode is unknown', () => {
+            expect(() => vForm(() => vGroup(null, {
+                group: vGroup(null, {
+                    nested: vArray(null, [
+                        vControl(1, { key: 1 }),
+                        { type: 100 } as any,
+                        vControl(3, { key: 2 }),
+                    ]),
+                }),
+            })).build({})).toThrowError(errorHasMessage('group.nested.1'));
+        });
+
+        it('"reconcilation of VFormControl" should throw error if type of vnode is different', () => {
+            const form = vForm((flag: boolean) => vGroup(null, {
+                group: vGroup(null, {
+                    nested: vArray(null, [
+                        vControl(1, { key: 1 }),
+                        flag ? vGroup({ key: 2 }, {}) : vControl(2, { key: 2 }),
+                        vControl(3, { key: 3 }),
+                    ]),
+                }),
+            })).build(false as boolean);
+
+            expect(() => form.setValue(true)).toThrowError(errorHasMessage(
+                'group.nested.1',
+                `requestedType = ${VFormNodeType[VFormNodeType.Group]}`,
+                'control = FormControl',
+            ));
+        });
+
+        it('"reconcilation of VFormGroup" should throw error if type of vnode is different', () => {
+            const form = vForm((flag: boolean) => vGroup(null, {
+                group: vGroup(null, {
+                    nested: vArray(null, [
+                        vControl(1, { key: 1 }),
+                        flag ? vArray({ key: 2 }, []) : vGroup({ key: 2 }, {}),
+                        vControl(3, { key: 3 }),
+                    ]),
+                }),
+            })).build(false as boolean);
+
+            expect(() => form.setValue(true)).toThrowError(errorHasMessage(
+                'group.nested.1',
+                `requestedType = ${VFormNodeType[VFormNodeType.Array]}`,
+                'control = FormGroup',
+            ));
+        });
+
+        it('"reconcilation of VFormArray" should throw error if type of vnode is different', () => {
+            const form = vForm((flag: boolean) => vGroup(null, {
+                group: vGroup(null, {
+                    nested: vArray(null, [
+                        vControl(1, { key: 1 }),
+                        flag ? vControl(2, { key: 2 }) : vArray({ key: 2 }, []),
+                        vControl(3, { key: 3 }),
+                    ]),
+                }),
+            })).build(false as boolean);
+
+            expect(() => form.setValue(true)).toThrowError(errorHasMessage(
+                'group.nested.1',
+                `requestedType = ${VFormNodeType[VFormNodeType.Control]}`,
+                'control = FormArray',
+            ));
+        });
+
+        it('"getLastFormNode" should throw error if control was never rendered', () => {
+            expect(() => getLastFormNode(new FormControl())).toThrowError();
+        });
+
+        it('"render operation" should throw error if validation strategy is unknown', () => {
+            const form = vForm(() => vControl(1, { required: true }))
+                .validationStrategy(123 as any)
+                .build(1);
+
+            expect(() => form.update()).toThrowError();
+        });
+
+        it('should not allow unmanaged controls in strict mode', () => {
+            const form = vForm(() => vGroup(null, {
+                group: vGroup(null, {
+                    nested: vArray(null, [
+                        vControl(1, { key: 'abracadabra' }),
+                        vControl(2, { key: 'abracadabra' }),
+                    ]),
+                }),
+            })).build({});
+
+            const array = form.getControl('group.nested') as FormArray;
+
+            array.push(new FormControl());
+
+            expect(() => form.update()).toThrowError(errorHasMessage('group.nested.2'));
+        });
+    });
+
+    describe('console messages', () => {
+        let warn: jasmine.Spy<typeof console['warn']>;
+
+        beforeEach(() => {
+            warn = spyOn(console, 'warn');
+        });
+
+        it('"array reconcilation" should print warning if item does not have a key', () => {
+            const form = vForm(() => vGroup(null, {
+                group: vGroup(null, {
+                    nested: vArray(null, [
+                        vControl(1, { key: 1 }),
+                        vControl(2),
+                        vControl(3, { key: 3 }),
+                    ]),
+                }),
+            })).build({});
+
+            form.update();
+
+            expect(warn).toHaveBeenCalledTimes(2);
+            expect(warn.calls.argsFor(0)[0]).toContain('group.nested.1');
+            expect(warn.calls.argsFor(1)[0]).toContain('group.nested.1');
         });
     });
 });
