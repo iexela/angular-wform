@@ -10,6 +10,10 @@ import { processValidators } from './validators';
 import { processAsyncValidators } from './validators-async';
 
 export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNode | VFormPlaceholder, control?: AbstractControl): AbstractControl {
+    if (node == null) {
+        throw Error(`Node is nil: ${ctx.pathTo(name).join('.')}`);
+    }
+
     switch (node.type) {
         case VFormNodeType.Control:
             return processControl(ctx, name, node, control);
@@ -182,7 +186,9 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     const { added, removed, updated, indexUpdated } = arrayDiff(
         currentChildrenNodes,
         nextChildrenNodes,
-        child => child.key,
+        // ?. is intentional here in order to allow nulls
+        // null error is catched later in processNode
+        child => child?.key,
         ctx.pathTo());
 
     const indexToControl: { [index: number]: AbstractControl } = {};
@@ -283,5 +289,10 @@ function makeNodeTypeModifiedError(path: VPathElement[], requestedType: VFormNod
 }
 
 function isUsedNode(node: VFormNode | VFormPlaceholder): node is VFormNode {
+    if (node == null) {
+        // It is intentional, null error is catched later in processNode
+        return true;
+    }
+
     return node.type !== VFormNodeType.Placeholder;
 }

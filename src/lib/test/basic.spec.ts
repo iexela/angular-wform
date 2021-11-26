@@ -278,7 +278,7 @@ describe('basic', () => {
             expect(() => form.update()).toThrowError();
         });
 
-        it('should not allow unmanaged controls in strict mode', () => {
+        it('"reconcilation operation" should throw error if unmanaged control is found in strict mode', () => {
             const form = vForm(() => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
@@ -293,6 +293,60 @@ describe('basic', () => {
             array.push(new FormControl());
 
             expect(() => form.update()).toThrowError(errorHasMessage('group.nested.2'));
+        });
+
+        it('"render operation" should throw error if root node is nil', () => {
+            expect(() => vForm(() => null as any).build(1)).toThrowError();
+        });
+
+        it('"reconcilation operation" should throw error if root node is nil', () => {
+            const form = vForm((n: number) => n < 0 ? null as any : vControl(n)).build(1 as number);
+
+            expect(() => form.setValue(-1)).toThrowError();
+        });
+
+        it('"render operation" should throw error if child of group is nil', () => {
+            expect(() => vForm(() => vGroup(null, {
+                group: vGroup(null, {
+                    nested: null as any,
+                }),
+            })).build(false)).toThrowError(errorHasMessage('group.nested'));
+        });
+
+        it('"reconcilation operation" should throw error if child of group is nil', () => {
+            const form = vForm((flag: boolean) => vGroup(null, {
+                group: vGroup(null, {
+                    nested: flag ? null as any : vControl(2, { key: 2 }),
+                }),
+            })).build(false as boolean);
+
+            expect(() => form.setValue(true)).toThrowError(errorHasMessage('group.nested'));
+        });
+
+        it('"render operation" should throw error if child of array is nil', () => {
+            expect(() => vForm(() => vGroup(null, {
+                group: vGroup(null, {
+                    nested: vArray(null, [
+                        vControl(1, { key: 1 }),
+                        null as any,
+                        vControl(3, { key: 3 }),
+                    ]),
+                }),
+            })).build(false)).toThrowError(errorHasMessage('group.nested.1'));
+        });
+
+        it('"reconcilation operation" should throw error if child of array is nil', () => {
+            const form = vForm((flag: boolean) => vGroup(null, {
+                group: vGroup(null, {
+                    nested: vArray(null, [
+                        vControl(1, { key: 1 }),
+                        flag ? null as any : vControl(2, { key: 2 }),
+                        vControl(3, { key: 3 }),
+                    ]),
+                }),
+            })).build(false as boolean);
+
+            expect(() => form.setValue(true)).toThrowError(errorHasMessage('group.nested.1'));
         });
     });
 
