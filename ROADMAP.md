@@ -6,8 +6,8 @@
 10. Write tests for `getLastValidators`
 12. Support CI
 13. Check that library works on Angular pre-12
-14. Cover environment usage
+14. Refactor to translator/Cover translator usage
 15. Write documentation
 16. Think about swapping position of parameters in vGroup/vArray
-17. Think about vSkip()
 19. Log console.debug/console.warn only in dev mode?
+20. Do not allow nil child

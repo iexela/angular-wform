@@ -1,8 +1,8 @@
 import { VERSION } from '@angular/core';
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
-import { PredicateFn, TransformFn } from './common';
+import { PredicateFn, TransformFn, TypeGuardedPredicateFn } from './common';
 
-type Dictionary = { [key: string]: any };
+type Dictionary<T> = { [key: string]: T };
 
 const intVersion = {
     major: parseInt(VERSION.major),
@@ -46,14 +46,16 @@ export function calculateValue(control: AbstractControl): any {
     return mapControls(control, child => child.value);
 }
 
-export function mapValues<R, T extends Dictionary, K extends keyof T>(obj: T, transform: (value: T[K], key: string) => R): { [P in K]: R} {
+export function mapValues<R, T extends Dictionary<any>, K extends keyof T>(obj: T, transform: (value: T[K], key: string) => R): { [P in K]: R} {
     return Object.keys(obj || {}).reduce((result, key) => {
         result[key] = transform(obj[key], key);
         return result;
     }, {} as any);
 }
 
-export function pickBy<R extends T, T extends Dictionary, K extends keyof T>(obj: T, predicate: PredicateFn<T[K]>): R {
+export function pickBy<T, S extends T>(obj: Dictionary<T>, predicate: TypeGuardedPredicateFn<T, S>): Dictionary<S>;
+export function pickBy<T>(obj: Dictionary<T>, predicate: PredicateFn<T>): Dictionary<T>;
+export function pickBy(obj: Dictionary<any>, predicate: PredicateFn<any>): Dictionary<any> {
     return Object.keys(obj || {}).reduce((result, key) => {
         if (predicate(obj[key])) {
             result[key] = obj[key];
@@ -89,7 +91,7 @@ export interface ObjectDiffResult {
     untouched: string[];
 }
 
-export function objectDiff<T extends Dictionary>(a: T, b: T): ObjectDiffResult {
+export function objectDiff<T extends Dictionary<any>>(a: T, b: T): ObjectDiffResult {
     const aKeys = Object.keys(a);
     const bKeys = Object.keys(b);
 

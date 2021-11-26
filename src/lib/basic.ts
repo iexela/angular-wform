@@ -1,5 +1,5 @@
 import { AsyncValidatorFn, ValidatorFn, Validators } from '@angular/forms';
-import { VAsyncValidatorNode, VFormNode } from '.';
+import { VAsyncValidatorNode, VFormNode, VFormPlaceholder } from '.';
 import { Maybe, Nilable } from './common';
 import { VFormArray, VFormControl, VFormGroup, VFormNodeType, VValidatorNode } from './model';
 import { arrayify } from './utils';
@@ -15,9 +15,9 @@ type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator' | 'asyncValidator'>> 
 
 export type VFormControlOptions = Omit<MakeOptions<VFormControl>, 'value'> & { required?: boolean };
 export type VFormGroupOptions = Omit<MakeOptions<VFormGroup>, 'children'>;
-export type VFormGroupChildren = Record<string, VFormNode>;
+export type VFormGroupChildren = Record<string, VFormNode | VFormPlaceholder>;
 export type VFormArrayOptions = Omit<MakeOptions<VFormArray>, 'children'>;
-export type VFormArrayChildren = VFormNode[];
+export type VFormArrayChildren = (VFormNode | VFormPlaceholder)[];
 
 const EMPTY_DATA = Object.freeze({});
 
@@ -73,5 +73,11 @@ export function vArray(options: Nilable<VFormArrayOptions> = {}, children: VForm
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
         children,
+    };
+}
+
+export function vSkip(): VFormPlaceholder {
+    return {
+        type: VFormNodeType.Placeholder,
     };
 }

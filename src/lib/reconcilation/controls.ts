@@ -1,14 +1,15 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
+import { VFormPlaceholder } from '..';
 import { Maybe } from '../common';
 import { VFormArray, VFormControl, VFormGroup, VFormNode, VFormNodeType } from '../model';
-import { arrayDiff, getControlTypeName, hasField, mapValues, objectDiff } from '../utils';
+import { arrayDiff, getControlTypeName, hasField, mapValues, objectDiff, pickBy } from '../utils';
 import { VPathElement } from './model';
 import { getLastFormNodeOrNothing, registerRenderResult } from './registry';
 import { VRenderContext } from './render-context';
 import { processValidators } from './validators';
 import { processAsyncValidators } from './validators-async';
 
-export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNode, control?: AbstractControl): AbstractControl {
+export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNode | VFormPlaceholder, control?: AbstractControl): AbstractControl {
     switch (node.type) {
         case VFormNodeType.Control:
             return processControl(ctx, name, node, control);
@@ -17,7 +18,7 @@ export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node
         case VFormNodeType.Array:
             return processArray(ctx, name, node, control as FormArray);
         default:
-            throw Error(`Unsupported node type: ${ctx.pathTo(name).join('.')}`);
+            throw Error(`Unsupported node type (${VFormNodeType[node.type] || node.type}): ${ctx.pathTo(name).join('.')}`);
     }
 }
 
@@ -79,7 +80,7 @@ function processGroup(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         const validator = processValidators(ctx, node.validator);
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
         const group = new FormGroup(
-            mapValues(node.children, (child, key) => processNode(ctx, key, child)),
+            mapValues(pickBy(node.children, isUsedNode), (child, key) => processNode(ctx, key, child as VFormNode)),
             {
                 validators: validator.compiled,
                 asyncValidators: asyncValidator.compiled,
@@ -110,13 +111,13 @@ function processGroup(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     }
 
     const currentChildrenNodes = mapValues(control.controls, (control, key) => getFormNodeWithKey(ctx, key, control));
-    const { added, removed, updated } = objectDiff(currentChildrenNodes, node.children);
+    const { added, removed, updated } = objectDiff(currentChildrenNodes, pickBy(node.children, isUsedNode));
     added.forEach(key => control.setControl(
         key,
-        processNode(ctx, key, node.children[key]),
+        processNode(ctx, key, node.children[key] as VFormNode),
     ));
     removed.forEach(key => control.removeControl(key));
-    updated.forEach(key => processNode(ctx, key, node.children[key], control.controls[key]));
+    updated.forEach(key => processNode(ctx, key, node.children[key] as VFormNode, control.controls[key]));
 
     if (control.disabled !== nextDisabled && nextDisabled) {
         control.disable();
@@ -145,7 +146,7 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
 
         const array = new FormArray(
-            node.children.map((child, i) => processNode(ctx, i, child)),
+            node.children.filter(isUsedNode).map((child, i) => processNode(ctx, i, child)),
             {
                 validators: validator.compiled,
                 asyncValidators: asyncValidator.compiled,
@@ -175,10 +176,12 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         control.enable();
     }
 
-    const currentChildrenNodes = control.controls.map((control, i) => getFormNodeWithKey(ctx, i, control));
+    const currentChildrenNodes = control.controls
+        .map((control, i) => getFormNodeWithKey(ctx, i, control));
+    const nextChildrenNodes = node.children.filter(isUsedNode);
     const { added, removed, updated, indexUpdated } = arrayDiff(
         currentChildrenNodes,
-        node.children,
+        nextChildrenNodes,
         child => child.key,
         ctx.pathTo());
 
@@ -193,12 +196,12 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     removed.reverse().forEach(index => control.removeAt(index));
     added.forEach(index => control.insert(
         index,
-        processNode(ctx, index, node.children[index]),
+        processNode(ctx, index, nextChildrenNodes[index] as VFormNode),
     ));
     updated.forEach(({ previous, next }) => {
         const nextControl = indexToControl[previous];
 
-        processNode(ctx, next, node.children[next], nextControl);
+        processNode(ctx, next, nextChildrenNodes[next] as VFormNode, nextControl);
 
         if (control.controls[next] !== nextControl) {
             control.setControl(next, nextControl);
@@ -277,4 +280,8 @@ function makeNodeTypeModifiedError(path: VPathElement[], requestedType: VFormNod
     throw Error(`Changing of node type is not supported: ${path.join('.')},
                  requestedType = ${VFormNodeType[requestedType]},
                  control = ${getControlTypeName(control)}`);
+}
+
+function isUsedNode(node: VFormNode | VFormPlaceholder): node is VFormNode {
+    return node.type !== VFormNodeType.Placeholder;
 }

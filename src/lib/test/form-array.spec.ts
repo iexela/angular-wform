@@ -1,6 +1,7 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormArray } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayChildren, VFormArrayOptions, VFormBuilder, VFormControlOptions, VFormHooks, vGroup, vValidator } from '..';
+import { vSkip } from '../basic';
 import { vValidatorAsync } from '../validators';
 import { Box, createTaxControl, elephant, even, krokodile, moreThan10, mouse, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
@@ -166,6 +167,18 @@ describe('VFormArray', () => {
             expect(andTick(renderArray(fibonaci10, options)).control.errors).toEqual({ length: true });
             expect(andTick(renderArray(fibonaci5, options)).control.errors).toBeFalsy();
         }));
+
+        it('should not render skipped control', () => {
+            const form = vForm((numbers: number[]) => vArray(null, [
+                vSkip(),
+                vControl(numbers[0], { key: 1 }),
+                vControl(numbers[1], { key: 2 }),
+            ])).build([10, 20]);
+
+            const array = form.control as FormArray;
+            expect(form.value as any).toEqual([10, 20]);
+            expect(array.length).toBe(2);
+        });
 
         it('should set updateOn flag to "change", by default', () => {
             const form = renderArray(fibonaci5, {});
@@ -649,6 +662,42 @@ describe('VFormArray', () => {
 
             expect(krokodileControl.value).toEqual(elephant);
             expect(elephantControl.value).toEqual(krokodile);
+        });
+
+        it('should add control if it is switched from vSkip', () => {
+            const form = vForm((numbers: number[]) => vArray(null, [
+                numbers.some(n => n < 0) ? vSkip() : vControl(numbers[0] + numbers[1], { key: 'sum' }),
+                vControl(numbers[0], { key: 1 }),
+                vControl(numbers[1], { key: 2 }),
+            ])).build([-10, -20]);
+
+            const array = form.control as FormArray;
+
+            expect(form.value).toEqual([-10, -20]);
+            expect(array.length).toBe(2);
+            
+            form.setValue([10, 20]);
+            
+            expect(form.value).toEqual([30, 10, 20]);
+            expect(array.length).toBe(3);
+        });
+
+        it('should remove control if it is switched to vSkip', () => {
+            const form = vForm((numbers: number[]) => vArray(null, [
+                numbers.some(n => n < 0) ? vSkip() : vControl(numbers[0] + numbers[1], { key: 'sum' }),
+                vControl(numbers[0], { key: 1 }),
+                vControl(numbers[1], { key: 2 }),
+            ])).build([10, 20]);
+
+            const array = form.control as FormArray;
+            
+            expect(form.value).toEqual([30, 10, 20]);
+            expect(array.length).toBe(3);
+            
+            form.setValue([-10, -20]);
+
+            expect(form.value).toEqual([-10, -20]);
+            expect(array.length).toBe(2);
         });
 
         it('should not update "updateOn" flag', () => {

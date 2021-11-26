@@ -1,7 +1,8 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, VFormHooks, vGroup } from '..';
-import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia, smallAsync, lightAsync, createTaxControl, taxData, vTaxModel } from './test-mocks';
+import { vSkip } from '../basic';
+import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia, smallAsync, lightAsync, createTaxControl, taxData, vTaxModel, elephant, mouse } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
 function withVolume(box: Box, options: VFormControlOptions = {}): VFormGroupChildren {
@@ -167,6 +168,20 @@ describe('VFormGroup', () => {
             const form = flightFormBuilder().build(belarusToAustralia);
 
             expect(form.value).toEqual(belarusToAustralia);
+        });
+
+        it('should not render skipped control', () => {
+            const form = vForm((current: Box) => vGroup(null, {
+                name: vControl(current.name),
+                weight: vSkip(),
+                volume: vControl(current.volume),
+            })).build(elephant);
+
+            expect(form.value as any).toEqual({
+                name: elephant.name,
+                volume: elephant.volume,
+            });
+            expect(form.control.get('weight')).toBeFalsy();
         });
 
         it('should set updateOn flag to "change", by default', () => {
@@ -590,6 +605,34 @@ describe('VFormGroup', () => {
             expect(form.hasControl('weight')).toBeTrue();
             expect(form.hasControl('volume')).toBeFalse();
             expect(form.value).toEqual({ weight: largeParcel.weight });
+        });
+
+        it('should add control if it is switched from vSkip', () => {
+            const form = vForm((current: Box) => vGroup(null, {
+                name: vControl(current.name),
+                weight: current.weight! < 50 ? vSkip() : vControl(current.weight),
+                volume: vControl(current.volume),
+            })).build(mouse);
+
+            expect(form.control.get('weight')).toBeFalsy();
+            
+            form.setValue(elephant);
+
+            expect(form.control.get('weight')).toBeTruthy();
+        });
+
+        it('should remove control if it is switched to vSkip', () => {
+            const form = vForm((current: Box) => vGroup(null, {
+                name: vControl(current.name),
+                weight: current.weight! < 50 ? vSkip() : vControl(current.weight),
+                volume: vControl(current.volume),
+            })).build(elephant);
+
+            expect(form.control.get('weight')).toBeTruthy();
+            
+            form.setValue(mouse);
+
+            expect(form.control.get('weight')).toBeFalsy();
         });
 
         it('should rerender nested vform containers', () => {

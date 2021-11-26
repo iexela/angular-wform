@@ -71,7 +71,7 @@ export type VAsyncValidatorNode = VAsyncCompoundValidatorNode | VAsyncSimpleVali
 // Form nodes
 
 export enum VFormNodeType {
-    Control, Group, Array
+    Control, Group, Array, Placeholder
 }
 
 export enum VFormHooks {
@@ -99,12 +99,16 @@ export interface VFormControl extends VFormNodeBase {
 
 export interface VFormGroup extends VFormNodeBase {
     type: VFormNodeType.Group;
-    children: Record<string, VFormNode>;
+    children: Record<string, VFormNode | VFormPlaceholder>;
 }
 
 export interface VFormArray extends VFormNodeBase {
     type: VFormNodeType.Array;
-    children: VFormNode[];
+    children: (VFormNode | VFormPlaceholder)[];
+}
+
+export interface VFormPlaceholder {
+    type: VFormNodeType.Placeholder;
 }
 
 export type VFormNode = VFormControl | VFormGroup | VFormArray;
