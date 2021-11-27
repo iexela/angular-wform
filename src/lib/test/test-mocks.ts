@@ -107,13 +107,13 @@ export const taxData = {
 }
 
 export const vTaxModel = vGroup(null, {
-    tax1: vControl(123),
-    tax2: vArray(null, [vControl(4), vControl(5)])
+    tax1: vControl({ value: 123 }),
+    tax2: vArray(null, [vControl({ value: 4 }), vControl({ value: 5 })])
 });
 
 export const vTaxModelWithKeys = vGroup({ key: 1 }, {
-    tax1: vControl(123, { key: 2 }),
-    tax2: vArray({ key: 3 }, [vControl(4, { key: 4 }), vControl(5, { key: 5 })])
+    tax1: vControl({ key: 2, value: 123 }),
+    tax2: vArray({ key: 3 }, [vControl({ key: 4, value: 4 }), vControl({ key: 5, value: 5 })])
 });
 
 export function createTaxControl(): AbstractControl {

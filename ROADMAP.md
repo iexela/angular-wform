@@ -1,4 +1,3 @@
-1. Make value optional in vControls
 2. Add support of value to native controls
 3. Implement tests for native controls to test changing of vnode types
 4. Support of portals
@@ -15,3 +14,4 @@
 17. Think about swapping position of parameters in vGroup/vArray
 18. Log console.debug/console.warn only in dev mode?
 19. Both key and data should be form local
+20. Maybe it is a good decision to use value as key for vControls

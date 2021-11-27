@@ -7,11 +7,11 @@ import { Box, createTaxControl, elephant, even, krokodile, moreThan10, mouse, ta
 import { andTick, trackControl } from './test-utils';
 
 function defaultItemRenderer<T>(value: T, index: number): VFormControlOptions {
-    return { key: index };
+    return { key: index, value };
 }
 
 function withItem<T>(items: T[], fn: (value: T, index: number) => VFormControlOptions = defaultItemRenderer): VFormArrayChildren {
-    return (items || []).map((item, index) => vControl(items[index], fn(item, index)));
+    return (items || []).map((item, index) => vControl(fn(item, index)));
 }
 
 const fibonaci5 = [0, 1, 1, 2, 3];
@@ -46,17 +46,17 @@ function renderDisabledConditionalGroup(initial: number[], anchor: number): VFor
 
 function boxArrayFormBuilder(): VFormBuilder<Box[]> {
     return vForm((boxes: Box[]) => vArray(null, boxes.map(box => vGroup({ key: box.name }, {
-        name: vControl(box.name),
-        weight: vControl(box.weight),
-        volume: vControl(box.volume),
+        name: vControl(),
+        weight: vControl(),
+        volume: vControl(),
     }))));
 }
 
 function boxArrayFormBuilderWithoutKeys(): VFormBuilder<Box[]> {
     return vForm((boxes: Box[]) => vArray(null, boxes.map(box => vGroup(null, {
-        name: vControl(box.name),
-        weight: vControl(box.weight),
-        volume: vControl(box.volume),
+        name: vControl(),
+        weight: vControl(),
+        volume: vControl(),
     }))));
 }
 
@@ -207,8 +207,8 @@ describe('VFormArray', () => {
         it('should not render skipped control', () => {
             const form = vForm((numbers: number[]) => vArray(null, [
                 vSkip(),
-                vControl(numbers[0], { key: 1 }),
-                vControl(numbers[1], { key: 2 }),
+                vControl({ key: 1, value: numbers[0] }),
+                vControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -219,8 +219,8 @@ describe('VFormArray', () => {
         it('should not render native control, if it is not bound', () => {
             const form = vForm((numbers: number[]) => vArray(null, [
                 vNative(),
-                vControl(numbers[0], { key: 1 }),
-                vControl(numbers[1], { key: 2 }),
+                vControl({ key: 1, value: numbers[0] }),
+                vControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -232,8 +232,8 @@ describe('VFormArray', () => {
             const control = new FormControl(999);
             const form = vForm((numbers: number[]) => vArray(null, [
                 vNative(control, { key: 999 }),
-                vControl(numbers[0], { key: 1 }),
-                vControl(numbers[1], { key: 2 }),
+                vControl({ key: 1, value: numbers[0] }),
+                vControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -811,9 +811,9 @@ describe('VFormArray', () => {
 
         it('should add control if it is switched from vSkip', () => {
             const form = vForm((numbers: number[]) => vArray(null, [
-                numbers.some(n => n < 0) ? vSkip() : vControl(numbers[0] + numbers[1], { key: 'sum' }),
-                vControl(numbers[0], { key: 1 }),
-                vControl(numbers[1], { key: 2 }),
+                numbers.some(n => n < 0) ? vSkip() : vControl({ key: 'sum', value: numbers[0] + numbers[1] }),
+                vControl({ key: 1, value: numbers[0] }),
+                vControl({ key: 2, value: numbers[1] }),
             ])).build([-10, -20]);
 
             const array = form.control as FormArray;
@@ -829,9 +829,9 @@ describe('VFormArray', () => {
 
         it('should remove control if it is switched to vSkip', () => {
             const form = vForm((numbers: number[]) => vArray(null, [
-                numbers.some(n => n < 0) ? vSkip() : vControl(numbers[0] + numbers[1], { key: 'sum' }),
-                vControl(numbers[0], { key: 1 }),
-                vControl(numbers[1], { key: 2 }),
+                numbers.some(n => n < 0) ? vSkip() : vControl({ key: 'sum', value: numbers[0] + numbers[1] }),
+                vControl({ key: 1, value: numbers[0] }),
+                vControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -849,8 +849,8 @@ describe('VFormArray', () => {
             const control = new FormControl(999);
             const form = vForm((numbers: number[]) => vArray(null, [
                 vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum' }),
-                vControl(numbers[0], { key: 1 }),
-                vControl(numbers[1], { key: 2 }),
+                vControl({ key: 1, value: numbers[0] }),
+                vControl({ key: 2, value: numbers[1] }),
             ])).build([-10, -20]);
 
             const array = form.control as FormArray;
@@ -868,8 +868,8 @@ describe('VFormArray', () => {
             const control = new FormControl(999);
             const form = vForm((numbers: number[]) => vArray(null, [
                 vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum' }),
-                vControl(numbers[0], { key: 1 }),
-                vControl(numbers[1], { key: 2 }),
+                vControl({ key: 1, value: numbers[0] }),
+                vControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;

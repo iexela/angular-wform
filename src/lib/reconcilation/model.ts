@@ -26,5 +26,6 @@ export interface VFormOptions {
 export interface VReconcilationRequest {
     options: VFormOptions;
     node: VFormNode;
+    value: any,
     control?: AbstractControl;
 }

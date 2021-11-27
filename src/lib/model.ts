@@ -97,7 +97,7 @@ export interface VFormNodeCreatedBase extends VFormNodeBase {
 
 export interface VFormControl extends VFormNodeCreatedBase {
     type: VFormNodeType.Control;
-    value: any;
+    value?: any;
 }
 
 export interface VFormGroup extends VFormNodeCreatedBase {

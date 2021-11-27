@@ -15,8 +15,8 @@ function withDisabledVolume(box: Box): VFormGroupChildren {
 
 function withWeightAndVolume(box: Box, weight?: VFormControlOptions, volume?: VFormControlOptions): VFormGroupChildren {
     return {
-        weight: vControl(box.weight, weight),
-        volume: vControl(box.volume, volume),
+        weight: vControl(weight),
+        volume: vControl(volume),
     };
 }
 
@@ -43,11 +43,11 @@ function renderDisabledConditionalGroup(initial: Box, anchor: number): VForm<Box
 
 function flightFormBuilder(): VFormBuilder<Flight> {
     return vForm((value: Flight) => vGroup(null, {
-        name: vControl(value.name),
-        route: vArray(null, value.route.map(node => vControl(node))),
+        name: vControl(),
+        route: vArray(null, value.route.map(() => vControl())),
         cost: vGroup(null, {
-            price: vControl(value.cost.price),
-            discount: vControl(value.cost.discount),
+            price: vControl(),
+            discount: vControl(),
         }),
     }))
 }
@@ -207,10 +207,10 @@ describe('VFormGroup', () => {
         });
 
         it('should not render skipped control', () => {
-            const form = vForm((current: Box) => vGroup(null, {
-                name: vControl(current.name),
+            const form = vForm(() => vGroup(null, {
+                name: vControl(),
                 weight: vSkip(),
-                volume: vControl(current.volume),
+                volume: vControl(),
             })).build(elephant);
 
             expect(form.value as any).toEqual({
@@ -223,9 +223,9 @@ describe('VFormGroup', () => {
         describe('skip', () => {
             it('should not render native control, if it is not bound', () => {
                 const form = vForm((current: Box) => vGroup(null, {
-                    name: vControl(current.name),
+                    name: vControl(),
                     weight: vNative(),
-                    volume: vControl(current.volume),
+                    volume: vControl(),
                 })).build(elephant);
     
                 expect(form.value as any).toEqual({
@@ -238,9 +238,9 @@ describe('VFormGroup', () => {
             it('should render native control, if it is bound', () => {
                 const control = new FormControl(999);
                 const form = vForm((current: Box) => vGroup(null, {
-                    name: vControl(current.name),
+                    name: vControl(),
                     weight: vNative(control),
-                    volume: vControl(current.volume),
+                    volume: vControl(),
                 })).build(elephant);
     
                 expect(form.value).toEqual({
@@ -709,14 +709,14 @@ describe('VFormGroup', () => {
                 [
                     {},
                     {
-                        weight: vControl(parcel.weight),
+                        weight: vControl(),
                     },
                 ],
                 [
                     {},
                     {
-                        weight: vControl(largeParcel.weight),
-                        volume: vControl(largeParcel.volume),
+                        weight: vControl(),
+                        volume: vControl(),
                     },
                 ]);
     
@@ -737,14 +737,14 @@ describe('VFormGroup', () => {
                 [
                     {},
                     {
-                        weight: vControl(parcel.weight),
-                        volume: vControl(parcel.volume),
+                        weight: vControl(),
+                        volume: vControl(),
                     },
                 ],
                 [
                     {},
                     {
-                        weight: vControl(largeParcel.weight),
+                        weight: vControl(),
                     },
                 ]);
     
@@ -761,9 +761,9 @@ describe('VFormGroup', () => {
 
         it('should add control if it is switched from vSkip', () => {
             const form = vForm((current: Box) => vGroup(null, {
-                name: vControl(current.name),
-                weight: current.weight! < 50 ? vSkip() : vControl(current.weight),
-                volume: vControl(current.volume),
+                name: vControl(),
+                weight: current.weight! < 50 ? vSkip() : vControl(),
+                volume: vControl(),
             })).build(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
@@ -775,9 +775,9 @@ describe('VFormGroup', () => {
 
         it('should remove control if it is switched to vSkip', () => {
             const form = vForm((current: Box) => vGroup(null, {
-                name: vControl(current.name),
-                weight: current.weight! < 50 ? vSkip() : vControl(current.weight),
-                volume: vControl(current.volume),
+                name: vControl(),
+                weight: current.weight! < 50 ? vSkip() : vControl(),
+                volume: vControl(),
             })).build(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
@@ -790,9 +790,9 @@ describe('VFormGroup', () => {
         it('should add native control, if it is switched to bind', () => {
             const control = new FormControl(999);
             const form = vForm((current: Box) => vGroup(null, {
-                name: vControl(current.name),
+                name: vControl(),
                 weight: vNative(current.weight! < 50 ? undefined : control),
-                volume: vControl(current.volume),
+                volume: vControl(),
             })).build(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
@@ -807,9 +807,9 @@ describe('VFormGroup', () => {
         it('should remove native control, if it is switched to unbind', () => {
             const control = new FormControl(999);
             const form = vForm((current: Box) => vGroup(null, {
-                name: vControl(current.name),
+                name: vControl(),
                 weight: vNative(current.weight! < 50 ? undefined : control),
-                volume: vControl(current.volume),
+                volume: vControl(),
             })).build(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();

@@ -13,7 +13,7 @@ type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator' | 'asyncValidator'>> 
     asyncValidator?: AnyAsyncValidator,
 };
 
-export type VFormControlOptions = Omit<MakeOptions<VFormControl>, 'value'> & { required?: boolean };
+export type VFormControlOptions = MakeOptions<VFormControl> & { required?: boolean };
 export type VFormGroupOptions = Omit<MakeOptions<VFormGroup>, 'children'>;
 export type VFormGroupChildren = Record<string, VFormNode | VFormPlaceholder>;
 export type VFormArrayOptions = Omit<MakeOptions<VFormArray>, 'children'>;
@@ -41,13 +41,12 @@ function createAsyncValidator(validator?: AnyAsyncValidator): Maybe<VAsyncValida
     return validator ? composeAsyncValidators(...arrayify(validator)) : undefined;
 }
 
-export function vControl(value: any, options?: VFormControlOptions): VFormControl {
+export function vControl(options?: VFormControlOptions): VFormControl {
     return {
         type: VFormNodeType.Control,
         disabled: false,
         data: EMPTY_DATA,
         ...options,
-        value,
         validator: options && createControlValidator(options),
         asyncValidator: options && createAsyncValidator(options.asyncValidator),
     };

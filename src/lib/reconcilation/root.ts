@@ -19,6 +19,7 @@ export function reconcile(request: VReconcilationRequest): AbstractControl {
         new VRenderContext(request.options),
         undefined,
         request.node,
+        request.value,
         request.control,
     );
 }

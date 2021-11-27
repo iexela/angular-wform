@@ -4,13 +4,13 @@ import { vNative, vSkip } from '../basic';
 import { belarusToAustralia, Box, createTaxControl, elephant, Flight, mouse, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
 const flightFactory = (value: Flight) => vGroup(null, {
-    name: vControl(value.name),
-    route: vArray(null, value.route.map(point => vControl(point))),
+    name: vControl(),
+    route: vArray(null, value.route.map(() => vControl())),
     cost: vGroup(null, {
-        price: vControl(value.cost.price),
-        discount: vControl(value.cost.discount),
+        price: vControl(),
+        discount: vControl(),
     }),
-    time: vControl(undefined, { disabled: true }),
+    time: vControl({ disabled: true }),
 });
 
 function errorHasMessage(...strs: string[]): RegExp {
@@ -20,7 +20,7 @@ function errorHasMessage(...strs: string[]): RegExp {
 describe('basic', () => {
     describe('virtual function', () => {
         it('should accept initial value', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl(1));
+            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
             vForm(fn).build(1 as number);
     
             expect(fn.calls.count()).toBe(1);
@@ -146,12 +146,12 @@ describe('basic', () => {
             const rawSubscriber = jasmine.createSpy('raw-subscriber')
 
             const form = vForm((value: Box) => vGroup(null, {
-                name: vControl(value.name),
-                weight: vControl(value.weight, {
+                name: vControl(),
+                weight: vControl({
                     disabled: value.volume! > 100,
                     validator: value.name === 'mouse' ? VValidators.max(10) : VValidators.max(10000),
                 }),
-                volume: vControl(value.volume, {
+                volume: vControl({
                     disabled: value.weight! < 10,
                 }),
             })).build(mouse);
@@ -173,9 +173,9 @@ describe('basic', () => {
             const form = vForm(() => vGroup(null, {
                 nested: vGroup(null, {
                     arr: vArray(null, [
-                        vControl(1),
+                        vControl(),
                         vGroup(null, {
-                            field: vControl('abc'),
+                            field: vControl({ value: 'abc' }),
                         }),
                     ]),
                 }),
@@ -192,8 +192,8 @@ describe('basic', () => {
             const form = vForm(() => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
-                        vControl(1, { key: 'abracadabra' }),
-                        vControl(2, { key: 'abracadabra' }),
+                        vControl({ key: 'abracadabra' }),
+                        vControl({ key: 'abracadabra' }),
                     ]),
                 }),
             })).build({});
@@ -205,9 +205,9 @@ describe('basic', () => {
             expect(() => vForm(() => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
-                        vControl(1, { key: 1 }),
+                        vControl({ key: 1 }),
                         { type: 100 } as any,
-                        vControl(3, { key: 2 }),
+                        vControl({ key: 2 }),
                     ]),
                 }),
             })).build({})).toThrowError(errorHasMessage('group.nested.1'));
@@ -217,9 +217,9 @@ describe('basic', () => {
             const form = vForm((flag: boolean) => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
-                        vControl(1, { key: 1 }),
-                        flag ? vGroup({ key: 2 }, {}) : vControl(2, { key: 2 }),
-                        vControl(3, { key: 3 }),
+                        vControl({ key: 1 }),
+                        flag ? vGroup({ key: 2 }, {}) : vControl({ key: 2 }),
+                        vControl({ key: 3 }),
                     ]),
                 }),
             })).build(false as boolean);
@@ -235,9 +235,9 @@ describe('basic', () => {
             const form = vForm((flag: boolean) => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
-                        vControl(1, { key: 1 }),
+                        vControl({ key: 1 }),
                         flag ? vArray({ key: 2 }, []) : vGroup({ key: 2 }, {}),
-                        vControl(3, { key: 3 }),
+                        vControl({ key: 3 }),
                     ]),
                 }),
             })).build(false as boolean);
@@ -253,9 +253,9 @@ describe('basic', () => {
             const form = vForm((flag: boolean) => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
-                        vControl(1, { key: 1 }),
-                        flag ? vControl(2, { key: 2 }) : vArray({ key: 2 }, []),
-                        vControl(3, { key: 3 }),
+                        vControl({ key: 1 }),
+                        flag ? vControl({ key: 2 }) : vArray({ key: 2 }, []),
+                        vControl({ key: 3 }),
                     ]),
                 }),
             })).build(false as boolean);
@@ -272,7 +272,7 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if validation strategy is unknown', () => {
-            const form = vForm(() => vControl(1, { required: true }))
+            const form = vForm(() => vControl({ required: true }))
                 .validationStrategy(123 as any)
                 .build(1);
 
@@ -283,8 +283,8 @@ describe('basic', () => {
             const form = vForm(() => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
-                        vControl(1, { key: 'abracadabra' }),
-                        vControl(2, { key: 'abracadabra' }),
+                        vControl({ key: 'abracadabra' }),
+                        vControl({ key: 'abracadabra' }),
                     ]),
                 }),
             })).build({});
@@ -305,7 +305,7 @@ describe('basic', () => {
         });
 
         it('"reconcilation operation" should throw error if root node is nil', () => {
-            const form = vForm((n: number) => n < 0 ? null as any : vControl(n)).build(1 as number);
+            const form = vForm((n: number) => n < 0 ? null as any : vControl()).build(1 as number);
 
             expect(() => form.setValue(-1)).toThrowError();
         });
@@ -321,7 +321,7 @@ describe('basic', () => {
         it('"reconcilation operation" should throw error if child of group is nil', () => {
             const form = vForm((flag: boolean) => vGroup(null, {
                 group: vGroup(null, {
-                    nested: flag ? null as any : vControl(2, { key: 2 }),
+                    nested: flag ? null as any : vControl({ key: 2 }),
                 }),
             })).build(false as boolean);
 
@@ -332,9 +332,9 @@ describe('basic', () => {
             expect(() => vForm(() => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
-                        vControl(1, { key: 1 }),
+                        vControl({ key: 1 }),
                         null as any,
-                        vControl(3, { key: 3 }),
+                        vControl({ key: 3 }),
                     ]),
                 }),
             })).build(false)).toThrowError(errorHasMessage('group.nested.1'));
@@ -344,9 +344,9 @@ describe('basic', () => {
             const form = vForm((flag: boolean) => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
-                        vControl(1, { key: 1 }),
-                        flag ? null as any : vControl(2, { key: 2 }),
-                        vControl(3, { key: 3 }),
+                        vControl({ key: 1 }),
+                        flag ? null as any : vControl({ key: 2 }),
+                        vControl({ key: 3 }),
                     ]),
                 }),
             })).build(false as boolean);
@@ -377,9 +377,9 @@ describe('basic', () => {
             const form = vForm(() => vGroup(null, {
                 group: vGroup(null, {
                     nested: vArray(null, [
-                        vControl(1, { key: 1 }),
-                        vControl(2),
-                        vControl(3, { key: 3 }),
+                        vControl({ key: 1 }),
+                        vControl(),
+                        vControl({ key: 3 }),
                     ]),
                 }),
             })).build({});

@@ -42,6 +42,7 @@ export class VForm<T> {
         this._control$$ = new BehaviorSubject(reconcile({
             options,
             node: factory(value),
+            value,
         }));
 
         const nativeValueChanges = this._control$$.pipe(switchMap(control => control.valueChanges));
@@ -71,6 +72,7 @@ export class VForm<T> {
             options: this._options,
             node: this._factory(value),
             control: this.control,
+            value,
         });
     }
 
@@ -132,6 +134,7 @@ export class VForm<T> {
             options: this._options,
             node: this._factory(value),
             control: this.control,
+            value,
         });
     }
 
@@ -140,6 +143,7 @@ export class VForm<T> {
             options: this._options,
             node: patcher(this.control),
             control: this.control,
+            value: this.rawValue,
         });
     }
 
