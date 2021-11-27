@@ -1,5 +1,6 @@
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, vForm, VFormNodeType, vGroup, VValidators } from '..';
+import { vNative, vSkip } from '../basic';
 import { belarusToAustralia, Box, createTaxControl, elephant, Flight, mouse, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
 const flightFactory = (value: Flight) => vGroup(null, {
@@ -299,6 +300,10 @@ describe('basic', () => {
             expect(() => vForm(() => null as any).build(1)).toThrowError();
         });
 
+        it('"render operation" should throw error if root node is a placeholder', () => {
+            expect(() => vForm(() => vSkip() as any).build(1)).toThrowError();
+        });
+
         it('"reconcilation operation" should throw error if root node is nil', () => {
             const form = vForm((n: number) => n < 0 ? null as any : vControl(n)).build(1 as number);
 
@@ -347,6 +352,17 @@ describe('basic', () => {
             })).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError(errorHasMessage('group.nested.1'));
+        });
+
+        it('"render operation" should throw error if native control is rendered into nil', () => {
+            expect(() => vForm(() => vNative()).build(1)).toThrowError()
+        });
+
+        it('"reconcilation operation" should throw error if native control is rendered into nil', () => {
+            const control = new FormControl();
+            const form = vForm((flag: boolean) => vNative(flag ? undefined : control)).build(false as boolean);
+
+            expect(() => form.setValue(true)).toThrowError()
         });
     });
 

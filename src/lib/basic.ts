@@ -1,5 +1,5 @@
-import { AsyncValidatorFn, ValidatorFn, Validators } from '@angular/forms';
-import { VAsyncValidatorNode, VFormNode, VFormPlaceholder } from '.';
+import { AbstractControl, AsyncValidatorFn, ValidatorFn, Validators } from '@angular/forms';
+import { VAsyncValidatorNode, VFormNative, VFormNode, VFormPlaceholder } from '.';
 import { Maybe, Nilable } from './common';
 import { VFormArray, VFormControl, VFormGroup, VFormNodeType, VValidatorNode } from './model';
 import { arrayify } from './utils';
@@ -18,6 +18,7 @@ export type VFormGroupOptions = Omit<MakeOptions<VFormGroup>, 'children'>;
 export type VFormGroupChildren = Record<string, VFormNode | VFormPlaceholder>;
 export type VFormArrayOptions = Omit<MakeOptions<VFormArray>, 'children'>;
 export type VFormArrayChildren = (VFormNode | VFormPlaceholder)[];
+export type VFormNativeOptions = MakeOptions<VFormNative>;
 
 const EMPTY_DATA = Object.freeze({});
 
@@ -79,5 +80,14 @@ export function vArray(options: Nilable<VFormArrayOptions> = {}, children: VForm
 export function vSkip(): VFormPlaceholder {
     return {
         type: VFormNodeType.Placeholder,
+    };
+}
+
+export function vNative(control?: AbstractControl, options?: VFormNativeOptions): VFormNative {
+    return {
+        type: VFormNodeType.Native,
+        control,
+        data: EMPTY_DATA,
+        ...options,
     };
 }

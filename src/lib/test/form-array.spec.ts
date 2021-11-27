@@ -1,7 +1,7 @@
 import { fakeAsync, tick } from '@angular/core/testing';
-import { FormArray } from '@angular/forms';
+import { FormArray, FormControl } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayChildren, VFormArrayOptions, VFormBuilder, VFormControlOptions, VFormHooks, vGroup, vValidator } from '..';
-import { vSkip } from '../basic';
+import { vNative, vSkip } from '../basic';
 import { vValidatorAsync } from '../validators';
 import { Box, createTaxControl, elephant, even, krokodile, moreThan10, mouse, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
@@ -178,6 +178,31 @@ describe('VFormArray', () => {
             const array = form.control as FormArray;
             expect(form.value as any).toEqual([10, 20]);
             expect(array.length).toBe(2);
+        });
+
+        it('should not render native control, if it is not bound', () => {
+            const form = vForm((numbers: number[]) => vArray(null, [
+                vNative(),
+                vControl(numbers[0], { key: 1 }),
+                vControl(numbers[1], { key: 2 }),
+            ])).build([10, 20]);
+
+            const array = form.control as FormArray;
+            expect(form.value as any).toEqual([10, 20]);
+            expect(array.length).toBe(2);
+        });
+
+        it('should render native control, if it is bound', () => {
+            const control = new FormControl(999);
+            const form = vForm((numbers: number[]) => vArray(null, [
+                vNative(control, { key: 999 }),
+                vControl(numbers[0], { key: 1 }),
+                vControl(numbers[1], { key: 2 }),
+            ])).build([10, 20]);
+
+            const array = form.control as FormArray;
+            expect(form.value as any).toEqual([999, 10, 20]);
+            expect(array.length).toBe(3);
         });
 
         it('should set updateOn flag to "change", by default', () => {
@@ -696,6 +721,44 @@ describe('VFormArray', () => {
             
             form.setValue([-10, -20]);
 
+            expect(form.value).toEqual([-10, -20]);
+            expect(array.length).toBe(2);
+        });
+
+        it('should add native control, if it is switched to bind', () => {
+            const control = new FormControl(999);
+            const form = vForm((numbers: number[]) => vArray(null, [
+                vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum' }),
+                vControl(numbers[0], { key: 1 }),
+                vControl(numbers[1], { key: 2 }),
+            ])).build([-10, -20]);
+
+            const array = form.control as FormArray;
+
+            expect(form.value).toEqual([-10, -20]);
+            expect(array.length).toBe(2);
+            
+            form.setValue([10, 20]);
+            
+            expect(form.value).toEqual([999, 10, 20]);
+            expect(array.length).toBe(3);
+        });
+
+        it('should remove native control if it is switched to unbind', () => {
+            const control = new FormControl(999);
+            const form = vForm((numbers: number[]) => vArray(null, [
+                vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum' }),
+                vControl(numbers[0], { key: 1 }),
+                vControl(numbers[1], { key: 2 }),
+            ])).build([10, 20]);
+
+            const array = form.control as FormArray;
+
+            expect(form.value).toEqual([999, 10, 20]);
+            expect(array.length).toBe(3);
+            
+            form.setValue([-10, -20]);
+            
             expect(form.value).toEqual([-10, -20]);
             expect(array.length).toBe(2);
         });

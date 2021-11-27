@@ -1,8 +1,9 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
-import { VFormPlaceholder } from '..';
+import { VFormNative, VFormPlaceholder } from '..';
 import { Maybe } from '../common';
 import { VFormArray, VFormControl, VFormGroup, VFormNode, VFormNodeType } from '../model';
 import { arrayDiff, getControlTypeName, hasField, mapValues, objectDiff, pickBy } from '../utils';
+import { createAsyncValidatorBundle, createValidatorBundle } from './internal-model';
 import { VPathElement } from './model';
 import { getLastFormNodeOrNothing, registerRenderResult } from './registry';
 import { VRenderContext } from './render-context';
@@ -21,9 +22,28 @@ export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node
             return processGroup(ctx, name, node, control as FormGroup);
         case VFormNodeType.Array:
             return processArray(ctx, name, node, control as FormArray);
+        case VFormNodeType.Native:
+            return processNative(ctx, name, node);
         default:
             throw Error(`Unsupported node type (${VFormNodeType[node.type] || node.type}): ${ctx.pathTo(name).join('.')}`);
     }
+}
+
+function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNative): AbstractControl {
+    const { control } = node;
+    if (control == null) {
+        throw Error(`Native node is rendered when it is not bound to the control: ${ctx.pathTo(name).join('.')}
+                    Typically this happens when native control is used in the root.
+                    But native control is not allowed to be used in the root.`);
+    }
+
+    registerRenderResult(control, {
+        node,
+        validator: createValidatorBundle([]),
+        asyncValidator: createAsyncValidatorBundle([]),
+    });
+
+    return control;
 }
 
 function processControl(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormControl, control?: AbstractControl): AbstractControl {
@@ -77,14 +97,16 @@ function processControl(ctx: VRenderContext, name: Maybe<VPathElement>, node: VF
     return control;
 }
 
-function processGroup(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormGroup, control?: FormGroup): AbstractControl {
+function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VFormGroup, control?: FormGroup): AbstractControl {
     if (!control) {
         ctx.push(name, node);
 
         const validator = processValidators(ctx, node.validator);
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
         const group = new FormGroup(
-            mapValues(pickBy(node.children, isUsedNode), (child, key) => processNode(ctx, key, child as VFormNode)),
+            mapValues(
+                pickBy(node.children, isUsedNode),
+                (child, key) => processNode(ctx, key, child as VFormNode)),
             {
                 validators: validator.compiled,
                 asyncValidators: asyncValidator.compiled,
@@ -114,7 +136,9 @@ function processGroup(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         control.enable();
     }
 
-    const currentChildrenNodes = mapValues(control.controls, (control, key) => getFormNodeWithKey(ctx, key, control));
+    const currentChildrenNodes = mapValues(
+        control.controls,
+        (control, key) => getOrRestoreFormNodeWithKey(ctx, key, control));
     const { added, removed, updated } = objectDiff(currentChildrenNodes, pickBy(node.children, isUsedNode));
     added.forEach(key => control.setControl(
         key,
@@ -181,7 +205,7 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     }
 
     const currentChildrenNodes = control.controls
-        .map((control, i) => getFormNodeWithKey(ctx, i, control));
+        .map((control, i) => getOrRestoreFormNodeWithKey(ctx, i, control));
     const nextChildrenNodes = node.children.filter(isUsedNode);
     const { added, removed, updated, indexUpdated } = arrayDiff(
         currentChildrenNodes,
@@ -262,7 +286,7 @@ interface VKeyOnlyFormNode {
     key: any;
 }
 
-function getFormNodeWithKey(ctx: VRenderContext, name: Maybe<VPathElement>, control: AbstractControl): VFormNode | VKeyOnlyFormNode {
+function getOrRestoreFormNodeWithKey(ctx: VRenderContext, name: Maybe<VPathElement>, control: AbstractControl): VFormNode | VKeyOnlyFormNode {
     const node = getLastFormNodeOrNothing(control);
     if (node) {
         return node;
@@ -283,7 +307,7 @@ function getFormNodeWithKey(ctx: VRenderContext, name: Maybe<VPathElement>, cont
 }
 
 function makeNodeTypeModifiedError(path: VPathElement[], requestedType: VFormNodeType, control: AbstractControl): Error {
-    throw Error(`Changing of node type is not supported: ${path.join('.')},
+    throw Error(`Changing of form control type is not supported: ${path.join('.')},
                  requestedType = ${VFormNodeType[requestedType]},
                  control = ${getControlTypeName(control)}`);
 }
@@ -294,5 +318,13 @@ function isUsedNode(node: VFormNode | VFormPlaceholder): node is VFormNode {
         return true;
     }
 
-    return node.type !== VFormNodeType.Placeholder;
+    if (node.type === VFormNodeType.Placeholder) {
+        return false;
+    }
+
+    if (node.type === VFormNodeType.Native && !node.control) {
+        return false;
+    }
+
+    return true;
 }

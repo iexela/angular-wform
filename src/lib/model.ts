@@ -71,7 +71,7 @@ export type VAsyncValidatorNode = VAsyncCompoundValidatorNode | VAsyncSimpleVali
 // Form nodes
 
 export enum VFormNodeType {
-    Control, Group, Array, Placeholder
+    Control, Group, Array, Native, Placeholder
 }
 
 export enum VFormHooks {
@@ -83,35 +83,43 @@ export enum VFormHooks {
 export interface VFormNodeBase {
     key?: any;
     type: VFormNodeType;
+    data: Record<string, any>;
+}
+
+export interface VManagedFormNode extends VFormNodeBase {
     disabled: boolean;
     validator?: VValidatorNode;
     asyncValidator?: VAsyncValidatorNode;
     updateOn?: VFormHooks;
-    data: Record<string, any>;
 }
 
-export interface VFormControl extends VFormNodeBase {
+export interface VFormControl extends VManagedFormNode {
     type: VFormNodeType.Control;
     dirty?: boolean;
     touched?: boolean;
     value: any;
 }
 
-export interface VFormGroup extends VFormNodeBase {
+export interface VFormGroup extends VManagedFormNode {
     type: VFormNodeType.Group;
     children: Record<string, VFormNode | VFormPlaceholder>;
 }
 
-export interface VFormArray extends VFormNodeBase {
+export interface VFormArray extends VManagedFormNode {
     type: VFormNodeType.Array;
     children: (VFormNode | VFormPlaceholder)[];
+}
+
+export interface VFormNative extends VFormNodeBase {
+    type: VFormNodeType.Native;
+    control?: AbstractControl;
 }
 
 export interface VFormPlaceholder {
     type: VFormNodeType.Placeholder;
 }
 
-export type VFormNode = VFormControl | VFormGroup | VFormArray;
+export type VFormNode = VFormControl | VFormGroup | VFormArray | VFormNative;
 
 export interface VFormNodeFactory<T> {
     (value: T): VFormNode;

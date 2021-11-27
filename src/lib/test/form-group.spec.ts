@@ -1,7 +1,7 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, VFormHooks, vGroup } from '..';
-import { vSkip } from '../basic';
+import { vNative, vSkip } from '../basic';
 import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia, smallAsync, lightAsync, createTaxControl, taxData, vTaxModel, elephant, mouse } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
@@ -182,6 +182,36 @@ describe('VFormGroup', () => {
                 volume: elephant.volume,
             });
             expect(form.control.get('weight')).toBeFalsy();
+        });
+
+        it('should not render native control, if it is not bound', () => {
+            const form = vForm((current: Box) => vGroup(null, {
+                name: vControl(current.name),
+                weight: vNative(),
+                volume: vControl(current.volume),
+            })).build(elephant);
+
+            expect(form.value as any).toEqual({
+                name: elephant.name,
+                volume: elephant.volume,
+            });
+            expect(form.control.get('weight')).toBeFalsy();
+        });
+
+        it('should render native control, if it is bound', () => {
+            const control = new FormControl(999);
+            const form = vForm((current: Box) => vGroup(null, {
+                name: vControl(current.name),
+                weight: vNative(control),
+                volume: vControl(current.volume),
+            })).build(elephant);
+
+            expect(form.value).toEqual({
+                name: elephant.name,
+                weight: 999,
+                volume: elephant.volume,
+            });
+            expect(form.control.get('weight')).toBeTruthy();
         });
 
         it('should set updateOn flag to "change", by default', () => {
@@ -633,6 +663,40 @@ describe('VFormGroup', () => {
             form.setValue(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
+        });
+
+        it('should add native control, if it is switched to bind', () => {
+            const control = new FormControl(999);
+            const form = vForm((current: Box) => vGroup(null, {
+                name: vControl(current.name),
+                weight: vNative(current.weight! < 50 ? undefined : control),
+                volume: vControl(current.volume),
+            })).build(mouse);
+
+            expect(form.control.get('weight')).toBeFalsy();
+            expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume } as any);
+            
+            form.setValue(elephant);
+
+            expect(form.control.get('weight')).toBeTruthy();
+            expect(form.value).toEqual({ ...elephant, weight: 999 });
+        });
+
+        it('should remove native control, if it is switched to unbind', () => {
+            const control = new FormControl(999);
+            const form = vForm((current: Box) => vGroup(null, {
+                name: vControl(current.name),
+                weight: vNative(current.weight! < 50 ? undefined : control),
+                volume: vControl(current.volume),
+            })).build(elephant);
+
+            expect(form.control.get('weight')).toBeTruthy();
+            expect(form.value).toEqual({ ...elephant, weight: 999 });
+            
+            form.setValue(mouse);
+            
+            expect(form.control.get('weight')).toBeFalsy();
+            expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume } as any);
         });
 
         it('should rerender nested vform containers', () => {
