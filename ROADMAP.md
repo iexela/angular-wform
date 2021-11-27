@@ -1,8 +1,6 @@
-3. Support of native controls
-3.2. Tests about changing of vnode types
-3.3. Tests about keys and data
-3.6. Tests about influence of disable/enable
-3.7. Tests that manual changes made on native control are always persisted
+1. Make value optional in vControls
+2. Add support of value to native controls
+3. Implement tests for native controls to test changing of vnode types
 4. Support of portals
 5. Attach to already built form
 7. Think how to simplify patch implementation
