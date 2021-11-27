@@ -1,5 +1,4 @@
 import { AbstractControl, ValidatorFn } from '@angular/forms';
-import { VManagedFormNode } from '..';
 import { VValidatorNode,VValidatorNodeType } from '../model';
 import { arrayDiffUnordered, arrayify, flatMap } from '../utils';
 import { canAccessListOfValidators, canManageValidatorsIndividually } from './flags';
@@ -19,7 +18,7 @@ export function processValidators(ctx: VRenderContext, node?: VValidatorNode, co
         return createValidatorBundle(createValidators(node));
     }
 
-    const lastNode = (getLastFormNodeOrNothing(control) as VManagedFormNode)?.validator;
+    const lastNode = getLastFormNodeOrNothing(control)?.validator;
     const lastValidatorBundle = getLastValidatorBundleOrCreate(control);
 
     return applyValidators(

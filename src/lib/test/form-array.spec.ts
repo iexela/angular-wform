@@ -168,6 +168,42 @@ describe('VFormArray', () => {
             expect(andTick(renderArray(fibonaci5, options)).control.errors).toBeFalsy();
         }));
 
+        it('should not mark control as dirty if corresponding tiny flag is not set', () => {
+            const form = renderArray(fibonaci5, {});
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should not mark control as dirty if corresponding tiny flag is set to false', () => {
+            const form = renderArray(fibonaci5, { dirty: false });
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should mark control as dirty if corresponding tiny flag is set to true', () => {
+            const form = renderArray(fibonaci5, { dirty: true });
+
+            expect(form.control.dirty).toBeTrue();
+        });
+
+        it('should not mark control as touched if corresponding tiny flag is not set', () => {
+            const form = renderArray(fibonaci5, {});
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should not mark control as touched if corresponding tiny flag is set to false', () => {
+            const form = renderArray(fibonaci5, { touched: false });
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should mark control as touched if corresponding tiny flag is set to true', () => {
+            const form = renderArray(fibonaci5, { touched: true });
+
+            expect(form.control.touched).toBeTrue();
+        });
+
         it('should not render skipped control', () => {
             const form = vForm((numbers: number[]) => vArray(null, [
                 vSkip(),
@@ -574,6 +610,90 @@ describe('VFormArray', () => {
                 expect(tracker.changed).toBeFalse();
             }));
         });
+
+        it('should not update dirty flag if corresponding tiny flag is not set', () => {
+            const form = renderConditionalArray(fibonaci10, 50, [{}], [{}]);
+
+            form.setValue(fibonaci2_10);
+
+            expect(form.control.dirty).toBeFalse();
+
+            form.control.markAsDirty();
+
+            form.setValue(fibonaci2_10.concat([999]));
+
+            expect(form.control.dirty).toBeTrue();
+        });
+
+        it('should unset dirty flag if corresponding tiny flag is set to false', () => {
+            const form = renderConditionalArray(fibonaci10, 50, [{}], [{ dirty: false }]);
+
+            form.setValue(fibonaci2_10);
+
+            expect(form.control.dirty).toBeFalse();
+
+            form.control.markAsDirty();
+
+            form.setValue(fibonaci2_10.concat(999));
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should mark control as dirty if corresponding tiny flag is set to true', () => {
+            const form = renderConditionalArray(fibonaci10, 50, [{}], [{ dirty: true }]);
+
+            form.setValue(fibonaci2_10);
+
+            expect(form.control.dirty).toBeTrue();
+
+            form.control.markAsPristine();
+
+            form.setValue(fibonaci2_10.concat(999));
+
+            expect(form.control.dirty).toBeTrue();
+        });
+
+        it('should not update touched flag if corresponding tiny flag is not set', () => {
+            const form = renderConditionalArray(fibonaci10, 50, [{}], [{}]);
+
+            form.setValue(fibonaci2_10);
+
+            expect(form.control.touched).toBeFalse();
+
+            form.control.markAsTouched();
+
+            form.setValue(fibonaci2_10);
+
+            expect(form.control.touched).toBeTrue();
+        });
+
+        it('should unset touched flag if corresponding tiny flag is set to false', () => {
+            const form = renderConditionalArray(fibonaci10, 50, [{}], [{ touched: false }]);
+
+            form.setValue(fibonaci2_10);
+
+            expect(form.control.touched).toBeFalse();
+
+            form.control.markAsTouched();
+
+            form.setValue(fibonaci2_10.concat(999));
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should mark control as dirty if corresponding tiny flag is set to true', () => {
+            const form = renderConditionalArray(fibonaci10, 50, [{}], [{ touched: true }]);
+
+            form.setValue(fibonaci2_10);
+
+            expect(form.control.touched).toBeTrue();
+
+            form.control.markAsUntouched();
+
+            form.setValue(fibonaci2_10.concat(999));
+
+            expect(form.control.touched).toBeTrue();
+        });
     
         it('should not recreate underlying FormControl', () => {
             const form = renderConditionalArray(fibonaci10, 50, [{ validator: startedFrom0 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
@@ -822,6 +942,94 @@ describe('VFormArray', () => {
             form.update();
 
             expect(form.control.disabled).toBeTrue();
+        });
+
+        it('should do nothing if touched state is not specified', () => {
+            const form = renderArray(fibonaci10);
+
+            form.control.markAsTouched()
+
+            expect(form.control.touched).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.touched).toBeTrue();
+
+            form.control.markAsUntouched();
+
+            expect(form.control.touched).toBeFalse();
+
+            form.update();
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should restore untouched state', () => {
+            const form = renderArray(fibonaci10, { touched: false });
+
+            form.control.markAsTouched()
+
+            expect(form.control.touched).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should restore touched state', () => {
+            const form = renderArray(fibonaci10, { touched: true });
+
+            form.control.markAsUntouched();
+
+            expect(form.control.touched).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.touched).toBeTrue();
+        });
+
+        it('should do nothing if dirty state is not specified', () => {
+            const form = renderArray(fibonaci10);
+
+            form.control.markAsDirty()
+
+            expect(form.control.dirty).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeTrue();
+
+            form.control.markAsPristine();
+
+            expect(form.control.dirty).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should restore pristine state', () => {
+            const form = renderArray(fibonaci10, { dirty: false });
+
+            form.control.markAsDirty()
+
+            expect(form.control.dirty).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should restore dirty state', () => {
+            const form = renderArray(fibonaci10, { dirty: true });
+
+            form.control.markAsPristine();
+
+            expect(form.control.dirty).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeTrue();
         });
 
         it('should remove not specified controls', () => {

@@ -170,6 +170,42 @@ describe('VFormGroup', () => {
             expect(form.value).toEqual(belarusToAustralia);
         });
 
+        it('should not mark control as dirty if corresponding tiny flag is not set', () => {
+            const form = renderGroup(parcel, {});
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should not mark control as dirty if corresponding tiny flag is set to false', () => {
+            const form = renderGroup(parcel, { dirty: false });
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should mark control as dirty if corresponding tiny flag is set to true', () => {
+            const form = renderGroup(parcel, { dirty: true });
+
+            expect(form.control.dirty).toBeTrue();
+        });
+
+        it('should not mark control as touched if corresponding tiny flag is not set', () => {
+            const form = renderGroup(parcel, {});
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should not mark control as touched if corresponding tiny flag is set to false', () => {
+            const form = renderGroup(parcel, { touched: false });
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should mark control as touched if corresponding tiny flag is set to true', () => {
+            const form = renderGroup(parcel, { touched: true });
+
+            expect(form.control.touched).toBeTrue();
+        });
+
         it('should not render skipped control', () => {
             const form = vForm((current: Box) => vGroup(null, {
                 name: vControl(current.name),
@@ -184,34 +220,36 @@ describe('VFormGroup', () => {
             expect(form.control.get('weight')).toBeFalsy();
         });
 
-        it('should not render native control, if it is not bound', () => {
-            const form = vForm((current: Box) => vGroup(null, {
-                name: vControl(current.name),
-                weight: vNative(),
-                volume: vControl(current.volume),
-            })).build(elephant);
-
-            expect(form.value as any).toEqual({
-                name: elephant.name,
-                volume: elephant.volume,
+        describe('skip', () => {
+            it('should not render native control, if it is not bound', () => {
+                const form = vForm((current: Box) => vGroup(null, {
+                    name: vControl(current.name),
+                    weight: vNative(),
+                    volume: vControl(current.volume),
+                })).build(elephant);
+    
+                expect(form.value as any).toEqual({
+                    name: elephant.name,
+                    volume: elephant.volume,
+                });
+                expect(form.control.get('weight')).toBeFalsy();
             });
-            expect(form.control.get('weight')).toBeFalsy();
-        });
 
-        it('should render native control, if it is bound', () => {
-            const control = new FormControl(999);
-            const form = vForm((current: Box) => vGroup(null, {
-                name: vControl(current.name),
-                weight: vNative(control),
-                volume: vControl(current.volume),
-            })).build(elephant);
-
-            expect(form.value).toEqual({
-                name: elephant.name,
-                weight: 999,
-                volume: elephant.volume,
+            it('should render native control, if it is bound', () => {
+                const control = new FormControl(999);
+                const form = vForm((current: Box) => vGroup(null, {
+                    name: vControl(current.name),
+                    weight: vNative(control),
+                    volume: vControl(current.volume),
+                })).build(elephant);
+    
+                expect(form.value).toEqual({
+                    name: elephant.name,
+                    weight: 999,
+                    volume: elephant.volume,
+                });
+                expect(form.control.get('weight')).toBeTruthy();
             });
-            expect(form.control.get('weight')).toBeTruthy();
         });
 
         it('should set updateOn flag to "change", by default', () => {
@@ -570,6 +608,90 @@ describe('VFormGroup', () => {
             }));
         });
 
+        it('should not update dirty flag if corresponding tiny flag is not set', () => {
+            const form = renderConditionalGroup(parcel, 50, [{}], [{}]);
+
+            form.setValue(largeParcel);
+
+            expect(form.control.dirty).toBeFalse();
+
+            form.control.markAsDirty();
+
+            form.setValue(heavyAndLargeParcel);
+
+            expect(form.control.dirty).toBeTrue();
+        });
+
+        it('should unset dirty flag if corresponding tiny flag is set to false', () => {
+            const form = renderConditionalGroup(parcel, 50, [{}], [{ dirty: false }]);
+
+            form.setValue(largeParcel);
+
+            expect(form.control.dirty).toBeFalse();
+
+            form.control.markAsDirty();
+
+            form.setValue(heavyAndLargeParcel);
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should mark control as dirty if corresponding tiny flag is set to true', () => {
+            const form = renderConditionalGroup(parcel, 50, [{}], [{ dirty: true }]);
+
+            form.setValue(largeParcel);
+
+            expect(form.control.dirty).toBeTrue();
+
+            form.control.markAsPristine();
+
+            form.setValue(heavyAndLargeParcel);
+
+            expect(form.control.dirty).toBeTrue();
+        });
+
+        it('should not update touched flag if corresponding tiny flag is not set', () => {
+            const form = renderConditionalGroup(parcel, 50, [{}], [{}]);
+
+            form.setValue(largeParcel);
+
+            expect(form.control.touched).toBeFalse();
+
+            form.control.markAsTouched();
+
+            form.setValue(heavyAndLargeParcel);
+
+            expect(form.control.touched).toBeTrue();
+        });
+
+        it('should unset touched flag if corresponding tiny flag is set to false', () => {
+            const form = renderConditionalGroup(parcel, 50, [{}], [{ touched: false }]);
+
+            form.setValue(largeParcel);
+
+            expect(form.control.touched).toBeFalse();
+
+            form.control.markAsTouched();
+
+            form.setValue(heavyAndLargeParcel);
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should mark control as dirty if corresponding tiny flag is set to true', () => {
+            const form = renderConditionalGroup(parcel, 50, [{}], [{ touched: true }]);
+
+            form.setValue(largeParcel);
+
+            expect(form.control.touched).toBeTrue();
+
+            form.control.markAsUntouched();
+
+            form.setValue(heavyAndLargeParcel);
+
+            expect(form.control.touched).toBeTrue();
+        });
+
         it('should not recreate underlying FormControl', () => {
             const form = renderConditionalGroup(parcel, 50, [{ validator: small }], [{ validator: [small, light] }]);
     
@@ -762,6 +884,94 @@ describe('VFormGroup', () => {
             form.update();
 
             expect(form.control.disabled).toBeTrue();
+        });
+
+        it('should do nothing if touched state is not specified', () => {
+            const form = renderGroup(parcel);
+
+            form.control.markAsTouched()
+
+            expect(form.control.touched).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.touched).toBeTrue();
+
+            form.control.markAsUntouched();
+
+            expect(form.control.touched).toBeFalse();
+
+            form.update();
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should restore untouched state', () => {
+            const form = renderGroup(parcel, { touched: false });
+
+            form.control.markAsTouched()
+
+            expect(form.control.touched).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.touched).toBeFalse();
+        });
+
+        it('should restore touched state', () => {
+            const form = renderGroup(parcel, { touched: true });
+
+            form.control.markAsUntouched();
+
+            expect(form.control.touched).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.touched).toBeTrue();
+        });
+
+        it('should do nothing if dirty state is not specified', () => {
+            const form = renderGroup(parcel);
+
+            form.control.markAsDirty()
+
+            expect(form.control.dirty).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeTrue();
+
+            form.control.markAsPristine();
+
+            expect(form.control.dirty).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should restore pristine state', () => {
+            const form = renderGroup(parcel, { dirty: false });
+
+            form.control.markAsDirty()
+
+            expect(form.control.dirty).toBeTrue();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeFalse();
+        });
+
+        it('should restore dirty state', () => {
+            const form = renderGroup(parcel, { dirty: true });
+
+            form.control.markAsPristine();
+
+            expect(form.control.dirty).toBeFalse();
+            
+            form.update();
+
+            expect(form.control.dirty).toBeTrue();
         });
 
         it('should remove not specified controls', () => {

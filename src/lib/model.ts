@@ -84,28 +84,28 @@ export interface VFormNodeBase {
     key?: any;
     type: VFormNodeType;
     data: Record<string, any>;
-}
-
-export interface VManagedFormNode extends VFormNodeBase {
     disabled: boolean;
     validator?: VValidatorNode;
     asyncValidator?: VAsyncValidatorNode;
+    dirty?: boolean;
+    touched?: boolean;
+}
+
+export interface VFormNodeCreatedBase extends VFormNodeBase {
     updateOn?: VFormHooks;
 }
 
-export interface VFormControl extends VManagedFormNode {
+export interface VFormControl extends VFormNodeCreatedBase {
     type: VFormNodeType.Control;
-    dirty?: boolean;
-    touched?: boolean;
     value: any;
 }
 
-export interface VFormGroup extends VManagedFormNode {
+export interface VFormGroup extends VFormNodeCreatedBase {
     type: VFormNodeType.Group;
     children: Record<string, VFormNode | VFormPlaceholder>;
 }
 
-export interface VFormArray extends VManagedFormNode {
+export interface VFormArray extends VFormNodeCreatedBase {
     type: VFormNodeType.Array;
     children: (VFormNode | VFormPlaceholder)[];
 }

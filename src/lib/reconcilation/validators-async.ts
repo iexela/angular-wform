@@ -1,6 +1,6 @@
 import { AbstractControl, AsyncValidatorFn } from '@angular/forms';
 import { VValidationStrategy } from '.';
-import { VAsyncValidatorNode, VAsyncValidatorNodeType, VManagedFormNode } from '..';
+import { VAsyncValidatorNode, VAsyncValidatorNodeType } from '..';
 import { arrayDiffUnordered, arrayify, flatMap } from '../utils';
 import { canAccessListOfValidators, canManageValidatorsIndividually } from './flags';
 import { AsyncValidatorBundle, createAsyncValidatorBundle } from './internal-model';
@@ -18,7 +18,7 @@ export function processAsyncValidators(ctx: VRenderContext, node?: VAsyncValidat
         return createAsyncValidatorBundle(createValidators(node));
     }
 
-    const lastNode = (getLastFormNodeOrNothing(control) as VManagedFormNode)?.asyncValidator;
+    const lastNode = getLastFormNodeOrNothing(control)?.asyncValidator;
     const lastValidatorBundle = getLastAsyncValidatorBundle(control);
 
     return applyValidators(

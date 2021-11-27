@@ -33,15 +33,30 @@ function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFo
     const { control } = node;
     if (control == null) {
         throw Error(`Native node is rendered when it is not bound to the control: ${ctx.pathTo(name).join('.')}
-                    Typically this happens when native control is used in the root.
-                    But native control is not allowed to be used in the root.`);
+                    Typically this happens when native control is used in the root of the form.
+                    But native control is not allowed to use in the root of the form.`);
     }
 
-    registerRenderResult(control, {
-        node,
-        validator: createValidatorBundle([]),
-        asyncValidator: createAsyncValidatorBundle([]),
-    });
+    const nextDisabled = ctx.tryDisabled(node.disabled);
+    if (control.disabled !== nextDisabled) {
+        if (nextDisabled) {
+            control.disable();
+        } else {
+            control.enable();
+        }
+    }
+
+    const validator = processValidators(ctx, node.validator, control);
+    const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
+
+    if (ctx.validatorsChanged) {
+        control.updateValueAndValidity();
+        ctx.unmarkValidatorsChanged();
+    }
+
+    processTinyFlags(node, control);
+
+    registerRenderResult(control, { node: node, validator, asyncValidator });
 
     return control;
 }
@@ -118,6 +133,8 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
         //     group.disable();
         // }
 
+        processTinyFlags(node, group);
+
         registerRenderResult(group, { node, validator, asyncValidator });
 
         ctx.pop();
@@ -131,10 +148,10 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
 
     ctx.push(name, node);
 
-    const nextDisabled = ctx.tryDisabled(node.disabled);
-    if (control.disabled !== nextDisabled && !nextDisabled) {
-        control.enable();
-    }
+    // const nextDisabled = ctx.tryDisabled(node.disabled);
+    // if (control.disabled !== nextDisabled && !nextDisabled) {
+    //     control.enable();
+    // }
 
     const currentChildrenNodes = mapValues(
         control.controls,
@@ -147,9 +164,9 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
     removed.forEach(key => control.removeControl(key));
     updated.forEach(key => processNode(ctx, key, node.children[key] as VFormNode, control.controls[key]));
 
-    if (control.disabled !== nextDisabled && nextDisabled) {
-        control.disable();
-    }
+    // if (control.disabled !== nextDisabled && nextDisabled) {
+    //     control.disable();
+    // }
 
     const validator = processValidators(ctx, node.validator, control);
     const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
@@ -158,6 +175,8 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
         control.updateValueAndValidity();
         ctx.unmarkValidatorsChanged();
     }
+
+    processTinyFlags(node, control);
 
     registerRenderResult(control, { node: node, validator, asyncValidator });
 
@@ -186,6 +205,8 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         //     array.disable();
         // }
 
+        processTinyFlags(node, array);
+
         registerRenderResult(array, { node, validator, asyncValidator });
 
         ctx.pop();
@@ -199,10 +220,10 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
 
     ctx.push(name, node);
 
-    const nextDisabled = ctx.tryDisabled(node.disabled);
-    if (control.disabled !== nextDisabled && !nextDisabled) {
-        control.enable();
-    }
+    // const nextDisabled = ctx.tryDisabled(node.disabled);
+    // if (control.disabled !== nextDisabled && !nextDisabled) {
+    //     control.enable();
+    // }
 
     const currentChildrenNodes = control.controls
         .map((control, i) => getOrRestoreFormNodeWithKey(ctx, i, control));
@@ -245,9 +266,9 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         }
     });
 
-    if (control.disabled !== nextDisabled && nextDisabled) {
-        control.disable();
-    }
+    // if (control.disabled !== nextDisabled && nextDisabled) {
+    //     control.disable();
+    // }
 
     const validator = processValidators(ctx, node.validator, control);
     const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
@@ -257,6 +278,8 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         ctx.unmarkValidatorsChanged();
     }
 
+    processTinyFlags(node, control);
+
     registerRenderResult(control, { node: node, validator, asyncValidator });
 
     ctx.pop();
@@ -264,7 +287,7 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     return control;
 }
 
-function processTinyFlags(node: VFormControl, control: FormControl): void {
+function processTinyFlags(node: VFormNode, control: AbstractControl): void {
     if (hasField(node, 'touched') && node.touched !== control.touched) {
         if (node.touched) {
             control.markAsTouched();

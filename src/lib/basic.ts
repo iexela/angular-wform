@@ -87,7 +87,10 @@ export function vNative(control?: AbstractControl, options?: VFormNativeOptions)
     return {
         type: VFormNodeType.Native,
         control,
+        disabled: false,
         data: EMPTY_DATA,
         ...options,
+        validator: options && createValidator(options.validator) || undefined,
+        asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
     };
 }

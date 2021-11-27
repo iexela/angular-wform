@@ -465,17 +465,17 @@ describe('VFormControl', () => {
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
-            const form = renderConditionalNumber(2, 5, {}, { dirty: true });
+            const form = renderConditionalNumber(2, 5, {}, { touched: true });
 
             form.setValue(7);
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.touched).toBeTrue();
 
             form.control.markAsUntouched();
 
             form.setValue(9);
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.touched).toBeTrue();
         });
 
         it('should not recreate underlying FormControl', () => {
