@@ -2,7 +2,7 @@ import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/for
 import { VFormNative, VFormPlaceholder } from '..';
 import { Maybe } from '../common';
 import { VFormArray, VFormControl, VFormGroup, VFormNode, VFormNodeType } from '../model';
-import { arrayDiff, getControlTypeName, hasField, mapValues, objectDiff, pickBy } from '../utils';
+import { arrayDiff, getControlTypeName, hasField, isControlValue, mapValues, objectDiff, pickBy } from '../utils';
 import { VPathElement } from './model';
 import { getLastFormNodeOrNothing, registerRenderResult } from './registry';
 import { VRenderContext } from './render-context';
@@ -29,6 +29,8 @@ export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node
 }
 
 function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNative, value: any): AbstractControl {
+    value = node.hasOwnProperty('value') ? node.value : value;
+    
     const { control } = node;
     if (control == null) {
         throw Error(`Native node is rendered when it is not bound to the control: ${ctx.pathTo(name).join('.')}
@@ -48,10 +50,13 @@ function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFo
     const validator = processValidators(ctx, node.validator, control);
     const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
 
-    if (ctx.validatorsChanged) {
+    if (!isControlValue(control, value)) {
+        control.setValue(value);
+    } else if (ctx.validatorsChanged) {
         control.updateValueAndValidity();
-        ctx.unmarkValidatorsChanged();
     }
+    
+    ctx.unmarkValidatorsChanged();
 
     processTinyFlags(node, control);
 

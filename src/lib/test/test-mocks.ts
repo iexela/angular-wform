@@ -101,6 +101,15 @@ export const belarusToRussia = {
     },
 };
 
+export const russiaToBelarus = {
+    name: 'Russia - Belarus',
+    route: ['Russia', 'Belarus'],
+    cost: {
+        price: 19.99,
+        discount: 20,
+    },
+};
+
 export const taxData = {
     tax1: 123,
     tax2: [4, 5],

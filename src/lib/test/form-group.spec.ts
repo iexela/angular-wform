@@ -243,11 +243,7 @@ describe('VFormGroup', () => {
                     volume: vControl(),
                 })).build(elephant);
     
-                expect(form.value).toEqual({
-                    name: elephant.name,
-                    weight: 999,
-                    volume: elephant.volume,
-                });
+                expect(form.value).toEqual(elephant);
                 expect(form.control.get('weight')).toBeTruthy();
             });
         });
@@ -801,7 +797,7 @@ describe('VFormGroup', () => {
             form.setValue(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
-            expect(form.value).toEqual({ ...elephant, weight: 999 });
+            expect(form.value).toEqual(elephant);
         });
 
         it('should remove native control, if it is switched to unbind', () => {
@@ -813,7 +809,7 @@ describe('VFormGroup', () => {
             })).build(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
-            expect(form.value).toEqual({ ...elephant, weight: 999 });
+            expect(form.value).toEqual(elephant);
             
             form.setValue(mouse);
             

@@ -231,7 +231,7 @@ describe('VFormArray', () => {
         it('should render native control, if it is bound', () => {
             const control = new FormControl(999);
             const form = vForm((numbers: number[]) => vArray(null, [
-                vNative(control, { key: 999 }),
+                vNative(control, { key: 999, value: control.value }),
                 vControl({ key: 1, value: numbers[0] }),
                 vControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
@@ -848,7 +848,7 @@ describe('VFormArray', () => {
         it('should add native control, if it is switched to bind', () => {
             const control = new FormControl(999);
             const form = vForm((numbers: number[]) => vArray(null, [
-                vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum' }),
+                vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum', value: control.value }),
                 vControl({ key: 1, value: numbers[0] }),
                 vControl({ key: 2, value: numbers[1] }),
             ])).build([-10, -20]);
@@ -867,7 +867,7 @@ describe('VFormArray', () => {
         it('should remove native control if it is switched to unbind', () => {
             const control = new FormControl(999);
             const form = vForm((numbers: number[]) => vArray(null, [
-                vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum' }),
+                vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum', value: control.value }),
                 vControl({ key: 1, value: numbers[0] }),
                 vControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);

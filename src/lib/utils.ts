@@ -46,6 +46,16 @@ export function calculateValue(control: AbstractControl): any {
     return mapControls(control, child => child.value);
 }
 
+export function isControlValue(control: AbstractControl, value: any): boolean {
+    if (control instanceof FormGroup) {
+        return Object.keys(control.controls).every(key => isControlValue(control.controls[key], value?.[key]));
+    } else if (control instanceof FormArray) {
+        return control.controls.every((child, i) => isControlValue(child, value?.[i]));
+    } else {
+        return control.value === value;
+    }
+}
+
 export function mapValues<R, T extends Dictionary<any>, K extends keyof T>(obj: T, transform: (value: T[K], key: string) => R): { [P in K]: R} {
     return Object.keys(obj || {}).reduce((result, key) => {
         result[key] = transform(obj[key], key);

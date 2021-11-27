@@ -1,4 +1,3 @@
-2. Add support of value to native controls
 3. Implement tests for native controls to test changing of vnode types
 4. Support of portals
 5. Attach to already built form

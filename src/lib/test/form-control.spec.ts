@@ -4,7 +4,7 @@ import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
 import { fakeAsync, tick } from '@angular/core/testing';
 
 function renderNumber(n: number, options?: VFormControlOptions): VForm<number> {
-    return vForm((value) => vControl(options)).build(n);
+    return vForm(() => vControl(options)).build(n);
 }
 
 function renderConditionalNumber(initial: number, anchor: number, optionsLess: VFormControlOptions, optionsMore: VFormControlOptions): VForm<number> {

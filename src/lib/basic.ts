@@ -18,7 +18,7 @@ export type VFormGroupOptions = Omit<MakeOptions<VFormGroup>, 'children'>;
 export type VFormGroupChildren = Record<string, VFormNode | VFormPlaceholder>;
 export type VFormArrayOptions = Omit<MakeOptions<VFormArray>, 'children'>;
 export type VFormArrayChildren = (VFormNode | VFormPlaceholder)[];
-export type VFormNativeOptions = MakeOptions<VFormNative>;
+export type VFormNativeOptions = Omit<MakeOptions<VFormNative>, 'control'>;
 
 const EMPTY_DATA = Object.freeze({});
 

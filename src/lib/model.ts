@@ -113,6 +113,7 @@ export interface VFormArray extends VFormNodeCreatedBase {
 export interface VFormNative extends VFormNodeBase {
     type: VFormNodeType.Native;
     control?: AbstractControl;
+    value?: any;
 }
 
 export interface VFormPlaceholder {

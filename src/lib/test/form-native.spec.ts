@@ -1,20 +1,34 @@
 import { fakeAsync, tick } from '@angular/core/testing';
-import { AbstractControl, FormControl } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode, vForm, VForm } from '..';
 import { VFormNativeOptions, vNative } from '../basic';
-import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
+import { belarusToAustralia, belarusToRussia, even, evenAsync, Flight, moreThan10, moreThan10Async, russiaToBelarus } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
 function renderControl(control: AbstractControl, options?: VFormNativeOptions): VForm<number> {
-    return vForm(() => vNative(control, options)).build(1);
+    return vForm(() => vNative(control, options)).build(control.value);
 }
 
 function renderConditionalControl(control: AbstractControl, anchor: number, optionsLess: VFormNativeOptions, optionsMore: VFormNativeOptions): VForm<number> {
-    return vForm(() => vNative(control, control.value < anchor ? optionsLess : optionsMore)).build(1 as number);
+    return vForm((value: number) => vNative(control, value < anchor ? optionsLess : optionsMore)).build(control.value);
 }
 
 function testControl(n: number): FormControl {
     return new FormControl(n);
+}
+
+function createFlightForm(flight: Flight): FormGroup {
+    return new FormGroup({
+        name: new FormControl(flight.name),
+        route: new FormArray([
+            new FormControl(flight.route[0]),
+            new FormControl(flight.route[1]),
+        ]),
+        cost: new FormGroup({
+            price: new FormControl(flight.cost.price),
+            discount: new FormControl(flight.cost.discount),
+        }),
+    });
 }
 
 describe('VFormNative', () => {
@@ -106,6 +120,12 @@ describe('VFormNative', () => {
             expect(andTick(renderControl(testControl(13), options)).control.errors).toEqual({ even: true });
             expect(andTick(renderControl(testControl(100), options)).control.errors).toBeFalsy();
         }));
+
+        it('should render value passed into vnode', () => {
+            const form = vForm((value: number) => vNative(testControl(1), { value: value + 1 })).build(1 as number);
+
+            expect(form.value).toBe(2);
+        });
 
         it('should leave control dirty flag as is (false) if corresponding tiny flag is not set', () => {
             const form = renderControl(testControl(2), {});
@@ -211,26 +231,47 @@ describe('VFormNative', () => {
     });
 
     describe('setValue', () => {
-        it('should not update control if it is called with different value', () => {
+        it('should update control if it is called with different value', () => {
             const form = renderControl(testControl(1));
     
             const tracker = trackControl(form.control);
 
             form.setValue(5);
     
-            expect(form.value).toBe(1);
+            expect(form.value).toBe(5);
+            expect(tracker.changed).toBeTrue();
+        });
+    
+        it('should not update control if value was not changed', () => {
+            const form = renderControl(testControl(1));
+    
+            const tracker = trackControl(form.control);
+    
+            form.setValue(1);
+    
             expect(tracker.changed).toBeFalse();
         });
     
-        it('should change value if it was changed directly for control', () => {
-            const form = renderControl(testControl(1));
+        it('should not modify control if value is the same', () => {
+            const control = createFlightForm(belarusToRussia);
+            const form = vForm(() => vNative(control)).build(belarusToRussia);
     
-            form.control.setValue(10);
-
             const tracker = trackControl(form.control);
     
-            expect(form.value).toBe(10);
+            form.setValue({ ...belarusToRussia, tax: 123 } as any);
+    
             expect(tracker.changed).toBeFalse();
+        });
+    
+        it('should modify control if value is different', () => {
+            const control = createFlightForm(belarusToRussia);
+            const form = vForm(() => vNative(control)).build(belarusToRussia);
+    
+            const tracker = trackControl(form.control);
+    
+            form.setValue(russiaToBelarus);
+    
+            expect(tracker.changed).toBeTrue();
         });
     });
 
@@ -318,8 +359,7 @@ describe('VFormNative', () => {
         
                 expect(form.control.errors).toBeFalsy();
         
-                form.control.setValue(7);
-                form.update();
+                form.setValue(7);
         
                 expect(form.control.errors).toEqual({ min: true });
             });
@@ -329,8 +369,7 @@ describe('VFormNative', () => {
         
                 expect(form.control.errors).toEqual({ min: true });
         
-                form.control.setValue(2);
-                form.update();
+                form.setValue(2);
         
                 expect(form.control.errors).toBeFalsy();
             });
@@ -340,10 +379,21 @@ describe('VFormNative', () => {
         
                 expect(form.control.errors).toEqual({ min: true });
         
-                form.control.setValue(7);
-                form.update();
+                form.setValue(7);
         
                 expect(form.control.errors).toEqual({ min: true, even: true });
+            });
+    
+            it('should rerender control if value was changed in meantime', () => {
+                const form = renderConditionalControl(testControl(2), 5, {}, { validator: moreThan10 });
+        
+                form.control.setValue(7);
+        
+                expect(form.control.errors).toBeFalsy();
+        
+                form.update();
+    
+                expect(form.control.errors).toEqual({ min: true });
             });
     
             it('should do nothing if validators were not changed', () => {
@@ -366,8 +416,7 @@ describe('VFormNative', () => {
 
                 expect(form.control.errors).toBeFalsy();
         
-                form.control.setValue(7);
-                form.update();
+                form.setValue(7);
         
                 tick();
 
@@ -381,8 +430,7 @@ describe('VFormNative', () => {
 
                 expect(form.control.errors).toEqual({ min: true });
         
-                form.control.setValue(2);
-                form.update();
+                form.setValue(2);
 
                 tick();
         
@@ -396,12 +444,27 @@ describe('VFormNative', () => {
 
                 expect(form.control.errors).toEqual({ min: true });
         
-                form.control.setValue(7);
-                form.update();
+                form.setValue(7);
 
                 tick();
         
                 expect(form.control.errors).toEqual({ min: true, even: true });
+            }));
+    
+            it('should rerender control if value was changed in meantime', fakeAsync(() => {
+                const form = renderConditionalControl(testControl(2), 5, {}, { validator: moreThan10 });
+        
+                tick();
+
+                form.control.setValue(7);
+        
+                expect(form.control.errors).toBeFalsy();
+        
+                form.update();
+    
+                tick();
+
+                expect(form.control.errors).toEqual({ min: true });
             }));
     
             it('should do nothing if async validators were not changed', fakeAsync(() => {
@@ -420,11 +483,19 @@ describe('VFormNative', () => {
             }));
         });
 
+        it('should update value by value passed into vnode', () => {
+            const control = testControl(1);
+            const form = vForm((value: number) => vNative(control, { value: value + 1 })).build(1 as number);
+
+            form.setValue(10);
+
+            expect(form.value).toBe(11);
+        });
+
         it('should not update dirty flag if corresponding tiny flag is not set', () => {
             const form = renderConditionalControl(testControl(2), 5, {}, {});
 
-            form.control.setValue(7);
-            form.update();
+            form.setValue(7);
 
             expect(form.control.dirty).toBeFalse();
 
