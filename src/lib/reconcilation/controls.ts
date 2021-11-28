@@ -1,10 +1,10 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
-import { VFormNative, VFormPlaceholder } from '..';
+import { getLastFormNode } from '.';
+import { VFormNative, VFormPlaceholder, VFormPortal, VPathElement, VThisFormNode } from '..';
 import { Maybe } from '../common';
 import { VFormArray, VFormControl, VFormGroup, VFormNode, VFormNodeType } from '../model';
 import { arrayDiff, getControlTypeName, hasField, isControlValue, mapValues, objectDiff, pickBy } from '../utils';
-import { VPathElement } from './model';
-import { getLastFormNodeOrNothing, registerRenderResult } from './registry';
+import { getLastFormNodeOrNothing, registerRenderResult, registerRoot } from './registry';
 import { VRenderContext } from './render-context';
 import { processValidators } from './validators';
 import { processAsyncValidators } from './validators-async';
@@ -23,9 +23,33 @@ export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node
             return processArray(ctx, name, node, value, control as FormArray);
         case VFormNodeType.Native:
             return processNative(ctx, name, node, value);
+        case VFormNodeType.Portal:
+            return processPortal(ctx, name, node, value, control);
         default:
             throw Error(`Unsupported node type (${VFormNodeType[node.type] || node.type}): ${ctx.pathTo(name).join('.')}`);
     }
+}
+
+function processPortal(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormPortal, value: any, control?: AbstractControl): AbstractControl {
+    value = node.hasOwnProperty('value') ? node.value : value;
+    
+    const form = ctx.portalHost.getForm(node.name);
+    if (form == null) {
+        throw Error(`Portal node is rendered when it is not bound to the vform: ${ctx.pathTo(name).join('.')}
+                    Typically this happens when portal is used in the root of the form.
+                    But portal is not allowed to use in the root of the form.`);
+    }
+
+    registerRoot(form.control, { disabled: ctx.tryDisabled(false) });
+
+    if (form.control === control) {
+        // Do not update value on connect
+        form.setValue(value);
+    } else {
+        form.update();
+    }
+
+    return form.control;
 }
 
 function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNative, value: any): AbstractControl {
@@ -126,7 +150,7 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
         const group = new FormGroup(
             mapValues(
-                pickBy(node.children, isUsedNode),
+                pickBy(node.children, ctx.isUsedNode),
                 (child, key) => processNode(ctx, key, child as VFormNode, value?.[key])),
             {
                 validators: validator.compiled,
@@ -162,7 +186,7 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
     const currentChildrenNodes = mapValues(
         control.controls,
         (control, key) => getOrRestoreFormNodeWithKey(ctx, key, control));
-    const { added, removed, updated } = objectDiff(currentChildrenNodes, pickBy(node.children, isUsedNode));
+    const { added, removed, updated } = objectDiff(currentChildrenNodes, pickBy(node.children, ctx.isUsedNode));
     added.forEach(key => control.setControl(
         key,
         processNode(ctx, key, node.children[key] as VFormNode, value?.[key]),
@@ -199,7 +223,7 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
         const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
 
         const array = new FormArray(
-            node.children.filter(isUsedNode).map((child, i) => processNode(ctx, i, child, value?.[i])),
+            node.children.filter(ctx.isUsedNode).map((child, i) => processNode(ctx, i, child, value?.[i])),
             {
                 validators: validator.compiled,
                 asyncValidators: asyncValidator.compiled,
@@ -233,13 +257,22 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
 
     const currentChildrenNodes = control.controls
         .map((control, i) => getOrRestoreFormNodeWithKey(ctx, i, control));
-    const nextChildrenNodes = node.children.filter(isUsedNode);
+    const nextChildrenNodes = node.children.filter(ctx.isUsedNode);
     const { added, removed, updated, indexUpdated } = arrayDiff(
         currentChildrenNodes,
         nextChildrenNodes,
-        // ?. is intentional here in order to allow nulls
-        // null error is catched later in processNode
-        child => child?.key,
+        child => {
+            // It is intentional here in order to allow nulls.
+            // null error is catched later in processNode.
+            if (!child) {
+                return;
+            }
+
+            if (isPortalNode(child)) {
+                return getLastFormNode(ctx.portalHost.getForm(child.name).control).key;
+            }
+            return child.key;
+        },
         ctx.pathTo());
 
     const indexToControl: { [index: number]: AbstractControl } = {};
@@ -293,7 +326,7 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     return control;
 }
 
-function processTinyFlags(node: VFormNode, control: AbstractControl): void {
+function processTinyFlags(node: VThisFormNode, control: AbstractControl): void {
     if (hasField(node, 'touched') && node.touched !== control.touched) {
         if (node.touched) {
             control.markAsTouched();
@@ -341,19 +374,6 @@ function makeNodeTypeModifiedError(path: VPathElement[], requestedType: VFormNod
                  control = ${getControlTypeName(control)}`);
 }
 
-function isUsedNode(node: VFormNode | VFormPlaceholder): node is VFormNode {
-    if (node == null) {
-        // It is intentional, null error is catched later in processNode
-        return true;
-    }
-
-    if (node.type === VFormNodeType.Placeholder) {
-        return false;
-    }
-
-    if (node.type === VFormNodeType.Native && !node.control) {
-        return false;
-    }
-
-    return true;
+function isPortalNode(node: VFormNode | VKeyOnlyFormNode): node is VFormPortal {
+    return (node as VFormNode).type === VFormNodeType.Portal;
 }

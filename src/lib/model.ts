@@ -1,5 +1,7 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
 
+export type VPathElement = string | number;
+
 // Validators
 
 export enum VValidatorNodeType {
@@ -71,7 +73,7 @@ export type VAsyncValidatorNode = VAsyncCompoundValidatorNode | VAsyncSimpleVali
 // Form nodes
 
 export enum VFormNodeType {
-    Control, Group, Array, Native, Placeholder
+    Control, Group, Array, Native, Portal, Placeholder
 }
 
 export enum VFormHooks {
@@ -116,11 +118,18 @@ export interface VFormNative extends VFormNodeBase {
     value?: any;
 }
 
+export interface VFormPortal {
+    type: VFormNodeType.Portal;
+    name: string;
+    value?: any;
+}
+
 export interface VFormPlaceholder {
     type: VFormNodeType.Placeholder;
 }
 
-export type VFormNode = VFormControl | VFormGroup | VFormArray | VFormNative;
+export type VThisFormNode = VFormControl | VFormGroup | VFormArray | VFormNative;
+export type VFormNode = VThisFormNode | VFormPortal;
 
 export interface VFormNodeFactory<T> {
     (value: T): VFormNode;

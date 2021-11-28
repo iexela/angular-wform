@@ -1,15 +1,35 @@
+import { VPathElement } from '../model';
 import { Maybe } from '../common';
 import { VFormArray, VFormGroup } from '../model';
 import { VFormOptions } from '../reconcilation';
-import { VPathElement } from './model';
+import { VPortalHost } from '../portal-host';
+import { VFormNode, VFormNodeType, VFormPatcher, VFormPlaceholder } from '..';
 
 export class VRenderContext {
     validatorsChanged = false;
+
+    isUsedNode = (node: VFormNode | VFormPlaceholder): node is VFormNode => {
+        if (node == null) {
+            // It is intentional, null error is catched later in processNode
+            return true;
+        }
+
+        switch (node.type) {
+            case VFormNodeType.Placeholder:
+                return false;
+            case VFormNodeType.Native:
+                return node.control != null;
+            case VFormNodeType.Portal:
+                return this.portalHost.getForm(node.name) != null;
+            default:
+                return true;
+        }
+    };
     
     private _currentPath: VPathElement[] = [];
     private _disabled: boolean[] = [];
 
-    constructor(readonly options: VFormOptions) {}
+    constructor(readonly options: VFormOptions, readonly portalHost: VPortalHost) {}
 
     tryDisabled(disabled: boolean): boolean {
         const disabledTop = this._disabled.length === 0 ? false : this._disabled[this._disabled.length - 1];

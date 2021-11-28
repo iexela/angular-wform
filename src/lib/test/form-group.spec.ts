@@ -1,7 +1,7 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, VFormHooks, vGroup } from '..';
-import { vNative, vSkip } from '../basic';
+import { vNative, vPortal, vSkip } from '../basic';
 import { belarusToAustralia, belarusToRussia, Box, createFlightVNode, createTaxControl, elephant, even, Flight, fragileParcel, heavyAndLargeParcel, heavyParcel, largeParcel, light, lightAsync, moreThan10, mouse, parcel, parcelWithoutVolume, small, smallAsync, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
@@ -213,32 +213,44 @@ describe('VFormGroup', () => {
             expect(form.control.get('weight')).toBeFalsy();
         });
 
-        describe('skip', () => {
-            it('should not render native control, if it is not bound', () => {
-                const form = vForm((current: Box) => vGroup({
-                    name: vControl(),
-                    weight: vNative(),
-                    volume: vControl(),
-                })).build(elephant);
-    
-                expect(form.value as any).toEqual({
-                    name: elephant.name,
-                    volume: elephant.volume,
-                });
-                expect(form.control.get('weight')).toBeFalsy();
-            });
+        it('should not render native control, if it is not bound', () => {
+            const form = vForm((current: Box) => vGroup({
+                name: vControl(),
+                weight: vNative(),
+                volume: vControl(),
+            })).build(elephant);
 
-            it('should render native control, if it is bound', () => {
-                const control = new FormControl(999);
-                const form = vForm((current: Box) => vGroup({
-                    name: vControl(),
-                    weight: vNative(control),
-                    volume: vControl(),
-                })).build(elephant);
-    
-                expect(form.value).toEqual(elephant);
-                expect(form.control.get('weight')).toBeTruthy();
+            expect(form.value as any).toEqual({
+                name: elephant.name,
+                volume: elephant.volume,
             });
+            expect(form.control.get('weight')).toBeFalsy();
+        });
+
+        it('should render native control, if it is bound', () => {
+            const control = new FormControl(999);
+            const form = vForm((current: Box) => vGroup({
+                name: vControl(),
+                weight: vNative(control),
+                volume: vControl(),
+            })).build(elephant);
+
+            expect(form.value).toEqual(elephant);
+            expect(form.control.get('weight')).toBeTruthy();
+        });
+
+        it('should not render portal control, if it is not connected', () => {
+            const form = vForm((current: Box) => vGroup({
+                name: vControl(),
+                weight: vPortal('weight'),
+                volume: vControl(),
+            })).build(elephant);
+
+            expect(form.value as any).toEqual({
+                name: elephant.name,
+                volume: elephant.volume,
+            });
+            expect(form.control.get('weight')).toBeFalsy();
         });
 
         it('should set updateOn flag to "change", by default', () => {
@@ -808,6 +820,38 @@ describe('VFormGroup', () => {
             
             expect(form.control.get('weight')).toBeFalsy();
             expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume } as any);
+        });
+
+        it('should add portal control, if it was connected', () => {
+            const weightForm = vForm((weight: number) => vControl()).build(elephant.weight);
+            const form = vForm((current: Box) => vGroup({
+                name: vControl(),
+                weight: vPortal('weight'),
+                volume: vControl(),
+            })).build(elephant);
+
+            form.connect('weight', weightForm);
+
+            expect(form.value).toEqual(elephant);
+            expect(form.control.get('weight')).toBe(weightForm.control);
+        });
+
+        it('should remove portal control, if it was disconnected', () => {
+            const weightForm = vForm((weight: number) => vControl()).build(elephant.weight);
+            const form = vForm((current: Box) => vGroup({
+                name: vControl(),
+                weight: vPortal('weight'),
+                volume: vControl(),
+            })).build(elephant);
+
+            form.connect('weight', weightForm);
+            form.disconnect('weight');
+
+            expect(form.value as any).toEqual({
+                name: elephant.name,
+                volume: elephant.volume,
+            });
+            expect(form.control.get('weight')).toBeFalsy();
         });
 
         it('should rerender nested vform containers', () => {

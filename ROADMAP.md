@@ -1,5 +1,4 @@
-3. Implement tests for native controls to test changing of vnode types
-4. Support of portals
+3. Implement tests for controls to test changing of vnode types
 7. Think how to simplify patch implementation
 9. Write real-world sample
 10. Write tests for `getLastValidators`
@@ -9,3 +8,4 @@
 15. Cover translator usage
 16. Write documentation
 18. Log console.debug/console.warn only in dev mode?
+19. Rename getControl to get

@@ -4,6 +4,7 @@ import { combineLatest } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 import { ProcedureFn } from './common';
 import { VFormNodeFactory, VFormPatcher as VFormNodePatcher } from './model';
+import { VPortalHost } from './portal-host';
 import { reconcile, VFormOptions, VReconcilationRequest } from './reconcilation';
 import { calculateValue } from './utils';
 
@@ -12,6 +13,7 @@ export class VForm<T> {
     private _factory: VFormNodeFactory<T>;
     private _options: VFormOptions;
     private _reconcilationInProgress$$ = new BehaviorSubject(false);
+    private _portalHost = new VPortalHost();
 
     readonly valueChanges: Observable<T>;
     readonly rawValueChanges: Observable<T>;
@@ -41,6 +43,7 @@ export class VForm<T> {
 
         this._control$$ = new BehaviorSubject(reconcile({
             options: { ...options, strict: false },
+            portalHost: this._portalHost,
             node: factory(value),
             value,
             control: base,
@@ -71,6 +74,7 @@ export class VForm<T> {
     setValue(value: T): void {
         this._reconcile({
             options: this._options,
+            portalHost: this._portalHost,
             node: this._factory(value),
             control: this.control,
             value,
@@ -79,6 +83,16 @@ export class VForm<T> {
 
     resetValue(value: T): void {
         this.setValue(value);
+    }
+
+    connect(name: string, form: VForm<any>): void {
+        this._portalHost.setForm(name, form);
+        this.update();
+    }
+
+    disconnect(name: string): void {
+        this._portalHost.resetForm(name);
+        this.update();
     }
 
     markAllAsPristine(): void {
@@ -133,6 +147,7 @@ export class VForm<T> {
 
         this._reconcile({
             options: this._options,
+            portalHost: this._portalHost,
             node: this._factory(value),
             control: this.control,
             value,
@@ -142,6 +157,7 @@ export class VForm<T> {
     patch(patcher: VFormNodePatcher): void {
         this._reconcile({
             options: this._options,
+            portalHost: this._portalHost,
             node: patcher(this.control),
             control: this.control,
             value: this.rawValue,

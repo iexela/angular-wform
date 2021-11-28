@@ -1,5 +1,5 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn, Validators } from '@angular/forms';
-import { VAsyncValidatorNode, VFormNative, VFormNode, VFormPlaceholder } from '.';
+import { VAsyncValidatorNode, VFormNative, VFormNode, VFormPlaceholder, VFormPortal } from '.';
 import { Maybe, Nilable } from './common';
 import { VFormArray, VFormControl, VFormGroup, VFormNodeType, VValidatorNode } from './model';
 import { arrayify } from './utils';
@@ -99,5 +99,12 @@ export function vNative(control?: AbstractControl, options?: VFormNativeOptions)
         ...options,
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
+    };
+}
+
+export function vPortal(name: string): VFormPortal {
+    return {
+        type: VFormNodeType.Portal,
+        name,
     };
 }

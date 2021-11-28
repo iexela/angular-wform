@@ -1,5 +1,7 @@
 import { AbstractControl } from '@angular/forms';
+import { VPathElement } from '..';
 import { VFormNode } from '../model';
+import { VPortalHost } from '../portal-host';
 
 export enum VReconcilationType {
     Update, Patch
@@ -9,8 +11,6 @@ export enum VValidationStrategy {
     Append,
     Replace,
 }
-
-export type VPathElement = string | number;
 
 export interface VKeyGenerator {
     (path: VPathElement[], value: any): any;
@@ -25,6 +25,7 @@ export interface VFormOptions {
 
 export interface VReconcilationRequest {
     options: VFormOptions;
+    portalHost: VPortalHost;
     node: VFormNode;
     value: any,
     control?: AbstractControl;

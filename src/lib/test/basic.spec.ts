@@ -1,6 +1,6 @@
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, vForm, VFormNodeType, vGroup, VValidators } from '..';
-import { vNative, vSkip } from '../basic';
+import { vNative, vPortal, vSkip } from '../basic';
 import { belarusToAustralia, belarusToRussia, Box, createFlightForm, createFlightVNode, createTaxControl, elephant, Flight, mouse, russiaToBelarus, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
 const flightFactory = (value: Flight) => vGroup({
@@ -335,6 +335,10 @@ describe('basic', () => {
 
         it('"render operation" should throw error if root node is a placeholder', () => {
             expect(() => vForm(() => vSkip() as any).build(1)).toThrowError();
+        });
+
+        it('"render operation" should throw error if root node is a portal', () => {
+            expect(() => vForm(() => vPortal('name') as any).build(1)).toThrowError();
         });
 
         it('"reconcilation operation" should throw error if root node is nil', () => {

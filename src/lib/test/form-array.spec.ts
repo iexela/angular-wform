@@ -1,7 +1,7 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormArray, FormControl } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayChildren, VFormArrayOptions, VFormBuilder, VFormControlOptions, VFormHooks, vGroup, vValidator } from '..';
-import { vNative, vSkip } from '../basic';
+import { vNative, vPortal, vSkip } from '../basic';
 import { vValidatorAsync } from '../validators';
 import { Box, createTaxControl, elephant, even, krokodile, moreThan10, mouse, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
@@ -239,6 +239,18 @@ describe('VFormArray', () => {
             const array = form.control as FormArray;
             expect(form.value as any).toEqual([999, 10, 20]);
             expect(array.length).toBe(3);
+        });
+
+        it('should not render portal control, if it is not connected', () => {
+            const form = vForm((numbers: number[]) => vArray([
+                vPortal('start'),
+                vControl({ key: 1, value: numbers[0] }),
+                vControl({ key: 2, value: numbers[1] }),
+            ])).build([10, 20]);
+
+            const array = form.control as FormArray;
+            expect(form.value as any).toEqual([10, 20]);
+            expect(array.length).toBe(2);
         });
 
         it('should set updateOn flag to "change", by default', () => {
@@ -880,6 +892,38 @@ describe('VFormArray', () => {
             form.setValue([-10, -20]);
             
             expect(form.value).toEqual([-10, -20]);
+            expect(array.length).toBe(2);
+        });
+
+        it('should add portal control, if it was connected', () => {
+            const startForm = vForm((value: number) => vControl()).build(999);
+            const form = vForm((numbers: number[]) => vArray([
+                vPortal('start'),
+                vControl({ key: 1, value: numbers[0] }),
+                vControl({ key: 2, value: numbers[1] }),
+            ])).build([10, 20]);
+
+            form.connect('start', startForm);
+
+            const array = form.control as FormArray;
+            expect(form.value as any).toEqual([999, 10, 20]);
+            expect(array.length).toBe(3);
+            expect(array.at(0)).toBe(startForm.control);
+        });
+
+        it('should remove portal control, if it was disconnected', () => {
+            const startForm = vForm((value: number) => vControl({ key: 999 })).build(999);
+            const form = vForm((numbers: number[]) => vArray([
+                vPortal('start'),
+                vControl({ key: 1, value: numbers[numbers.length - 2] }),
+                vControl({ key: 2, value: numbers[numbers.length - 1] }),
+            ])).build([10, 20]);
+
+            form.connect('start', startForm);
+            form.disconnect('start');
+
+            const array = form.control as FormArray;
+            expect(form.value as any).toEqual([10, 20]);
             expect(array.length).toBe(2);
         });
 
