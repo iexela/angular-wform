@@ -52,7 +52,11 @@ export function vControl(options?: VFormControlOptions): VFormControl {
     };
 }
 
-export function vGroup(options: Nilable<VFormGroupOptions> = {}, children: VFormGroupChildren = {}): VFormGroup {
+export function vGroup(children: VFormGroupChildren): VFormGroup;
+export function vGroup(options: VFormGroupOptions, children: VFormGroupChildren): VFormGroup;
+export function vGroup(optionsOrChildren?: VFormGroupOptions | VFormGroupChildren, childrenOrNil?: VFormGroupChildren): VFormGroup {
+    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as VFormGroupChildren || {});
+    const options = childrenOrNil ? optionsOrChildren as VFormGroupOptions : undefined;
     return {
         type: VFormNodeType.Group,
         disabled: false,
@@ -64,7 +68,11 @@ export function vGroup(options: Nilable<VFormGroupOptions> = {}, children: VForm
     };
 }
 
-export function vArray(options: Nilable<VFormArrayOptions> = {}, children: VFormArrayChildren = []): VFormArray {
+export function vArray(children: VFormArrayChildren): VFormArray;
+export function vArray(options: VFormArrayOptions, children: VFormArrayChildren): VFormArray;
+export function vArray(optionsOrChildren: VFormArrayOptions | VFormArrayChildren, childrenOrNil?: VFormArrayChildren): VFormArray {
+    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as VFormArrayChildren || {});
+    const options = childrenOrNil ? optionsOrChildren as VFormArrayOptions : undefined;
     return {
         type: VFormNodeType.Array,
         disabled: false,

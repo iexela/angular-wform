@@ -3,10 +3,10 @@ import { getLastFormNode, vArray, vControl, vForm, VFormNodeType, vGroup, VValid
 import { vNative, vSkip } from '../basic';
 import { belarusToAustralia, belarusToRussia, Box, createFlightForm, createFlightVNode, createTaxControl, elephant, Flight, mouse, russiaToBelarus, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
-const flightFactory = (value: Flight) => vGroup(null, {
+const flightFactory = (value: Flight) => vGroup({
     name: vControl(),
-    route: vArray(null, value.route.map(() => vControl())),
-    cost: vGroup(null, {
+    route: vArray(value.route.map(() => vControl())),
+    cost: vGroup({
         price: vControl(),
         discount: vControl(),
     }),
@@ -139,7 +139,7 @@ describe('basic', () => {
         it('key generator does not generate key for existing controls', () => {
             const keyGenerator = jasmine.createSpy();
             vForm(() =>
-                vGroup(null, { abc: vTaxModel }),
+                vGroup({ abc: vTaxModel }),
             ).keyGenerator(keyGenerator).build(false);
 
             expect(keyGenerator).not.toHaveBeenCalled();
@@ -148,7 +148,7 @@ describe('basic', () => {
         it('key generator generates key for each restored control', () => {
             const keyGenerator = jasmine.createSpy().and.returnValues([1, 2, 3, 4, 5]);
             const form = vForm((flag) =>
-                vGroup(null, flag
+                vGroup(flag
                         ? { abc: vTaxModel, tax: vTaxModelWithKeys }
                         : { abc: vTaxModel }),
             ).keyGenerator(keyGenerator).lenient().build(false);
@@ -178,7 +178,7 @@ describe('basic', () => {
             const subscriber = jasmine.createSpy('subscriber')
             const rawSubscriber = jasmine.createSpy('raw-subscriber')
 
-            const form = vForm((value: Box) => vGroup(null, {
+            const form = vForm((value: Box) => vGroup({
                 name: vControl(),
                 weight: vControl({
                     disabled: value.volume! > 100,
@@ -203,11 +203,11 @@ describe('basic', () => {
 
     describe('errors', () => {
         it('"getControl" should throw error if control does not exist', () => {
-            const form = vForm(() => vGroup(null, {
-                nested: vGroup(null, {
-                    arr: vArray(null, [
+            const form = vForm(() => vGroup({
+                nested: vGroup({
+                    arr: vArray([
                         vControl(),
-                        vGroup(null, {
+                        vGroup({
                             field: vControl({ value: 'abc' }),
                         }),
                     ]),
@@ -222,9 +222,9 @@ describe('basic', () => {
         });
 
         it('"array reconcilation" should throw error if several items have the same key', () => {
-            const form = vForm(() => vGroup(null, {
-                group: vGroup(null, {
-                    nested: vArray(null, [
+            const form = vForm(() => vGroup({
+                group: vGroup({
+                    nested: vArray([
                         vControl({ key: 'abracadabra' }),
                         vControl({ key: 'abracadabra' }),
                     ]),
@@ -235,9 +235,9 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if type of vnode is unknown', () => {
-            expect(() => vForm(() => vGroup(null, {
-                group: vGroup(null, {
-                    nested: vArray(null, [
+            expect(() => vForm(() => vGroup({
+                group: vGroup({
+                    nested: vArray([
                         vControl({ key: 1 }),
                         { type: 100 } as any,
                         vControl({ key: 2 }),
@@ -247,9 +247,9 @@ describe('basic', () => {
         });
 
         it('"reconcilation of VFormControl" should throw error if type of vnode is different', () => {
-            const form = vForm((flag: boolean) => vGroup(null, {
-                group: vGroup(null, {
-                    nested: vArray(null, [
+            const form = vForm((flag: boolean) => vGroup({
+                group: vGroup({
+                    nested: vArray([
                         vControl({ key: 1 }),
                         flag ? vGroup({ key: 2 }, {}) : vControl({ key: 2 }),
                         vControl({ key: 3 }),
@@ -265,9 +265,9 @@ describe('basic', () => {
         });
 
         it('"reconcilation of VFormGroup" should throw error if type of vnode is different', () => {
-            const form = vForm((flag: boolean) => vGroup(null, {
-                group: vGroup(null, {
-                    nested: vArray(null, [
+            const form = vForm((flag: boolean) => vGroup({
+                group: vGroup({
+                    nested: vArray([
                         vControl({ key: 1 }),
                         flag ? vArray({ key: 2 }, []) : vGroup({ key: 2 }, {}),
                         vControl({ key: 3 }),
@@ -283,9 +283,9 @@ describe('basic', () => {
         });
 
         it('"reconcilation of VFormArray" should throw error if type of vnode is different', () => {
-            const form = vForm((flag: boolean) => vGroup(null, {
-                group: vGroup(null, {
-                    nested: vArray(null, [
+            const form = vForm((flag: boolean) => vGroup({
+                group: vGroup({
+                    nested: vArray([
                         vControl({ key: 1 }),
                         flag ? vControl({ key: 2 }) : vArray({ key: 2 }, []),
                         vControl({ key: 3 }),
@@ -313,9 +313,9 @@ describe('basic', () => {
         });
 
         it('"reconcilation operation" should throw error if unmanaged control is found in strict mode', () => {
-            const form = vForm(() => vGroup(null, {
-                group: vGroup(null, {
-                    nested: vArray(null, [
+            const form = vForm(() => vGroup({
+                group: vGroup({
+                    nested: vArray([
                         vControl({ key: 'abracadabra' }),
                         vControl({ key: 'abracadabra' }),
                     ]),
@@ -344,16 +344,16 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if child of group is nil', () => {
-            expect(() => vForm(() => vGroup(null, {
-                group: vGroup(null, {
+            expect(() => vForm(() => vGroup({
+                group: vGroup({
                     nested: null as any,
                 }),
             })).build(false)).toThrowError(errorHasMessage('group.nested'));
         });
 
         it('"reconcilation operation" should throw error if child of group is nil', () => {
-            const form = vForm((flag: boolean) => vGroup(null, {
-                group: vGroup(null, {
+            const form = vForm((flag: boolean) => vGroup({
+                group: vGroup({
                     nested: flag ? null as any : vControl({ key: 2 }),
                 }),
             })).build(false as boolean);
@@ -362,9 +362,9 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if child of array is nil', () => {
-            expect(() => vForm(() => vGroup(null, {
-                group: vGroup(null, {
-                    nested: vArray(null, [
+            expect(() => vForm(() => vGroup({
+                group: vGroup({
+                    nested: vArray([
                         vControl({ key: 1 }),
                         null as any,
                         vControl({ key: 3 }),
@@ -374,9 +374,9 @@ describe('basic', () => {
         });
 
         it('"reconcilation operation" should throw error if child of array is nil', () => {
-            const form = vForm((flag: boolean) => vGroup(null, {
-                group: vGroup(null, {
-                    nested: vArray(null, [
+            const form = vForm((flag: boolean) => vGroup({
+                group: vGroup({
+                    nested: vArray([
                         vControl({ key: 1 }),
                         flag ? null as any : vControl({ key: 2 }),
                         vControl({ key: 3 }),
@@ -407,9 +407,9 @@ describe('basic', () => {
         });
 
         it('"array reconcilation" should print warning if item does not have a key', () => {
-            const form = vForm(() => vGroup(null, {
-                group: vGroup(null, {
-                    nested: vArray(null, [
+            const form = vForm(() => vGroup({
+                group: vGroup({
+                    nested: vArray([
                         vControl({ key: 1 }),
                         vControl(),
                         vControl({ key: 3 }),

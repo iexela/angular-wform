@@ -115,9 +115,9 @@ export const taxData = {
     tax2: [4, 5],
 }
 
-export const vTaxModel = vGroup(null, {
+export const vTaxModel = vGroup({
     tax1: vControl({ value: 123 }),
-    tax2: vArray(null, [vControl({ value: 4 }), vControl({ value: 5 })])
+    tax2: vArray([vControl({ value: 4 }), vControl({ value: 5 })])
 });
 
 export const vTaxModelWithKeys = vGroup({ key: 1 }, {
@@ -133,10 +133,10 @@ export function createTaxControl(): AbstractControl {
 }
 
 export function createFlightVNode(value: Flight): VFormNode {
-    return vGroup(null, {
+    return vGroup({
         name: vControl(),
-        route: vArray(null, value.route.map(() => vControl())),
-        cost: vGroup(null, {
+        route: vArray(value.route.map(() => vControl())),
+        cost: vGroup({
             price: vControl(),
             discount: vControl(),
         }),

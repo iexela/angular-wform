@@ -200,7 +200,7 @@ describe('VFormGroup', () => {
         });
 
         it('should not render skipped control', () => {
-            const form = vForm(() => vGroup(null, {
+            const form = vForm(() => vGroup({
                 name: vControl(),
                 weight: vSkip(),
                 volume: vControl(),
@@ -215,7 +215,7 @@ describe('VFormGroup', () => {
 
         describe('skip', () => {
             it('should not render native control, if it is not bound', () => {
-                const form = vForm((current: Box) => vGroup(null, {
+                const form = vForm((current: Box) => vGroup({
                     name: vControl(),
                     weight: vNative(),
                     volume: vControl(),
@@ -230,7 +230,7 @@ describe('VFormGroup', () => {
 
             it('should render native control, if it is bound', () => {
                 const control = new FormControl(999);
-                const form = vForm((current: Box) => vGroup(null, {
+                const form = vForm((current: Box) => vGroup({
                     name: vControl(),
                     weight: vNative(control),
                     volume: vControl(),
@@ -749,7 +749,7 @@ describe('VFormGroup', () => {
         });
 
         it('should add control if it is switched from vSkip', () => {
-            const form = vForm((current: Box) => vGroup(null, {
+            const form = vForm((current: Box) => vGroup({
                 name: vControl(),
                 weight: current.weight! < 50 ? vSkip() : vControl(),
                 volume: vControl(),
@@ -763,7 +763,7 @@ describe('VFormGroup', () => {
         });
 
         it('should remove control if it is switched to vSkip', () => {
-            const form = vForm((current: Box) => vGroup(null, {
+            const form = vForm((current: Box) => vGroup({
                 name: vControl(),
                 weight: current.weight! < 50 ? vSkip() : vControl(),
                 volume: vControl(),
@@ -778,7 +778,7 @@ describe('VFormGroup', () => {
 
         it('should add native control, if it is switched to bind', () => {
             const control = new FormControl(999);
-            const form = vForm((current: Box) => vGroup(null, {
+            const form = vForm((current: Box) => vGroup({
                 name: vControl(),
                 weight: vNative(current.weight! < 50 ? undefined : control),
                 volume: vControl(),
@@ -795,7 +795,7 @@ describe('VFormGroup', () => {
 
         it('should remove native control, if it is switched to unbind', () => {
             const control = new FormControl(999);
-            const form = vForm((current: Box) => vGroup(null, {
+            const form = vForm((current: Box) => vGroup({
                 name: vControl(),
                 weight: vNative(current.weight! < 50 ? undefined : control),
                 volume: vControl(),
