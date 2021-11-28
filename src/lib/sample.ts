@@ -61,7 +61,7 @@ form.resetValue({
     
 });
 
-const control = form.getControl('jobs.0.name');
+const control = form.get('jobs.0.name');
 
 form.update();
 

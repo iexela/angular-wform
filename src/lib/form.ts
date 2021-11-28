@@ -128,7 +128,7 @@ export class VForm<T> {
         onEach(this.control);
     }
 
-    getControl(path: string): AbstractControl {
+    get(path: string): AbstractControl {
         const found = this.control.get(path);
 
         if (found == null) {
@@ -138,7 +138,7 @@ export class VForm<T> {
         return found;
     }
 
-    hasControl(path: string): boolean {
+    has(path: string): boolean {
         return this.control.get(path) != null;
     }
 

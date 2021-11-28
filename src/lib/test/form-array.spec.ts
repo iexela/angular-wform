@@ -81,8 +81,8 @@ describe('VFormArray', () => {
         it('should enable all internal controls, by default', () => {
             const form = renderArray(fibonaci5, {}, withItem(fibonaci5));
 
-            expect(form.getControl('0').disabled).toBeFalse();
-            expect(form.getControl('1').disabled).toBeFalse();
+            expect(form.get('0').disabled).toBeFalse();
+            expect(form.get('1').disabled).toBeFalse();
         });
 
         it('should disable all internal controls if "disabled" is true', () => {
@@ -90,8 +90,8 @@ describe('VFormArray', () => {
                 disabled: true,
             }, withItem(fibonaci5));
 
-            expect(form.getControl('0').disabled).toBeTrue();
-            expect(form.getControl('1').disabled).toBeTrue();
+            expect(form.get('0').disabled).toBeTrue();
+            expect(form.get('1').disabled).toBeTrue();
         });
 
         it('should disable all internal controls if "disabled" is true (regardless internal controls disabled flag)', () => {
@@ -99,8 +99,8 @@ describe('VFormArray', () => {
                 disabled: true,
             }, withItem(fibonaci5, () => ({ disabled: false })));
 
-            expect(form.getControl('0').disabled).toBeTrue();
-            expect(form.getControl('1').disabled).toBeTrue();
+            expect(form.get('0').disabled).toBeTrue();
+            expect(form.get('1').disabled).toBeTrue();
         });
 
         it('should leave "disabled" state for internal controls as they desire when "disabled" is false', () => {
@@ -108,8 +108,8 @@ describe('VFormArray', () => {
                 disabled: false,
             }, withItem(fibonaci5, (_, i) => ({ disabled: (i % 2) === 0 })));
 
-            expect(form.getControl('0').disabled).toBeTrue();
-            expect(form.getControl('1').disabled).toBeFalse();
+            expect(form.get('0').disabled).toBeTrue();
+            expect(form.get('1').disabled).toBeFalse();
         });
 
         describe('validator', () => {
@@ -257,14 +257,14 @@ describe('VFormArray', () => {
             const form = renderArray(fibonaci5, {});
 
             expect(form.control.updateOn).toBe(VFormHooks.Change);
-            expect(form.getControl('1').updateOn).toBe(VFormHooks.Change);
+            expect(form.get('1').updateOn).toBe(VFormHooks.Change);
         });
 
         it('should allow to set updateOn flag', () => {
             const form = renderArray(fibonaci5, { updateOn: VFormHooks.Blur });
 
             expect(form.control.updateOn).toBe(VFormHooks.Blur);
-            expect(form.getControl('1').updateOn).toBe(VFormHooks.Blur);
+            expect(form.get('1').updateOn).toBe(VFormHooks.Blur);
         });
 
         it('should allow to redeclare updateOn flag on child level', () => {
@@ -274,8 +274,8 @@ describe('VFormArray', () => {
                 withItem(fibonaci5, (_, i) => (i === 1 ? { updateOn: VFormHooks.Submit } : {})));
 
             expect(form.control.updateOn).toBe(VFormHooks.Blur);
-            expect(form.getControl('0').updateOn).toBe(VFormHooks.Blur);
-            expect(form.getControl('1').updateOn).toBe(VFormHooks.Submit);
+            expect(form.get('0').updateOn).toBe(VFormHooks.Blur);
+            expect(form.get('1').updateOn).toBe(VFormHooks.Submit);
         });
     });
 
@@ -399,8 +399,8 @@ describe('VFormArray', () => {
             form.setValue(fibonaci5);
     
             expect(form.control.disabled).toBeTrue();
-            expect(form.getControl('0').disabled).toBeTrue();
-            expect(form.getControl('1').disabled).toBeTrue();
+            expect(form.get('0').disabled).toBeTrue();
+            expect(form.get('1').disabled).toBeTrue();
         });
 
         it('should switch state of control from disabled to enabled', () => {
@@ -411,8 +411,8 @@ describe('VFormArray', () => {
             form.setValue(fibonaci10);
     
             expect(form.control.disabled).toBeFalse();
-            expect(form.getControl('0').disabled).toBeFalse();
-            expect(form.getControl('1').disabled).toBeFalse();
+            expect(form.get('0').disabled).toBeFalse();
+            expect(form.get('1').disabled).toBeFalse();
         });
 
         it('should do nothing if disabled flag was not modified in vform tree', () => {
@@ -443,8 +443,8 @@ describe('VFormArray', () => {
             form.setValue(fibonaci10);
     
             expect(form.control.disabled).toBeTrue();
-            expect(form.getControl('0').disabled).toBeTrue();
-            expect(form.getControl('1').disabled).toBeTrue();
+            expect(form.get('0').disabled).toBeTrue();
+            expect(form.get('1').disabled).toBeTrue();
         });
 
         it('should respect "disabled" state of internal controls if "disabled" flag was switched to false', () => {
@@ -465,8 +465,8 @@ describe('VFormArray', () => {
             form.setValue(fibonaci2_10);
     
             expect(form.control.disabled).toBeFalse();
-            expect(form.getControl('0').disabled).toBeFalse();
-            expect(form.getControl('1').disabled).toBeTrue();
+            expect(form.get('0').disabled).toBeFalse();
+            expect(form.get('1').disabled).toBeTrue();
         });
 
         it('should switch state of internal controls (if any) if "disabled" flag is set to false', () => {
@@ -482,13 +482,13 @@ describe('VFormArray', () => {
                     withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
                 ]);
     
-            expect(form.getControl('0').disabled).toBeTrue();
-            expect(form.getControl('1').disabled).toBeFalse();
+            expect(form.get('0').disabled).toBeTrue();
+            expect(form.get('1').disabled).toBeFalse();
     
             form.setValue(fibonaci2_10);
     
-            expect(form.getControl('0').disabled).toBeFalse();
-            expect(form.getControl('1').disabled).toBeTrue();
+            expect(form.get('0').disabled).toBeFalse();
+            expect(form.get('1').disabled).toBeTrue();
         });
 
         describe('validator', () => {
@@ -720,88 +720,88 @@ describe('VFormArray', () => {
         it('should append new control if it appears in the end of the vform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
-            const krokodileControl = form.getControl('0');
-            const elephantControl = form.getControl('1');
+            const krokodileControl = form.get('0');
+            const elephantControl = form.get('1');
 
             const newBoxes = [krokodile, elephant, mouse];
 
             form.setValue(newBoxes);
 
             expect(form.value).toEqual(newBoxes);
-            expect(form.getControl('0')).toBe(krokodileControl);
-            expect(form.getControl('1')).toBe(elephantControl);
-            expect(form.getControl('2')).toBeTruthy();
+            expect(form.get('0')).toBe(krokodileControl);
+            expect(form.get('1')).toBe(elephantControl);
+            expect(form.get('2')).toBeTruthy();
         });
 
         it('should prepend new control if it appears in the beginning of the vform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
-            const krokodileControl = form.getControl('0');
-            const elephantControl = form.getControl('1');
+            const krokodileControl = form.get('0');
+            const elephantControl = form.get('1');
 
             const newBoxes = [mouse, krokodile, elephant];
 
             form.setValue(newBoxes);
 
             expect(form.value).toEqual(newBoxes);
-            expect(form.getControl('0')).toBeTruthy();
-            expect(form.getControl('1')).toBe(krokodileControl);
-            expect(form.getControl('2')).toBe(elephantControl);
+            expect(form.get('0')).toBeTruthy();
+            expect(form.get('1')).toBe(krokodileControl);
+            expect(form.get('2')).toBe(elephantControl);
         });
 
         it('should insert new control if it appears in the middle of the vform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
-            const krokodileControl = form.getControl('0');
-            const elephantControl = form.getControl('1');
+            const krokodileControl = form.get('0');
+            const elephantControl = form.get('1');
 
             const newBoxes = [krokodile, mouse, elephant];
 
             form.setValue(newBoxes);
 
             expect(form.value).toEqual(newBoxes);
-            expect(form.getControl('0')).toBe(krokodileControl);
-            expect(form.getControl('1')).toBeTruthy();
-            expect(form.getControl('2')).toBe(elephantControl);
+            expect(form.get('0')).toBe(krokodileControl);
+            expect(form.get('1')).toBeTruthy();
+            expect(form.get('2')).toBe(elephantControl);
         });
 
         it('should move controls if they positions were chnaged in the vform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
-            const krokodileControl = form.getControl('0');
-            const elephantControl = form.getControl('1');
+            const krokodileControl = form.get('0');
+            const elephantControl = form.get('1');
 
             const newBoxes = [elephant, mouse, krokodile];
 
             form.setValue(newBoxes);
 
             expect(form.value).toEqual(newBoxes);
-            expect(form.getControl('0')).toBe(elephantControl);
-            expect(form.getControl('1')).toBeTruthy();
-            expect(form.getControl('2')).toBe(krokodileControl);
+            expect(form.get('0')).toBe(elephantControl);
+            expect(form.get('1')).toBeTruthy();
+            expect(form.get('2')).toBe(krokodileControl);
         });
 
         it('should remove control if it disappears from the vform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
-            const krokodileControl = form.getControl('0');
-            const elephantControl = form.getControl('1');
+            const krokodileControl = form.get('0');
+            const elephantControl = form.get('1');
 
             const newBoxes = [elephant, mouse];
 
             form.setValue(newBoxes);
 
             expect(form.value).toEqual(newBoxes);
-            expect(form.getControl('0')).toBe(elephantControl);
-            expect(form.getControl('1')).toBeTruthy();
-            expect(form.getControl('1')).not.toBe(krokodileControl);
+            expect(form.get('0')).toBe(elephantControl);
+            expect(form.get('1')).toBeTruthy();
+            expect(form.get('1')).not.toBe(krokodileControl);
         });
 
         it('should update array controls by key if it is specified', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
-            const krokodileControl = form.getControl('0');
-            const elephantControl = form.getControl('1');
+            const krokodileControl = form.get('0');
+            const elephantControl = form.get('1');
 
             form.setValue([elephant, krokodile]);
 
@@ -812,8 +812,8 @@ describe('VFormArray', () => {
         it('should update array controls in order if key is not specified', () => {
             const form = boxArrayFormBuilderWithoutKeys().build([krokodile, elephant]);
 
-            const krokodileControl = form.getControl('0');
-            const elephantControl = form.getControl('1');
+            const krokodileControl = form.get('0');
+            const elephantControl = form.get('1');
 
             form.setValue([elephant, krokodile]);
 

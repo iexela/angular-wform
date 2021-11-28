@@ -102,7 +102,7 @@ describe('basic', () => {
             expect(factory).toHaveBeenCalledWith(belarusToAustralia);
             expect(factory).toHaveBeenCalledTimes(1);
 
-            form.getControl('cost.price').setValue(99);
+            form.get('cost.price').setValue(99);
 
             expect(factory).toHaveBeenCalledWith({
                 ...belarusToAustralia,
@@ -125,7 +125,7 @@ describe('basic', () => {
             expect(factory).toHaveBeenCalledWith(belarusToAustralia);
             expect(factory).toHaveBeenCalledTimes(1);
 
-            form.getControl('time').setValue(120);
+            form.get('time').setValue(120);
 
             expect(factory).toHaveBeenCalledWith({
                 ...belarusToAustralia,
@@ -164,11 +164,11 @@ describe('basic', () => {
             expect(keyGenerator).toHaveBeenCalledWith(['tax', 'tax2'], [ 4, 5 ]);
             expect(keyGenerator).toHaveBeenCalledWith(['tax', 'tax2', 0], 4);
             expect(keyGenerator).toHaveBeenCalledWith(['tax', 'tax2', 1], 5);
-            expect(getLastFormNode(form.getControl('tax')!).key).toBe(1);
-            expect(getLastFormNode(form.getControl('tax.tax1')!).key).toBe(2);
-            expect(getLastFormNode(form.getControl('tax.tax2')!).key).toBe(3);
-            expect(getLastFormNode(form.getControl('tax.tax2.0')!).key).toBe(4);
-            expect(getLastFormNode(form.getControl('tax.tax2.1')!).key).toBe(5);
+            expect(getLastFormNode(form.get('tax')!).key).toBe(1);
+            expect(getLastFormNode(form.get('tax.tax1')!).key).toBe(2);
+            expect(getLastFormNode(form.get('tax.tax2')!).key).toBe(3);
+            expect(getLastFormNode(form.get('tax.tax2.0')!).key).toBe(4);
+            expect(getLastFormNode(form.get('tax.tax2.1')!).key).toBe(5);
             
         });
     });
@@ -214,11 +214,11 @@ describe('basic', () => {
                 }),
             })).build({});
 
-            expect(form.getControl('nested.arr.1.field').value).toBe('abc');
-            expect(() => form.getControl('a.b.c.0')).toThrowError(errorHasMessage('a.b.c.0'));
-            expect(() => form.getControl('unexisting')).toThrowError(errorHasMessage('unexisting'));
-            expect(() => form.getControl('0')).toThrowError(errorHasMessage('0'));
-            expect(() => form.getControl('nested.arr.1.field2')).toThrowError(errorHasMessage('nested.arr.1.field2'));
+            expect(form.get('nested.arr.1.field').value).toBe('abc');
+            expect(() => form.get('a.b.c.0')).toThrowError(errorHasMessage('a.b.c.0'));
+            expect(() => form.get('unexisting')).toThrowError(errorHasMessage('unexisting'));
+            expect(() => form.get('0')).toThrowError(errorHasMessage('0'));
+            expect(() => form.get('nested.arr.1.field2')).toThrowError(errorHasMessage('nested.arr.1.field2'));
         });
 
         it('"array reconcilation" should throw error if several items have the same key', () => {
@@ -322,7 +322,7 @@ describe('basic', () => {
                 }),
             })).build({});
 
-            const array = form.getControl('group.nested') as FormArray;
+            const array = form.get('group.nested') as FormArray;
 
             array.push(new FormControl());
 

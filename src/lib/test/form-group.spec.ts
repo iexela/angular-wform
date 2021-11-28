@@ -66,15 +66,15 @@ describe('VFormGroup', () => {
         it('should enable all internal controls, by default', () => {
             const form = renderGroup(parcel, {}, withWeightAndVolume(parcel));
 
-            expect(form.getControl('weight').disabled).toBeFalse();
-            expect(form.getControl('volume').disabled).toBeFalse();
+            expect(form.get('weight').disabled).toBeFalse();
+            expect(form.get('volume').disabled).toBeFalse();
         });
 
         it('should disable all internal controls if "disabled" is true', () => {
             const form = renderGroup(parcel, { disabled: true }, withWeightAndVolume(parcel));
 
-            expect(form.getControl('weight').disabled).toBeTrue();
-            expect(form.getControl('volume').disabled).toBeTrue();
+            expect(form.get('weight').disabled).toBeTrue();
+            expect(form.get('volume').disabled).toBeTrue();
         });
 
         it('should disable all internal controls if "disabled" is true (regardless internal controls disabled flag)', () => {
@@ -84,8 +84,8 @@ describe('VFormGroup', () => {
                 withWeightAndVolume(parcel, { disabled: false }, { disabled: false }),
             );
 
-            expect(form.getControl('weight').disabled).toBeTrue();
-            expect(form.getControl('volume').disabled).toBeTrue();
+            expect(form.get('weight').disabled).toBeTrue();
+            expect(form.get('volume').disabled).toBeTrue();
         });
 
         it('should leave "disabled" state for internal controls as they desire when "disabled" is false', () => {
@@ -95,8 +95,8 @@ describe('VFormGroup', () => {
                 withWeightAndVolume(parcel, { disabled: true }, { disabled: false }),
             );
 
-            expect(form.getControl('weight').disabled).toBeTrue();
-            expect(form.getControl('volume').disabled).toBeFalse();
+            expect(form.get('weight').disabled).toBeTrue();
+            expect(form.get('volume').disabled).toBeFalse();
         });
 
         describe('validator', () => {
@@ -257,22 +257,22 @@ describe('VFormGroup', () => {
             const form = renderGroup(parcel, {});
 
             expect(form.control.updateOn).toBe(VFormHooks.Change);
-            expect(form.getControl('volume').updateOn).toBe(VFormHooks.Change);
+            expect(form.get('volume').updateOn).toBe(VFormHooks.Change);
         });
 
         it('should allow to set updateOn flag', () => {
             const form = renderGroup(parcel, { updateOn: VFormHooks.Blur });
 
             expect(form.control.updateOn).toBe(VFormHooks.Blur);
-            expect(form.getControl('volume').updateOn).toBe(VFormHooks.Blur);
+            expect(form.get('volume').updateOn).toBe(VFormHooks.Blur);
         });
 
         it('should allow to redeclare updateOn flag on child level', () => {
             const form = renderGroup(parcel, { updateOn: VFormHooks.Blur }, withWeightAndVolume(parcel, {}, { updateOn: VFormHooks.Submit }));
 
             expect(form.control.updateOn).toBe(VFormHooks.Blur);
-            expect(form.getControl('weight').updateOn).toBe(VFormHooks.Blur);
-            expect(form.getControl('volume').updateOn).toBe(VFormHooks.Submit);
+            expect(form.get('weight').updateOn).toBe(VFormHooks.Blur);
+            expect(form.get('volume').updateOn).toBe(VFormHooks.Submit);
         });
     });
 
@@ -389,8 +389,8 @@ describe('VFormGroup', () => {
             form.setValue(parcel);
     
             expect(form.control.disabled).toBeTrue();
-            expect(form.getControl('weight').disabled).toBeTrue();
-            expect(form.getControl('volume').disabled).toBeTrue();
+            expect(form.get('weight').disabled).toBeTrue();
+            expect(form.get('volume').disabled).toBeTrue();
         });
 
         it('should switch state of control from disabled to enabled', () => {
@@ -401,8 +401,8 @@ describe('VFormGroup', () => {
             form.setValue(largeParcel);
     
             expect(form.control.disabled).toBeFalse();
-            expect(form.getControl('weight').disabled).toBeFalse();
-            expect(form.getControl('volume').disabled).toBeFalse();
+            expect(form.get('weight').disabled).toBeFalse();
+            expect(form.get('volume').disabled).toBeFalse();
         });
 
         it('should do nothing if disabled flag was not modified in vform tree', () => {
@@ -433,8 +433,8 @@ describe('VFormGroup', () => {
             form.setValue(parcel);
     
             expect(form.control.disabled).toBeTrue();
-            expect(form.getControl('weight').disabled).toBeTrue();
-            expect(form.getControl('volume').disabled).toBeTrue();
+            expect(form.get('weight').disabled).toBeTrue();
+            expect(form.get('volume').disabled).toBeTrue();
         });
 
         it('should respect "disabled" state of internal controls if "disabled" flag was switched to false', () => {
@@ -455,8 +455,8 @@ describe('VFormGroup', () => {
             form.setValue(largeParcel);
     
             expect(form.control.disabled).toBeFalse();
-            expect(form.getControl('weight').disabled).toBeTrue();
-            expect(form.getControl('volume').disabled).toBeFalse();
+            expect(form.get('weight').disabled).toBeTrue();
+            expect(form.get('volume').disabled).toBeFalse();
         });
 
         it('should switch state of internal controls (if any) if "disabled" flag is set to false', () => {
@@ -472,13 +472,13 @@ describe('VFormGroup', () => {
                     withWeightAndVolume(largeParcel, { disabled: true }, { disabled: false }),
                 ]);
     
-            expect(form.getControl('weight').disabled).toBeFalse();
-            expect(form.getControl('volume').disabled).toBeTrue();
+            expect(form.get('weight').disabled).toBeFalse();
+            expect(form.get('volume').disabled).toBeTrue();
     
             form.setValue(largeParcel);
     
-            expect(form.getControl('weight').disabled).toBeTrue();
-            expect(form.getControl('volume').disabled).toBeFalse();
+            expect(form.get('weight').disabled).toBeTrue();
+            expect(form.get('volume').disabled).toBeFalse();
         });
 
         describe('validator', () => {
@@ -721,14 +721,14 @@ describe('VFormGroup', () => {
                     },
                 ]);
     
-            expect(form.hasControl('weight')).toBeTrue();
-            expect(form.hasControl('volume')).toBeFalse();
+            expect(form.has('weight')).toBeTrue();
+            expect(form.has('volume')).toBeFalse();
             expect(form.value).toEqual({ weight: parcel.weight });
     
             form.setValue(largeParcel);
     
-            expect(form.hasControl('weight')).toBeTrue();
-            expect(form.hasControl('volume')).toBeTrue();
+            expect(form.has('weight')).toBeTrue();
+            expect(form.has('volume')).toBeTrue();
         });
 
         it('should remove control if it disappears from the vform description', () => {
@@ -749,14 +749,14 @@ describe('VFormGroup', () => {
                     },
                 ]);
     
-            expect(form.hasControl('weight')).toBeTrue();
-            expect(form.hasControl('volume')).toBeTrue();
+            expect(form.has('weight')).toBeTrue();
+            expect(form.has('volume')).toBeTrue();
             expect(form.value).toEqual(parcel);
             
             form.setValue(largeParcel);
             
-            expect(form.hasControl('weight')).toBeTrue();
-            expect(form.hasControl('volume')).toBeFalse();
+            expect(form.has('weight')).toBeTrue();
+            expect(form.has('volume')).toBeFalse();
             expect(form.value).toEqual({ weight: largeParcel.weight });
         });
 

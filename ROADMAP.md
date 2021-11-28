@@ -8,4 +8,3 @@
 15. Cover translator usage
 16. Write documentation
 18. Log console.debug/console.warn only in dev mode?
-19. Rename getControl to get

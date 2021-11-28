@@ -42,7 +42,7 @@ describe('VFormPortal', () => {
 
         form.connect('site', siteForm);
 
-        expect(form.getControl('portal').value).toBe(1);
+        expect(form.get('portal').value).toBe(1);
         expect(spy).toHaveBeenCalled();
     });
 
@@ -57,7 +57,7 @@ describe('VFormPortal', () => {
         
         form.setValue({ portal: 100 });
 
-        expect(form.getControl('portal').value).toBe(100);
+        expect(form.get('portal').value).toBe(100);
         expect(spy).toHaveBeenCalledWith(100);
     });
 
@@ -72,7 +72,7 @@ describe('VFormPortal', () => {
         
         form.update();
 
-        expect(form.getControl('portal').value).toBe(1);
+        expect(form.get('portal').value).toBe(1);
         expect(spy).toHaveBeenCalledWith(1);
     });
 
