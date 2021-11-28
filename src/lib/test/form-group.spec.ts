@@ -1,8 +1,8 @@
 import { fakeAsync, tick } from '@angular/core/testing';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
-import { getLastFormNode, vArray, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, VFormHooks, vGroup } from '..';
+import { FormControl, FormGroup } from '@angular/forms';
+import { getLastFormNode, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, VFormHooks, vGroup } from '..';
 import { vNative, vSkip } from '../basic';
-import { light, even, parcel, heavyParcel, largeParcel, heavyAndLargeParcel, moreThan10, Box, small, fragileParcel, parcelWithoutVolume, Flight, belarusToAustralia, belarusToRussia, smallAsync, lightAsync, createTaxControl, taxData, vTaxModel, elephant, mouse } from './test-mocks';
+import { belarusToAustralia, belarusToRussia, Box, createFlightVNode, createTaxControl, elephant, even, Flight, fragileParcel, heavyAndLargeParcel, heavyParcel, largeParcel, light, lightAsync, moreThan10, mouse, parcel, parcelWithoutVolume, small, smallAsync, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
 function withVolume(box: Box, options: VFormControlOptions = {}): VFormGroupChildren {
@@ -42,14 +42,7 @@ function renderDisabledConditionalGroup(initial: Box, anchor: number): VForm<Box
 }
 
 function flightFormBuilder(): VFormBuilder<Flight> {
-    return vForm((value: Flight) => vGroup(null, {
-        name: vControl(),
-        route: vArray(null, value.route.map(() => vControl())),
-        cost: vGroup(null, {
-            price: vControl(),
-            discount: vControl(),
-        }),
-    }))
+    return vForm(createFlightVNode);
 }
 
 describe('VFormGroup', () => {

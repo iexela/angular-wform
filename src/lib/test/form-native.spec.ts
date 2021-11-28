@@ -1,8 +1,8 @@
 import { fakeAsync, tick } from '@angular/core/testing';
-import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, FormControl } from '@angular/forms';
 import { getLastFormNode, vForm, VForm } from '..';
 import { VFormNativeOptions, vNative } from '../basic';
-import { belarusToAustralia, belarusToRussia, even, evenAsync, Flight, moreThan10, moreThan10Async, russiaToBelarus } from './test-mocks';
+import { belarusToRussia, createFlightForm, even, evenAsync, moreThan10, moreThan10Async, russiaToBelarus } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
 function renderControl(control: AbstractControl, options?: VFormNativeOptions): VForm<number> {
@@ -15,20 +15,6 @@ function renderConditionalControl(control: AbstractControl, anchor: number, opti
 
 function testControl(n: number): FormControl {
     return new FormControl(n);
-}
-
-function createFlightForm(flight: Flight): FormGroup {
-    return new FormGroup({
-        name: new FormControl(flight.name),
-        route: new FormArray([
-            new FormControl(flight.route[0]),
-            new FormControl(flight.route[1]),
-        ]),
-        cost: new FormGroup({
-            price: new FormControl(flight.cost.price),
-            discount: new FormControl(flight.cost.discount),
-        }),
-    });
 }
 
 describe('VFormNative', () => {

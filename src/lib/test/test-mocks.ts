@@ -1,5 +1,5 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
-import { vArray, vControl, vGroup, vValidator } from '..';
+import { vArray, vControl, vForm, VFormBuilder, VFormNode, vGroup, vValidator } from '..';
 import { vValidatorAsync } from '../validators';
 
 export const moreThan10 = vValidator(control => control.value <= 10 ? { min: true } : null);
@@ -130,4 +130,29 @@ export function createTaxControl(): AbstractControl {
         tax1: new FormControl(123),
         tax2: new FormArray([new FormControl(4), new FormControl(5)])
     })
+}
+
+export function createFlightVNode(value: Flight): VFormNode {
+    return vGroup(null, {
+        name: vControl(),
+        route: vArray(null, value.route.map(() => vControl())),
+        cost: vGroup(null, {
+            price: vControl(),
+            discount: vControl(),
+        }),
+    });
+}
+
+export function createFlightForm(flight: Flight): FormGroup {
+    return new FormGroup({
+        name: new FormControl(flight.name),
+        route: new FormArray([
+            new FormControl(flight.route[0]),
+            new FormControl(flight.route[1]),
+        ]),
+        cost: new FormGroup({
+            price: new FormControl(flight.cost.price),
+            discount: new FormControl(flight.cost.discount),
+        }),
+    });
 }

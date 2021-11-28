@@ -12,5 +12,4 @@
 16. Write documentation
 17. Think about swapping position of parameters in vGroup/vArray
 18. Log console.debug/console.warn only in dev mode?
-19. Both key and data should be form local
 20. Maybe it is a good decision to use value as key for vControls
