@@ -1,10 +1,11 @@
+import { AbstractControl } from '@angular/forms';
 import { Maybe } from './common';
 import { VEnvFormNodeFactory, VEnvFormNodeType, VFormEnvironment } from './env-model';
 import { VForm } from './form';
 import { VFormNode, VFormNodeFactory } from './model';
 import { VFormOptions, VValidationStrategy } from './reconcilation';
 import { VKeyGenerator } from './reconcilation/model';
-import { mapValues, pickBy } from './utils';
+import { calculateValue, mapValues, pickBy } from './utils';
 
 export interface VFormBuilderFactory {
     use<TNode>(env: VFormEnvironment<TNode>): VEnvFormBuilderFactory<TNode>;
@@ -58,6 +59,17 @@ export class VFormBuilder<T> {
                 ...this._options,
             },
             value,
+        );
+    }
+
+    attach<U extends T = T>(control: AbstractControl): VForm<U> {
+        return new VForm<U>(
+            this._factory,
+            {
+                ...this._options,
+            },
+            calculateValue(control),
+            control,
         );
     }
 }

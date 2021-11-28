@@ -1,7 +1,7 @@
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode, vArray, vControl, vForm, VFormNodeType, vGroup, VValidators } from '..';
 import { vNative, vSkip } from '../basic';
-import { belarusToAustralia, Box, createTaxControl, elephant, Flight, mouse, vTaxModel, vTaxModelWithKeys } from './test-mocks';
+import { belarusToAustralia, belarusToRussia, Box, createFlightForm, createFlightVNode, createTaxControl, elephant, Flight, mouse, russiaToBelarus, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
 const flightFactory = (value: Flight) => vGroup(null, {
     name: vControl(),
@@ -55,6 +55,39 @@ describe('basic', () => {
     
             expect(fn.calls.count()).toBe(1);
             expect(fn.calls.mostRecent().args[0]).toBe(1);
+        });
+    });
+
+    describe('attach', () => {
+        it('should attach existing reactive form to vform', () => {
+            const control = createFlightForm(belarusToRussia);
+
+            const form = vForm(createFlightVNode).attach(control);
+
+            expect(form.value).toEqual(belarusToRussia);
+            expect(form.control).toBe(control);
+            
+            form.setValue(russiaToBelarus);
+            
+            expect(form.value).toEqual(russiaToBelarus);
+            expect(form.control).toBe(control);
+
+            form.setValue(belarusToAustralia);
+
+            expect(form.value).toEqual(belarusToAustralia);
+            expect(form.control).toBe(control);
+        });
+
+        it('should leave builder in "strict" mode', () => {
+            const control = createFlightForm(belarusToRussia);
+
+            const form = vForm(createFlightVNode).attach(control);
+
+            const group = form.control as FormGroup;
+
+            group.setControl('tax', new FormControl(123));
+
+            expect(() => form.update()).toThrowError(errorHasMessage('strict'));
         });
     });
 

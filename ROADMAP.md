@@ -1,6 +1,5 @@
 3. Implement tests for native controls to test changing of vnode types
 4. Support of portals
-5. Attach to already built form
 7. Think how to simplify patch implementation
 8. Restore node from control when node does not exist
 9. Write real-world sample

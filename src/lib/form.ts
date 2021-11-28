@@ -36,13 +36,14 @@ export class VForm<T> {
         return this.control.invalid;
     }
 
-    constructor(factory: VFormNodeFactory<T>, options: VFormOptions, value: T) {
+    constructor(factory: VFormNodeFactory<T>, options: VFormOptions, value: T, base?: AbstractControl) {
         this._options = options;
 
         this._control$$ = new BehaviorSubject(reconcile({
-            options,
+            options: { ...options, strict: false },
             node: factory(value),
             value,
+            control: base,
         }));
 
         const nativeValueChanges = this._control$$.pipe(switchMap(control => control.valueChanges));
