@@ -121,7 +121,6 @@ export interface VFormNative extends VFormNodeBase {
 export interface VFormPortal {
     type: VFormNodeType.Portal;
     name: string;
-    value?: any;
 }
 
 export interface VFormPlaceholder {
@@ -133,6 +132,14 @@ export type VFormNode = VThisFormNode | VFormPortal;
 
 export interface VFormNodeFactory<T> {
     (value: T): VFormNode;
+}
+
+export interface VFormTranslator<TNode> {
+    (node: TNode): VFormNode;
+}
+
+export interface VTranslatedFormNodeFactory<T, TNode> {
+    (value: T): TNode;
 }
 
 export interface VFormPatcher {

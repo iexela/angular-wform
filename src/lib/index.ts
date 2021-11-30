@@ -11,16 +11,10 @@ export {
 
 export {
     VFormBuilder,
-    VEnvFormBuilderFactory as VEnvFormConstructor,
+    VTranslatedFormBuilderFactory as VEnvFormConstructor,
     VFormBuilderFactory as VFormConstructor,
     vForm,
 } from './builder';
-
-export {
-    VEnvFormNodeFactory,
-    VEnvFormNodeType,
-    VFormEnvironment
-} from './env-model';
 
 export {
     VForm,

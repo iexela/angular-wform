@@ -31,8 +31,6 @@ export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node
 }
 
 function processPortal(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormPortal, value: any, control?: AbstractControl): AbstractControl {
-    value = node.hasOwnProperty('value') ? node.value : value;
-    
     const form = ctx.portalHost.getForm(node.name);
     if (form == null) {
         throw Error(`Portal node is rendered when it is not bound to the vform: ${ctx.pathTo(name).join('.')}
