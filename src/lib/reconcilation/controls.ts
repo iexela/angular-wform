@@ -1,8 +1,8 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode } from '.';
-import { VFormNative, VFormPlaceholder, VFormPortal, VPathElement, VThisFormNode } from '..';
+import { VFormGroupChildren, VFormNative, VFormPlaceholder, VFormPortal, VPathElement, VThisFormNode } from '..';
 import { Maybe } from '../common';
-import { VFormArray, VFormControl, VFormGroup, VFormNode, VFormNodeType } from '../model';
+import { VFormArray, VFormArrayChildren, VFormControl, VFormGroup, VFormNode, VFormNodeType } from '../model';
 import { arrayDiff, getControlTypeName, hasField, isControlValue, mapValues, objectDiff, pickBy } from '../utils';
 import { getLastFormNodeOrNothing, registerRenderResult, registerRoot } from './registry';
 import { VRenderContext } from './render-context';
@@ -50,7 +50,7 @@ function processPortal(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFo
     return form.control;
 }
 
-function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNative, value: any): AbstractControl {
+function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNative<any>, value: any): AbstractControl {
     value = node.hasOwnProperty('value') ? node.value : value;
     
     const { control } = node;
@@ -87,7 +87,7 @@ function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFo
     return control;
 }
 
-function processControl(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormControl, value: any, control?: AbstractControl): AbstractControl {
+function processControl(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormControl<any>, value: any, control?: AbstractControl): AbstractControl {
     value = node.hasOwnProperty('value') ? node.value : value;
 
     if (!node || !control) {

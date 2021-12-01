@@ -12,7 +12,7 @@ export interface VFormBuilderFactory {
 }
 
 export interface VTranslatedFormBuilderFactory<TNode> {
-    <T>(factory: VTranslatedFormNodeFactory<T, TNode>): VFormBuilder<T>;
+    <TValue>(factory: VTranslatedFormNodeFactory<TValue, TNode>): VFormBuilder<TValue>;
 }
 
 function nilKeyGenerator(): undefined {
@@ -51,8 +51,8 @@ export class VFormBuilder<T> {
         return this;
     }
 
-    build<U extends T>(value: U): VForm<U> {
-        return new VForm(
+    build<U extends T>(value: U): VForm<T> {
+        return new VForm<T>(
             this._factory,
             {
                 ...this._options,
@@ -61,8 +61,8 @@ export class VFormBuilder<T> {
         );
     }
 
-    attach<U extends T = T>(control: AbstractControl): VForm<U> {
-        return new VForm<U>(
+    attach<U extends T>(control: AbstractControl): VForm<T> {
+        return new VForm<T>(
             this._factory,
             {
                 ...this._options,
@@ -73,14 +73,14 @@ export class VFormBuilder<T> {
     }
 }
 
-export function vForm<T>(factory: VFormNodeFactory<T>): VFormBuilder<T> {
+export function vForm<T = any>(factory: VFormNodeFactory<T>): VFormBuilder<T> {
     return new VFormBuilder(factory);
 }
 
 vForm.use = <TNode>(translator: VFormTranslator<TNode>): VTranslatedFormBuilderFactory<TNode> => {
-    function vEnvForm<T>(factory: VTranslatedFormNodeFactory<T, TNode>): VFormBuilder<T> {
-        return vForm(value => translator(factory(value)));
+    function vEnvForm<TValue>(factory: VTranslatedFormNodeFactory<TValue, TNode>): VFormBuilder<TValue> {
+        return vForm(value => translator(factory(value)) as any);
     }
     
-    return vEnvForm;
+    return vEnvForm as any;
 };

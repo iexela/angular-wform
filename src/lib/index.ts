@@ -1,9 +1,7 @@
 export {
     VFormArrayOptions,
-    VFormArrayChildren,
     VFormControlOptions,
     VFormGroupOptions,
-    VFormGroupChildren,
     vArray,
     vControl,
     vGroup,

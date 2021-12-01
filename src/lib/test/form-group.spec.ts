@@ -5,7 +5,7 @@ import { vNative, vPortal, vSkip } from '../basic';
 import { belarusToAustralia, belarusToRussia, Box, createFlightVNode, createTaxControl, elephant, even, Flight, fragileParcel, heavyAndLargeParcel, heavyParcel, largeParcel, light, lightAsync, moreThan10, mouse, parcel, parcelWithoutVolume, small, smallAsync, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
-function withVolume(box: Box, options: VFormControlOptions = {}): VFormGroupChildren {
+function withVolume(box: Box, options: VFormControlOptions<number> = {}): VFormGroupChildren {
     return withWeightAndVolume(box, {}, options);
 }
 
@@ -13,7 +13,7 @@ function withDisabledVolume(box: Box): VFormGroupChildren {
     return withVolume(box, { disabled: true });
 }
 
-function withWeightAndVolume(box: Box, weight?: VFormControlOptions, volume?: VFormControlOptions): VFormGroupChildren {
+function withWeightAndVolume(box: Box, weight?: VFormControlOptions<number>, volume?: VFormControlOptions<number>): VFormGroupChildren {
     return {
         weight: vControl(weight),
         volume: vControl(volume),

@@ -1,3 +1,9 @@
+1. Types
+1.1. Restore type of form value
+1.2. Do we need vValue?
+1.3. Think about typings of validators
+1.4. Think do we really need to type options
+1.5. Check that extra fields are validated
 3. Implement tests for controls to test changing of vnode types
 7. Think how to simplify patch implementation
 9. Write real-world sample

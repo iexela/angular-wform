@@ -97,7 +97,7 @@ export class VSampleStagedEnvironment implements VFormStagedEnvironment {
         this.visible.pop();
         return array;
     }
-    control(node: VEnvFormControl): VFormControl {
+    control(node: VEnvFormControl): VFormControl<any> {
         const visible = this.tryVisible(this.resolveBoolean(node.visible));
         return {
             type: VFormNodeType.Control,
@@ -109,7 +109,7 @@ export class VSampleStagedEnvironment implements VFormStagedEnvironment {
             },
         };
     }
-    native(node: VEnvFormNative): VFormNative {
+    native(node: VEnvFormNative): VFormNative<any> {
         return {
             type: VFormNodeType.Native,
             disabled: this.resolveBoolean(node.disabled),

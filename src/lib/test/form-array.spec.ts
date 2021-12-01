@@ -6,11 +6,11 @@ import { vValidatorAsync } from '../validators';
 import { Box, createTaxControl, elephant, even, krokodile, moreThan10, mouse, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
-function defaultItemRenderer<T>(value: T, index: number): VFormControlOptions {
+function defaultItemRenderer<T>(value: T, index: number): VFormControlOptions<T> {
     return { key: index, value };
 }
 
-function withItem<T>(items: T[], fn: (value: T, index: number) => VFormControlOptions = defaultItemRenderer): VFormArrayChildren {
+function withItem<T>(items: T[], fn: (value: T, index: number) => VFormControlOptions<T> = defaultItemRenderer): VFormArrayChildren {
     return (items || []).map((item, index) => vControl(fn(item, index)));
 }
 

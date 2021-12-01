@@ -1,7 +1,7 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn, Validators } from '@angular/forms';
 import { VAsyncValidatorNode, VFormNative, VFormNode, VFormPlaceholder, VFormPortal } from '.';
 import { Maybe, Nilable } from './common';
-import { VFormArray, VFormControl, VFormGroup, VFormNodeType, VValidatorNode } from './model';
+import { VFormArray, VFormArrayChildren, VFormControl, VFormGroup, VFormGroupChildren, VFormNodeType, VValidatorNode } from './model';
 import { arrayify } from './utils';
 import { andValidators, composeAsyncValidators, composeValidators, vValidator } from './validators';
 
@@ -13,16 +13,14 @@ type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator' | 'asyncValidator'>> 
     asyncValidator?: AnyAsyncValidator,
 };
 
-export type VFormControlOptions = MakeOptions<VFormControl> & { required?: boolean };
-export type VFormGroupOptions = Omit<MakeOptions<VFormGroup>, 'children'>;
-export type VFormGroupChildren = Record<string, VFormNode | VFormPlaceholder>;
-export type VFormArrayOptions = Omit<MakeOptions<VFormArray>, 'children'>;
-export type VFormArrayChildren = (VFormNode | VFormPlaceholder)[];
-export type VFormNativeOptions = Omit<MakeOptions<VFormNative>, 'control'>;
+export type VFormControlOptions<T> = MakeOptions<VFormControl<T>> & { required?: boolean };
+export type VFormGroupOptions = Omit<MakeOptions<VFormGroup<any>>, 'children'>;
+export type VFormArrayOptions = Omit<MakeOptions<VFormArray<any>>, 'children'>;
+export type VFormNativeOptions<T> = Omit<MakeOptions<VFormNative<T>>, 'control'>;
 
 const EMPTY_DATA = Object.freeze({});
 
-function createControlValidator(options: VFormControlOptions): Maybe<VValidatorNode> {
+function createControlValidator<T>(options: VFormControlOptions<T>): Maybe<VValidatorNode> {
     if (options.validator && options.required) {
         return andValidators(Validators.required, composeValidators(...arrayify(options.validator)));
     } else if (options.validator) {
@@ -41,7 +39,7 @@ function createAsyncValidator(validator?: AnyAsyncValidator): Maybe<VAsyncValida
     return validator ? composeAsyncValidators(...arrayify(validator)) : undefined;
 }
 
-export function vControl(options?: VFormControlOptions): VFormControl {
+export function vControl<T = any>(options?: VFormControlOptions<T>): VFormControl<T> {
     return {
         type: VFormNodeType.Control,
         disabled: false,
@@ -52,9 +50,9 @@ export function vControl(options?: VFormControlOptions): VFormControl {
     };
 }
 
-export function vGroup(children: VFormGroupChildren): VFormGroup;
-export function vGroup(options: VFormGroupOptions, children: VFormGroupChildren): VFormGroup;
-export function vGroup(optionsOrChildren?: VFormGroupOptions | VFormGroupChildren, childrenOrNil?: VFormGroupChildren): VFormGroup {
+export function vGroup<C extends VFormGroupChildren>(children: C): VFormGroup<C>;
+export function vGroup<C extends VFormGroupChildren>(options: VFormGroupOptions, children: C): VFormGroup<C>;
+export function vGroup(optionsOrChildren?: VFormGroupOptions | VFormGroupChildren, childrenOrNil?: VFormGroupChildren): VFormGroup<any> {
     const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as VFormGroupChildren || {});
     const options = childrenOrNil ? optionsOrChildren as VFormGroupOptions : undefined;
     return {
@@ -68,9 +66,9 @@ export function vGroup(optionsOrChildren?: VFormGroupOptions | VFormGroupChildre
     };
 }
 
-export function vArray(children: VFormArrayChildren): VFormArray;
-export function vArray(options: VFormArrayOptions, children: VFormArrayChildren): VFormArray;
-export function vArray(optionsOrChildren: VFormArrayOptions | VFormArrayChildren, childrenOrNil?: VFormArrayChildren): VFormArray {
+export function vArray<C extends VFormArrayChildren>(children: C): VFormArray<C>;
+export function vArray<C extends VFormArrayChildren>(options: VFormArrayOptions, children: C): VFormArray<C>;
+export function vArray(optionsOrChildren: VFormArrayOptions | VFormArrayChildren, childrenOrNil?: VFormArrayChildren): VFormArray<any> {
     const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as VFormArrayChildren || {});
     const options = childrenOrNil ? optionsOrChildren as VFormArrayOptions : undefined;
     return {
@@ -90,7 +88,7 @@ export function vSkip(): VFormPlaceholder {
     };
 }
 
-export function vNative(control?: AbstractControl, options?: VFormNativeOptions): VFormNative {
+export function vNative<T = any>(control?: AbstractControl, options?: VFormNativeOptions<T>): VFormNative<T> {
     return {
         type: VFormNodeType.Native,
         control,

@@ -5,11 +5,11 @@ import { VFormNativeOptions, vNative } from '../basic';
 import { belarusToRussia, createFlightForm, even, evenAsync, moreThan10, moreThan10Async, russiaToBelarus } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
-function renderControl(control: AbstractControl, options?: VFormNativeOptions): VForm<number> {
+function renderControl(control: AbstractControl, options?: VFormNativeOptions<number>): VForm<number> {
     return vForm(() => vNative(control, options)).build(control.value);
 }
 
-function renderConditionalControl(control: AbstractControl, anchor: number, optionsLess: VFormNativeOptions, optionsMore: VFormNativeOptions): VForm<number> {
+function renderConditionalControl(control: AbstractControl, anchor: number, optionsLess: VFormNativeOptions<number>, optionsMore: VFormNativeOptions<number>): VForm<number> {
     return vForm((value: number) => vNative(control, value < anchor ? optionsLess : optionsMore)).build(control.value);
 }
 

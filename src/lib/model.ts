@@ -97,25 +97,29 @@ export interface VFormNodeCreatedBase extends VFormNodeBase {
     updateOn?: VFormHooks;
 }
 
-export interface VFormControl extends VFormNodeCreatedBase {
+export interface VFormControl<T> extends VFormNodeCreatedBase {
     type: VFormNodeType.Control;
-    value?: any;
+    value?: T;
 }
 
-export interface VFormGroup extends VFormNodeCreatedBase {
+export type VFormGroupChildren = { [name: string]: VFormNode | VFormPlaceholder };
+
+export interface VFormGroup<C extends VFormGroupChildren = VFormGroupChildren> extends VFormNodeCreatedBase {
     type: VFormNodeType.Group;
-    children: Record<string, VFormNode | VFormPlaceholder>;
+    children: C;
 }
 
-export interface VFormArray extends VFormNodeCreatedBase {
+export type VFormArrayChildren = (VFormNode | VFormPlaceholder)[];
+
+export interface VFormArray<C extends VFormArrayChildren = VFormArrayChildren> extends VFormNodeCreatedBase {
     type: VFormNodeType.Array;
-    children: (VFormNode | VFormPlaceholder)[];
+    children: C;
 }
 
-export interface VFormNative extends VFormNodeBase {
+export interface VFormNative<T> extends VFormNodeBase {
     type: VFormNodeType.Native;
     control?: AbstractControl;
-    value?: any;
+    value?: T;
 }
 
 export interface VFormPortal {
@@ -127,7 +131,7 @@ export interface VFormPlaceholder {
     type: VFormNodeType.Placeholder;
 }
 
-export type VThisFormNode = VFormControl | VFormGroup | VFormArray | VFormNative;
+export type VThisFormNode = VFormGroup<any> | VFormArray<any> | VFormControl<any> | VFormNative<any>;
 export type VFormNode = VThisFormNode | VFormPortal;
 
 export interface VFormNodeFactory<T> {
@@ -138,8 +142,8 @@ export interface VFormTranslator<TNode> {
     (node: TNode): VFormNode;
 }
 
-export interface VTranslatedFormNodeFactory<T, TNode> {
-    (value: T): TNode;
+export interface VTranslatedFormNodeFactory<TValue, TNode> {
+    (value: TValue): TNode;
 }
 
 export interface VFormPatcher {

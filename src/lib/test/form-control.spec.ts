@@ -3,11 +3,11 @@ import { andTick, trackControl } from './test-utils';
 import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
 import { fakeAsync, tick } from '@angular/core/testing';
 
-function renderNumber(n: number, options?: VFormControlOptions): VForm<number> {
+function renderNumber(n: number, options?: VFormControlOptions<number>): VForm<number> {
     return vForm(() => vControl(options)).build(n);
 }
 
-function renderConditionalNumber(initial: number, anchor: number, optionsLess: VFormControlOptions, optionsMore: VFormControlOptions): VForm<number> {
+function renderConditionalNumber(initial: number, anchor: number, optionsLess: VFormControlOptions<number>, optionsMore: VFormControlOptions<number>): VForm<number> {
     return vForm((value: number) => vControl(value < anchor ? optionsLess : optionsMore)).build(initial);
 }
 
