@@ -823,7 +823,7 @@ describe('VFormGroup', () => {
         });
 
         it('should add portal control, if it was connected', () => {
-            const weightForm = vForm((weight: number) => vControl()).build(elephant.weight);
+            const weightForm = vForm(() => vControl()).build(elephant.weight);
             const form = vForm((current: Box) => vGroup({
                 name: vControl(),
                 weight: vPortal('weight'),
@@ -837,7 +837,7 @@ describe('VFormGroup', () => {
         });
 
         it('should remove portal control, if it was disconnected', () => {
-            const weightForm = vForm((weight: number) => vControl()).build(elephant.weight);
+            const weightForm = vForm(() => vControl()).build(elephant.weight);
             const form = vForm((current: Box) => vGroup({
                 name: vControl(),
                 weight: vPortal('weight'),

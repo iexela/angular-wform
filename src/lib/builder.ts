@@ -1,5 +1,5 @@
 import { AbstractControl } from '@angular/forms';
-import { VFormTranslator, VTranslatedFormNodeFactory } from '.';
+import { ExtractFormValue, VFormNode, VFormTranslator, VTranslatedFormNodeFactory } from '.';
 import { VForm } from './form';
 import { VFormNodeFactory } from './model';
 import { VFormOptions, VValidationStrategy } from './reconcilation';
@@ -8,7 +8,7 @@ import { calculateValue } from './utils';
 
 export interface VFormBuilderFactory {
     use<TNode>(env: VFormTranslator<TNode>): VTranslatedFormBuilderFactory<TNode>;
-    <T>(factory: VFormNodeFactory<T>): VFormBuilder<T>;
+    <TValue = any, TFormNode extends VFormNode = VFormNode>(factory: VFormNodeFactory<TValue, TFormNode>): VFormBuilder<ExtractFormValue<TValue, TFormNode>>;
 }
 
 export interface VTranslatedFormBuilderFactory<TNode> {
@@ -27,7 +27,7 @@ export class VFormBuilder<T> {
         strict: true,
     }
 
-    constructor(private _factory: VFormNodeFactory<T>) {
+    constructor(private _factory: VFormNodeFactory<T, VFormNode>) {
     }
 
     validationStrategy(strategy: VValidationStrategy): this {
@@ -61,7 +61,7 @@ export class VFormBuilder<T> {
         );
     }
 
-    attach<U extends T>(control: AbstractControl): VForm<T> {
+    attach(control: AbstractControl): VForm<T> {
         return new VForm<T>(
             this._factory,
             {
@@ -73,7 +73,7 @@ export class VFormBuilder<T> {
     }
 }
 
-export function vForm<T = any>(factory: VFormNodeFactory<T>): VFormBuilder<T> {
+export function vForm<TValue = any, TFormNode extends VFormNode = VFormNode>(factory: VFormNodeFactory<ExtractFormValue<TValue, TFormNode>, TFormNode>): VFormBuilder<ExtractFormValue<TValue, TFormNode>> {
     return new VFormBuilder(factory);
 }
 

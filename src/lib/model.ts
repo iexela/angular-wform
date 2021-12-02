@@ -134,8 +134,8 @@ export interface VFormPlaceholder {
 export type VThisFormNode = VFormGroup<any> | VFormArray<any> | VFormControl<any> | VFormNative<any>;
 export type VFormNode = VThisFormNode | VFormPortal;
 
-export interface VFormNodeFactory<T> {
-    (value: T): VFormNode;
+export interface VFormNodeFactory<TValue, TFormNode extends VFormNode> {
+    (value: TValue): TFormNode;
 }
 
 export interface VFormTranslator<TNode> {
@@ -146,7 +146,7 @@ export interface VTranslatedFormNodeFactory<TValue, TNode> {
     (value: TValue): TNode;
 }
 
-export interface VFormPatcher {
+export interface VFormNodePatcher {
     (control: AbstractControl): VFormNode;
 }
 
@@ -158,3 +158,49 @@ export function isAsyncValidatorNode(value: any): value is VAsyncValidatorNode {
     return !!VAsyncValidatorNodeType[value['type']];
 }
 
+type ArrayItemOf<T> = T extends (infer R)[] ? R : never;
+
+type OptionalKeys<T> = { [P in keyof T]-?: undefined extends T[P] ? P : never }[keyof T];
+type RequiredKeys<T> = Exclude<keyof T, OptionalKeys<T>>;
+
+type RestoreKeys<TSource, TDestination> = {
+    [P in RequiredKeys<TSource> & (keyof TDestination)]: TDestination[P];
+} & {
+    [P in OptionalKeys<TSource> & (keyof TDestination)]?: TDestination[P];
+};
+
+type FormGroupValueOf<TValue extends object, TFormGroupChildren extends VFormGroupChildren> = RestoreKeys<TValue, {
+    [P in (keyof TFormGroupChildren & keyof TValue)]: ExtractFormValue<Exclude<TValue[P], undefined>, TFormGroupChildren[P]>;
+}>;
+
+type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends VFormArrayChildren> =
+    ExtractFormValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+
+export type ExtractFormValue<TValue, TFormNode> =
+    TFormNode extends VFormGroup<infer RGroupChildren>
+        ? (TValue extends object ? FormGroupValueOf<TValue, RGroupChildren> : never)
+        : (TFormNode extends VFormArray<infer RArrayChildren>
+            ? (TValue extends any[] ? FormArrayValueOf<TValue, RArrayChildren> : never)
+            : (TFormNode extends (VFormControl<any> | VFormNative<any> | VFormPortal | VFormPlaceholder)
+                ? TValue
+                : never));
+
+
+// export type ExtractFormValue2<TValue, TFormNode> =
+//     TFormNode extends VFormGroup<infer RGroupChildren>
+//         ? (TValue extends object ? FormGroupValueOf<TValue, RGroupChildren> : VError)
+//         : (TFormNode extends VFormArray<infer RArrayChildren>
+//             ? (TValue extends any[] ? FormArrayValueOf<TValue, RArrayChildren> : VError)
+//             : (TFormNode extends (VFormControl<any> | VFormNative<any> | VFormPortal)
+//                 ? TValue
+//                 : VError))
+
+// type Sample = ExtractFormValue2<{ a: [1, 2] }, VFormGroup<{ a: VFormArray<VFormControl<any>[]> }>>;
+
+// function someValue(): any {
+
+// }
+
+// const a: Sample = someValue();
+
+// console.log(a.a[0].toString(10));

@@ -65,7 +65,7 @@ export const krokodile = {
     volume: 120,
 };
 
-export const elephant = {
+export const elephant: Box = {
     name: 'elephant',
     weight: 1000,
     volume: 1100,
@@ -132,7 +132,7 @@ export function createTaxControl(): AbstractControl {
     })
 }
 
-export function createFlightVNode(value: Flight): VFormNode {
+export function createFlightVNode(value: Flight) {
     return vGroup({
         name: vControl(),
         route: vArray(value.route.map(() => vControl())),

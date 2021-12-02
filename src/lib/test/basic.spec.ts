@@ -147,7 +147,7 @@ describe('basic', () => {
 
         it('key generator generates key for each restored control', () => {
             const keyGenerator = jasmine.createSpy().and.returnValues([1, 2, 3, 4, 5]);
-            const form = vForm((flag) =>
+            const form = vForm<boolean>((flag) =>
                 vGroup(flag
                         ? { abc: vTaxModel, tax: vTaxModelWithKeys }
                         : { abc: vTaxModel }),
@@ -247,7 +247,7 @@ describe('basic', () => {
         });
 
         it('"reconcilation of VFormControl" should throw error if type of vnode is different', () => {
-            const form = vForm((flag: boolean) => vGroup({
+            const form = vForm<boolean>((flag: boolean) => vGroup({
                 group: vGroup({
                     nested: vArray([
                         vControl({ key: 1 }),
@@ -265,7 +265,7 @@ describe('basic', () => {
         });
 
         it('"reconcilation of VFormGroup" should throw error if type of vnode is different', () => {
-            const form = vForm((flag: boolean) => vGroup({
+            const form = vForm<boolean>((flag: boolean) => vGroup({
                 group: vGroup({
                     nested: vArray([
                         vControl({ key: 1 }),
@@ -283,7 +283,7 @@ describe('basic', () => {
         });
 
         it('"reconcilation of VFormArray" should throw error if type of vnode is different', () => {
-            const form = vForm((flag: boolean) => vGroup({
+            const form = vForm<boolean>((flag: boolean) => vGroup({
                 group: vGroup({
                     nested: vArray([
                         vControl({ key: 1 }),
@@ -356,7 +356,7 @@ describe('basic', () => {
         });
 
         it('"reconcilation operation" should throw error if child of group is nil', () => {
-            const form = vForm((flag: boolean) => vGroup({
+            const form = vForm<boolean>((flag: boolean) => vGroup({
                 group: vGroup({
                     nested: flag ? null as any : vControl({ key: 2 }),
                 }),
@@ -378,7 +378,7 @@ describe('basic', () => {
         });
 
         it('"reconcilation operation" should throw error if child of array is nil', () => {
-            const form = vForm((flag: boolean) => vGroup({
+            const form = vForm<boolean>((flag: boolean) => vGroup({
                 group: vGroup({
                     nested: vArray([
                         vControl({ key: 1 }),

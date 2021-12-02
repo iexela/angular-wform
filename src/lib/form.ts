@@ -3,14 +3,14 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 import { ProcedureFn } from './common';
-import { VFormNodeFactory, VFormPatcher as VFormNodePatcher } from './model';
+import { VFormNode, VFormNodeFactory, VFormNodePatcher } from './model';
 import { VPortalHost } from './portal-host';
 import { reconcile, VFormOptions, VReconcilationRequest } from './reconcilation';
 import { calculateValue } from './utils';
 
 export class VForm<T> {
     private _control$$: BehaviorSubject<AbstractControl>;
-    private _factory: VFormNodeFactory<T>;
+    private _factory: VFormNodeFactory<T, VFormNode>;
     private _options: VFormOptions;
     private _reconcilationInProgress$$ = new BehaviorSubject(false);
     private _portalHost = new VPortalHost();
@@ -38,13 +38,13 @@ export class VForm<T> {
         return this.control.invalid;
     }
 
-    constructor(factory: VFormNodeFactory<T>, options: VFormOptions, value: T, base?: AbstractControl) {
+    constructor(factory: VFormNodeFactory<T, VFormNode>, options: VFormOptions, value: T, base?: AbstractControl) {
         this._options = options;
 
         this._control$$ = new BehaviorSubject(reconcile({
             options: { ...options, strict: false },
             portalHost: this._portalHost,
-            node: factory(value),
+            node: factory(value) as any,
             value,
             control: base,
         }));
@@ -75,7 +75,7 @@ export class VForm<T> {
         this._reconcile({
             options: this._options,
             portalHost: this._portalHost,
-            node: this._factory(value),
+            node: this._factory(value) as any,
             control: this.control,
             value,
         });
@@ -148,7 +148,7 @@ export class VForm<T> {
         this._reconcile({
             options: this._options,
             portalHost: this._portalHost,
-            node: this._factory(value),
+            node: this._factory(value) as any,
             control: this.control,
             value,
         });

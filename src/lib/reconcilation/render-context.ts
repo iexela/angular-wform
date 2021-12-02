@@ -1,9 +1,8 @@
-import { VFormArrayChildren, VPathElement } from '../model';
+import { VFormNode, VFormNodeType, VFormPlaceholder, VPathElement } from '../model';
 import { Maybe } from '../common';
 import { VFormArray, VFormGroup } from '../model';
 import { VFormOptions } from '../reconcilation';
 import { VPortalHost } from '../portal-host';
-import { VFormGroupChildren, VFormNode, VFormNodeType, VFormPatcher, VFormPlaceholder } from '..';
 
 export class VRenderContext {
     validatorsChanged = false;
