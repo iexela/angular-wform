@@ -244,7 +244,7 @@ describe('VFormNative', () => {
     
             const tracker = trackControl(form.control);
     
-            form.setValue({ ...belarusToRussia, tax: 123 } as any);
+            form.setValue({ ...belarusToRussia, tax: 123 });
     
             expect(tracker.changed).toBeFalse();
         });

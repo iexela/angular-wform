@@ -212,7 +212,7 @@ describe('VFormArray', () => {
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
-            expect(form.value as any).toEqual([10, 20]);
+            expect(form.value).toEqual([10, 20]);
             expect(array.length).toBe(2);
         });
 
@@ -224,7 +224,7 @@ describe('VFormArray', () => {
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
-            expect(form.value as any).toEqual([10, 20]);
+            expect(form.value).toEqual([10, 20]);
             expect(array.length).toBe(2);
         });
 
@@ -237,7 +237,7 @@ describe('VFormArray', () => {
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
-            expect(form.value as any).toEqual([999, 10, 20]);
+            expect(form.value).toEqual([999, 10, 20]);
             expect(array.length).toBe(3);
         });
 
@@ -249,7 +249,7 @@ describe('VFormArray', () => {
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
-            expect(form.value as any).toEqual([10, 20]);
+            expect(form.value).toEqual([10, 20]);
             expect(array.length).toBe(2);
         });
 
@@ -906,7 +906,7 @@ describe('VFormArray', () => {
             form.connect('start', startForm);
 
             const array = form.control as FormArray;
-            expect(form.value as any).toEqual([999, 10, 20]);
+            expect(form.value).toEqual([999, 10, 20]);
             expect(array.length).toBe(3);
             expect(array.at(0)).toBe(startForm.control);
         });
@@ -923,7 +923,7 @@ describe('VFormArray', () => {
             form.disconnect('start');
 
             const array = form.control as FormArray;
-            expect(form.value as any).toEqual([10, 20]);
+            expect(form.value).toEqual([10, 20]);
             expect(array.length).toBe(2);
         });
 

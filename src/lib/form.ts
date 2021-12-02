@@ -44,7 +44,7 @@ export class VForm<T> {
         this._control$$ = new BehaviorSubject(reconcile({
             options: { ...options, strict: false },
             portalHost: this._portalHost,
-            node: factory(value) as any,
+            node: factory(value),
             value,
             control: base,
         }));
@@ -75,7 +75,7 @@ export class VForm<T> {
         this._reconcile({
             options: this._options,
             portalHost: this._portalHost,
-            node: this._factory(value) as any,
+            node: this._factory(value),
             control: this.control,
             value,
         });
@@ -148,7 +148,7 @@ export class VForm<T> {
         this._reconcile({
             options: this._options,
             portalHost: this._portalHost,
-            node: this._factory(value) as any,
+            node: this._factory(value),
             control: this.control,
             value,
         });

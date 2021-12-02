@@ -239,7 +239,7 @@ describe('basic', () => {
                 group: vGroup({
                     nested: vArray([
                         vControl({ key: 1 }),
-                        { type: 100 } as any,
+                        { type: 100 },
                         vControl({ key: 2 }),
                     ]),
                 }),
@@ -338,7 +338,7 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if root node is a portal', () => {
-            expect(() => vForm(() => vPortal('name') as any).build(1)).toThrowError();
+            expect(() => vForm(() => vPortal('name')).build(1)).toThrowError();
         });
 
         it('"reconcilation operation" should throw error if root node is nil', () => {

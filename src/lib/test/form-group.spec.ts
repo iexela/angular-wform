@@ -206,7 +206,7 @@ describe('VFormGroup', () => {
                 volume: vControl(),
             })).build(elephant);
 
-            expect(form.value as any).toEqual({
+            expect(form.value).toEqual({
                 name: elephant.name,
                 volume: elephant.volume,
             });
@@ -220,7 +220,7 @@ describe('VFormGroup', () => {
                 volume: vControl(),
             })).build(elephant);
 
-            expect(form.value as any).toEqual({
+            expect(form.value).toEqual({
                 name: elephant.name,
                 volume: elephant.volume,
             });
@@ -246,7 +246,7 @@ describe('VFormGroup', () => {
                 volume: vControl(),
             })).build(elephant);
 
-            expect(form.value as any).toEqual({
+            expect(form.value).toEqual({
                 name: elephant.name,
                 volume: elephant.volume,
             });
@@ -797,7 +797,7 @@ describe('VFormGroup', () => {
             })).build(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
-            expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume } as any);
+            expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume });
             
             form.setValue(elephant);
 
@@ -819,7 +819,7 @@ describe('VFormGroup', () => {
             form.setValue(mouse);
             
             expect(form.control.get('weight')).toBeFalsy();
-            expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume } as any);
+            expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume });
         });
 
         it('should add portal control, if it was connected', () => {
@@ -847,7 +847,7 @@ describe('VFormGroup', () => {
             form.connect('weight', weightForm);
             form.disconnect('weight');
 
-            expect(form.value as any).toEqual({
+            expect(form.value).toEqual({
                 name: elephant.name,
                 volume: elephant.volume,
             });
