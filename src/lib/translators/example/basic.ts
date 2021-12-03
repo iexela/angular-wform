@@ -4,27 +4,27 @@ import { Maybe } from 'src/lib/common';
 import { arrayify } from '../../utils';
 import { composeAsyncValidators, composeValidators } from '../../validators';
 import { toCondition, whenAll } from './conditions';
-import { VEnvFormArray, VEnvFormControl, VEnvFormGroup, VEnvFormNative, VEnvFormNode, VEnvFormNodeType, VEnvFormOptions, VEnvFormPlaceholder, VEnvFormPortal, VEnvPredicate } from './model';
+import { FormSampleArray, FormSampleControl, FormSampleGroup, FormSampleNative, FormSampleNode, FormSampleNodeType, FormSampleNoOptionsNoOptions, FormSampleOptions, FormSamplePlaceholder, FormSamplePortal, SampleEnvironmentPredicate } from './model';
 
 type AnyValidator = ValidatorFn | VValidatorNode | (ValidatorFn | VValidatorNode)[];
 type AnyAsyncValidator = AsyncValidatorFn | VAsyncValidatorNode | (AsyncValidatorFn | VAsyncValidatorNode)[];
 
 type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator' | 'asyncValidator' | 'disabled' | 'visible'>> & {
-    disabled?: VFlag;
-    visible?: VFlag;
+    disabled?: SampleEnvironmentFlag;
+    visible?: SampleEnvironmentFlag;
     validator?: AnyValidator,
     asyncValidator?: AnyAsyncValidator,
 };
 
-export type VFlag = boolean | VEnvPredicate | (VEnvPredicate | boolean)[];
+export type SampleEnvironmentFlag = boolean | SampleEnvironmentPredicate | (SampleEnvironmentPredicate | boolean)[];
 
-export type VEnvFormControlOptions = Omit<MakeOptions<VEnvFormControl>, 'required'> & { required?: VFlag };
-export type VEnvFormGroupOptions = Omit<MakeOptions<VEnvFormGroup>, 'children'>;
-export type VEnvFormGroupChildren = Record<string, VEnvFormNode | VEnvFormPlaceholder>;
-export type VEnvFormArrayOptions = Omit<MakeOptions<VEnvFormArray>, 'children'>;
-export type VEnvFormArrayChildren = (VEnvFormNode | VEnvFormPlaceholder)[];
-export type VEnvFormNativeOptions = Omit<MakeOptions<VEnvFormNative>, 'control'>;
-export type VEnvFormOptionsOptions = Omit<VEnvFormOptions, 'type' | 'child'>;
+export type FormSampleControlOptions<T> = Omit<MakeOptions<FormSampleControl<T>>, 'required'> & { required?: SampleEnvironmentFlag };
+export type FormSampleGroupOptions = Omit<MakeOptions<FormSampleGroup<any>>, 'children'>;
+export type FormSampleGroupChildren = Record<string, FormSampleNode | FormSamplePlaceholder>;
+export type FormSampleArrayOptions = Omit<MakeOptions<FormSampleArray<any>>, 'children'>;
+export type FormSampleArrayChildren = (FormSampleNode | FormSamplePlaceholder)[];
+export type FormSampleNativeOptions<T> = Omit<MakeOptions<FormSampleNative<T>>, 'control'>;
+export type FormSampleOptionsOptions = Omit<FormSampleOptions<any>, 'type' | 'child'>;
 
 function createValidator(validator?: AnyValidator): Maybe<VValidatorNode> {
     return validator ? composeValidators(...arrayify(validator)) : undefined;
@@ -34,7 +34,7 @@ function createAsyncValidator(validator?: AnyAsyncValidator): Maybe<VAsyncValida
     return validator ? composeAsyncValidators(...arrayify(validator)) : undefined;
 }
 
-function resolveFlag(flag: Maybe<VFlag>, defaultValue: boolean): VEnvPredicate {
+function resolveFlag(flag: Maybe<SampleEnvironmentFlag>, defaultValue: boolean): SampleEnvironmentPredicate {
     if (typeof flag === 'function') {
         return flag;
     } else if (typeof flag === 'boolean') {
@@ -46,22 +46,22 @@ function resolveFlag(flag: Maybe<VFlag>, defaultValue: boolean): VEnvPredicate {
     return toCondition(defaultValue);
 }
 
-export function vEnvRoot(options: VEnvFormOptionsOptions & VEnvFormGroupOptions, children: VEnvFormGroupChildren): VEnvFormOptions {
+export function vEnvRoot<C extends FormSampleGroupChildren, G extends FormSampleGroup<C>>(options: FormSampleOptionsOptions & FormSampleGroupOptions, children: C): FormSampleOptions<G> {
     const { mode, ...groupOptions } = options;
-    return vEnvOptions({ mode }, vEnvGroup(groupOptions, children));
+    return vEnvOptions({ mode }, vEnvGroup(groupOptions, children)) as FormSampleOptions<G>;
 }
 
-export function vEnvOptions(options: VEnvFormOptionsOptions, node: VEnvFormNode): VEnvFormOptions {
+export function vEnvOptions<C extends FormSampleNoOptionsNoOptions>(options: FormSampleOptionsOptions, node: C): FormSampleOptions<C> {
     return {
-        type: VEnvFormNodeType.Options,
+        type: FormSampleNodeType.Options,
         ...options,
         child: node,
     };
 }
 
-export function vEnvControl(options?: VEnvFormControlOptions): VEnvFormControl {
+export function vEnvControl<T = any>(options?: FormSampleControlOptions<T>): FormSampleControl<T> {
     return {
-        type: VEnvFormNodeType.Control,
+        type: FormSampleNodeType.Control,
         ...options,
         visible: resolveFlag(options?.visible, true),
         disabled: resolveFlag(options?.disabled, false),
@@ -71,13 +71,13 @@ export function vEnvControl(options?: VEnvFormControlOptions): VEnvFormControl {
     };
 }
 
-export function vEnvGroup(children: VEnvFormGroupChildren): VEnvFormGroup;
-export function vEnvGroup(options: VEnvFormGroupOptions, children: VEnvFormGroupChildren): VEnvFormGroup;
-export function vEnvGroup(optionsOrChildren?: VEnvFormGroupOptions | VEnvFormGroupChildren, childrenOrNil?: VEnvFormGroupChildren): VEnvFormGroup {
-    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as VEnvFormGroupChildren || {});
-    const options = childrenOrNil ? optionsOrChildren as VEnvFormGroupOptions : undefined;
+export function vEnvGroup<C extends FormSampleGroupChildren>(children: C): FormSampleGroup<C>;
+export function vEnvGroup<C extends FormSampleGroupChildren>(options: FormSampleGroupOptions, children: C): FormSampleGroup<C>;
+export function vEnvGroup(optionsOrChildren?: FormSampleGroupOptions | FormSampleGroupChildren, childrenOrNil?: FormSampleGroupChildren): FormSampleGroup<any> {
+    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as FormSampleGroupChildren || {});
+    const options = childrenOrNil ? optionsOrChildren as FormSampleGroupOptions : undefined;
     return {
-        type: VEnvFormNodeType.Group,
+        type: FormSampleNodeType.Group,
         ...options,
         visible: resolveFlag(options?.visible, true),
         disabled: resolveFlag(options?.disabled, false),
@@ -87,13 +87,13 @@ export function vEnvGroup(optionsOrChildren?: VEnvFormGroupOptions | VEnvFormGro
     };
 }
 
-export function vEnvArray(children: VEnvFormArrayChildren): VEnvFormArray;
-export function vEnvArray(options: VEnvFormArrayOptions, children: VEnvFormArrayChildren): VEnvFormArray;
-export function vEnvArray(optionsOrChildren: VEnvFormArrayOptions | VEnvFormArrayChildren, childrenOrNil?: VEnvFormArrayChildren): VEnvFormArray {
-    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as VEnvFormArrayChildren || {});
-    const options = childrenOrNil ? optionsOrChildren as VEnvFormArrayOptions : undefined;
+export function vEnvArray<C extends FormSampleArrayChildren>(children: C): FormSampleArray<C>;
+export function vEnvArray<C extends FormSampleArrayChildren>(options: FormSampleArrayOptions, children: C): FormSampleArray<C>;
+export function vEnvArray(optionsOrChildren: FormSampleArrayOptions | FormSampleArrayChildren, childrenOrNil?: FormSampleArrayChildren): FormSampleArray<any> {
+    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as FormSampleArrayChildren || {});
+    const options = childrenOrNil ? optionsOrChildren as FormSampleArrayOptions : undefined;
     return {
-        type: VEnvFormNodeType.Array,
+        type: FormSampleNodeType.Array,
         ...options,
         visible: resolveFlag(options?.visible, true),
         disabled: resolveFlag(options?.disabled, false),
@@ -103,15 +103,15 @@ export function vEnvArray(optionsOrChildren: VEnvFormArrayOptions | VEnvFormArra
     };
 }
 
-export function vEnvSkip(): VEnvFormPlaceholder {
+export function vEnvSkip(): FormSamplePlaceholder {
     return {
-        type: VEnvFormNodeType.Placeholder,
+        type: FormSampleNodeType.Placeholder,
     };
 }
 
-export function vEnvNative(control?: AbstractControl, options?: VEnvFormNativeOptions): VEnvFormNative {
+export function vEnvNative<T = any>(control?: AbstractControl, options?: FormSampleNativeOptions<T>): FormSampleNative<T> {
     return {
-        type: VEnvFormNodeType.Native,
+        type: FormSampleNodeType.Native,
         control,
         ...options,
         visible: resolveFlag(options?.visible, true),
@@ -121,9 +121,9 @@ export function vEnvNative(control?: AbstractControl, options?: VEnvFormNativeOp
     };
 }
 
-export function vEnvPortal(name: string): VEnvFormPortal {
+export function vEnvPortal(name: string): FormSamplePortal {
     return {
-        type: VEnvFormNodeType.Portal,
+        type: FormSampleNodeType.Portal,
         name,
     };
 }

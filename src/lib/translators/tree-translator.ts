@@ -1,16 +1,16 @@
-import { VFormArray, VFormControl, VFormGroup, VFormNode, VFormNodeType, VFormPlaceholder, VFormTranslator } from '..';
-import { Maybe } from '../common';
+import { VFormNode, VFormNodeType, VFormPlaceholder } from '../model';
+import { Maybe, TransformFn } from '../common';
 import { mapValues, pickBy } from '../utils';
-import { VEnvFormNode, VEnvFormOptions, VEnvFormPortal } from './example/model';
 
-export enum VStagedFormNodeType {
+export enum VFormTreeNodeType {
     Control, Group, Array, Native, Portal, Placeholder, Options
 }
-export interface VFormStagedEnvironment {
+
+export interface VFormTreeVisitor {
     begin(): void;
     end(): void;
 
-    resolveType(node: any): VStagedFormNodeType;
+    resolveType(node: any): VFormTreeNodeType;
     
     beginOptions(node: any): void;
     optionsChild(node: any): any;
@@ -31,10 +31,10 @@ export interface VFormStagedEnvironment {
     portal(node: any): VFormNode;
 }
 
-export function buildStagedTranslator(env: VFormStagedEnvironment): VFormTranslator<VEnvFormNode | VEnvFormPortal | VEnvFormOptions> {
+export function buildTreeTranslator(env: VFormTreeVisitor): TransformFn<any, VFormNode> {
     return rootNode => {
         env.begin();
-        const node = mapStagedNode(rootNode) as VFormNode;
+        const node = translateNode(rootNode) as VFormNode;
         env.end();
 
         if (!node) {
@@ -44,37 +44,37 @@ export function buildStagedTranslator(env: VFormStagedEnvironment): VFormTransla
         return node;
     };
 
-    function mapStagedNode(node: any): Maybe<VFormNode | VFormPlaceholder> {
+    function translateNode(node: any): Maybe<VFormNode | VFormPlaceholder> {
         const type = env.resolveType(node);
         switch (type) {
-            case VStagedFormNodeType.Options:
+            case VFormTreeNodeType.Options:
                 env.beginOptions(node);
-                const nextNode = mapStagedNode(env.optionsChild(node));
+                const nextNode = translateNode(env.optionsChild(node));
                 env.endOptions(node);
                 return nextNode;
-            case VStagedFormNodeType.Array:
+            case VFormTreeNodeType.Array:
                 env.beginArray(node);
                 return env.endArray(node, env.arrayChildren(node)
-                    .map(mapStagedNode)
+                    .map(translateNode)
                     .filter(Boolean) as VFormNode[]);
-            case VStagedFormNodeType.Group:
+            case VFormTreeNodeType.Group:
                 env.beginGroup(node);
                 const children = pickBy(
                     mapValues(
                         env.groupChildren(node),
-                        mapStagedNode),
+                        translateNode),
                     Boolean) as { [name: string]: VFormNode };
                 return env.endGroup(node, children);
-            case VStagedFormNodeType.Control:
+            case VFormTreeNodeType.Control:
                 return env.control(node);
-            case VStagedFormNodeType.Native:
+            case VFormTreeNodeType.Native:
                 return env.native(node);
-            case VStagedFormNodeType.Placeholder:
+            case VFormTreeNodeType.Placeholder:
                 return { type: VFormNodeType.Placeholder };
-            case VStagedFormNodeType.Portal:
+            case VFormTreeNodeType.Portal:
                 return env.portal(node);
             default:
-                throw new Error();
+                throw new Error(`Unknown translate form node type: ${type}`);
         }
     }
 }

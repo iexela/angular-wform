@@ -1,12 +1,12 @@
 import { AbstractControl } from '@angular/forms';
-import { PredicateFn } from '../../common';
+import { ArrayItemOf, PredicateFn, RestoreKeys } from '../../common';
 import { VAsyncValidatorNode, VFormHooks, VValidatorNode } from '../../model';
 
-export enum VEnvFormNodeType {
+export enum FormSampleNodeType {
     Control, Group, Array, Native, Portal, Placeholder, Options
 }
 
-export enum VEnvFormMode {
+export enum FormSampleMode {
     Create, Edit, View
 }
 
@@ -14,65 +14,91 @@ export enum Location {
     AMER, EMEA, APAC
 }
 
-export interface VEnv {
-    mode: VEnvFormMode;
+export interface SampleEnvironment {
+    mode: FormSampleMode;
     location: Location;
     language: string;
 }
 
-export type VEnvPredicate = PredicateFn<VEnv>;
+export type SampleEnvironmentPredicate = PredicateFn<SampleEnvironment>;
 
-export interface VEnvFormNodeBase {
+export interface FormSampleNodeBase {
     key?: any;
-    type: VEnvFormNodeType;
-    visible: VEnvPredicate;
-    disabled: VEnvPredicate;
+    type: FormSampleNodeType;
+    visible: SampleEnvironmentPredicate;
+    disabled: SampleEnvironmentPredicate;
     validator?: VValidatorNode;
     asyncValidator?: VAsyncValidatorNode;
     dirty?: boolean;
     touched?: boolean;
 }
 
-export interface VEnvFormNodeCreatedBase extends VEnvFormNodeBase {
+export interface FormSampleNodeCreatedBase extends FormSampleNodeBase {
     updateOn?: VFormHooks;
 }
 
-export interface VEnvFormControl extends VEnvFormNodeCreatedBase {
-    type: VEnvFormNodeType.Control;
-    required: VEnvPredicate;
-    value?: any;
+export interface FormSampleControl<T> extends FormSampleNodeCreatedBase {
+    type: FormSampleNodeType.Control;
+    required: SampleEnvironmentPredicate;
+    value?: T;
 }
 
-export interface VEnvFormGroup extends VEnvFormNodeCreatedBase {
-    type: VEnvFormNodeType.Group;
-    children: Record<string, VEnvFormNode | VEnvFormPlaceholder>;
+export type FormSampleGroupChildren = { [name: string]: FormSampleNode | FormSamplePlaceholder };
+
+export interface FormSampleGroup<C extends FormSampleGroupChildren = FormSampleGroupChildren> extends FormSampleNodeCreatedBase {
+    type: FormSampleNodeType.Group;
+    children: C;
 }
 
-export interface VEnvFormArray extends VEnvFormNodeCreatedBase {
-    type: VEnvFormNodeType.Array;
-    children: (VEnvFormNode | VEnvFormPlaceholder)[];
+export type FormSampleArrayChildren = (FormSampleNode | FormSamplePlaceholder)[];
+export interface FormSampleArray<C extends FormSampleArrayChildren = FormSampleArrayChildren> extends FormSampleNodeCreatedBase {
+    type: FormSampleNodeType.Array;
+    children: C;
 }
 
-export interface VEnvFormNative extends VEnvFormNodeBase {
-    type: VEnvFormNodeType.Native;
+export interface FormSampleNative<T> extends FormSampleNodeBase {
+    type: FormSampleNodeType.Native;
     control?: AbstractControl;
-    value?: any;
+    value?: T;
 }
 
-export interface VEnvFormPortal {
-    type: VEnvFormNodeType.Portal;
+export interface FormSamplePortal {
+    type: FormSampleNodeType.Portal;
     name: string;
 }
 
-export interface VEnvFormPlaceholder {
-    type: VEnvFormNodeType.Placeholder;
+export interface FormSamplePlaceholder {
+    type: FormSampleNodeType.Placeholder;
 }
 
-export interface VEnvFormOptions {
-    type: VEnvFormNodeType.Options;
-    mode: VEnvFormMode;
-    child: VEnvFormNode;
+export interface FormSampleOptions<C extends FormSampleNoOptionsNoOptions = FormSampleNoOptionsNoOptions> {
+    type: FormSampleNodeType.Options;
+    mode: FormSampleMode;
+    child: C;
 }
 
-export type VEnvThisFormNode = VEnvFormControl | VEnvFormGroup | VEnvFormArray | VEnvFormNative;
-export type VEnvFormNode = VEnvThisFormNode | VEnvFormPortal;
+export type ThisFormSampleNode = FormSampleControl<any> | FormSampleGroup<any> | FormSampleArray<any> | FormSampleNative<any>;
+export type FormSampleNode = ThisFormSampleNode | FormSamplePortal | FormSampleOptions<any>;
+export type FormSampleNoOptionsNoOptions = Exclude<FormSampleNode, FormSampleOptions<any>>;
+
+export interface FormSampleNodeFactory<TValue, TNode extends FormSampleNode> {
+    (value: TValue): TNode;
+}
+
+type FormSampleGroupValueOf<TValue extends object, TChildren extends FormSampleGroupChildren> = RestoreKeys<TValue, {
+    [P in (keyof TChildren & keyof TValue)]: ExtractFormSampleValue<Exclude<TValue[P], undefined>, TChildren[P]>;
+}>;
+
+type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends FormSampleArrayChildren> =
+    ExtractFormSampleValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+
+export type ExtractFormSampleValue<TValue, TNode> =
+    TNode extends FormSampleOptions<infer ROptionsChild>
+        ? ExtractFormSampleValue<TValue, ROptionsChild>
+        : (TNode extends FormSampleGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormSampleGroupValueOf<TValue, RGroupChildren> : never)
+            : (TNode extends FormSampleArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf<TValue, RArrayChildren> : never)
+                : (TNode extends (FormSampleControl<any> | FormSampleNative<any> | FormSamplePortal | FormSamplePlaceholder)
+                    ? TValue
+                    : never)));

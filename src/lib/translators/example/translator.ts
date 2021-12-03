@@ -4,17 +4,17 @@ import { Maybe } from 'src/lib/common';
 import { VFormNode } from 'src/lib/model';
 import { arrayify } from 'src/lib/utils';
 import { andValidators } from 'src/lib/validators';
-import { VFormStagedEnvironment, VStagedFormNodeType } from '../staged';
-import { Location, VEnvFormArray, VEnvFormControl, VEnvFormGroup, VEnvFormMode, VEnvFormNative, VEnvFormNode, VEnvFormNodeType, VEnvFormOptions, VEnvFormPlaceholder, VEnvFormPortal, VEnvPredicate } from './model';
+import { VFormTreeVisitor, VFormTreeNodeType } from '../tree-translator';
+import { Location, FormSampleArray, FormSampleControl, FormSampleGroup, FormSampleMode, FormSampleNative, FormSampleNode, FormSampleNodeType, FormSampleOptions, FormSamplePlaceholder, FormSamplePortal, SampleEnvironmentPredicate } from './model';
 
 interface Options {
     location: Location;
     language: string;
 }
 
-export class VSampleStagedEnvironment implements VFormStagedEnvironment {
+export class VSampleTreeVisitor implements VFormTreeVisitor {
     private _options: Options;
-    private _mode = VEnvFormMode.View;
+    private _mode = FormSampleMode.View;
     private visible: boolean[] = [];
 
     constructor(options: Options) {
@@ -22,7 +22,7 @@ export class VSampleStagedEnvironment implements VFormStagedEnvironment {
     }
 
     begin(): void {
-        this._mode = VEnvFormMode.View;
+        this._mode = FormSampleMode.View;
         this.visible = [];
     }
 
@@ -30,42 +30,42 @@ export class VSampleStagedEnvironment implements VFormStagedEnvironment {
 
     }
 
-    resolveType(node: VEnvFormNode | VEnvFormPlaceholder | VEnvFormOptions): VStagedFormNodeType {
+    resolveType(node: FormSampleNode | FormSamplePlaceholder | FormSampleOptions): VFormTreeNodeType {
         switch (node.type) {
-            case VEnvFormNodeType.Array:
-                return VStagedFormNodeType.Array;
-            case VEnvFormNodeType.Group:
-                return VStagedFormNodeType.Group;
-            case VEnvFormNodeType.Control:
-                return VStagedFormNodeType.Control;
-            case VEnvFormNodeType.Native:
-                return VStagedFormNodeType.Native;
-            case VEnvFormNodeType.Placeholder:
-                return VStagedFormNodeType.Placeholder;
-            case VEnvFormNodeType.Portal:
-                return VStagedFormNodeType.Portal;
-            case VEnvFormNodeType.Options:
-                return VStagedFormNodeType.Options;
+            case FormSampleNodeType.Array:
+                return VFormTreeNodeType.Array;
+            case FormSampleNodeType.Group:
+                return VFormTreeNodeType.Group;
+            case FormSampleNodeType.Control:
+                return VFormTreeNodeType.Control;
+            case FormSampleNodeType.Native:
+                return VFormTreeNodeType.Native;
+            case FormSampleNodeType.Placeholder:
+                return VFormTreeNodeType.Placeholder;
+            case FormSampleNodeType.Portal:
+                return VFormTreeNodeType.Portal;
+            case FormSampleNodeType.Options:
+                return VFormTreeNodeType.Options;
             default:
                 throw new Error('Unknown node type');
         }
     }
-    beginOptions(node: VEnvFormOptions): void {
+    beginOptions(node: FormSampleOptions): void {
         this._mode = node.mode;
     }
-    optionsChild(node: VEnvFormOptions): VEnvFormNode | VEnvFormPlaceholder {
+    optionsChild(node: FormSampleOptions): FormSampleNode | FormSamplePlaceholder {
         return node.child;
     }
-    endOptions(node: VEnvFormOptions): void {
+    endOptions(node: FormSampleOptions): void {
         
     }
-    beginGroup(node: VEnvFormGroup): void {
+    beginGroup(node: FormSampleGroup): void {
         this.visible.push(this.resolveBoolean(node.visible));
     }
-    groupChildren(node: VEnvFormGroup): Record<string, VEnvFormNode | VEnvFormPlaceholder> {
+    groupChildren(node: FormSampleGroup): Record<string, FormSampleNode | FormSamplePlaceholder> {
         return node.children;
     }
-    endGroup(node: VEnvFormGroup, children: Record<string, VFormNode>): VFormNode {
+    endGroup(node: FormSampleGroup, children: Record<string, VFormNode>): VFormNode {
         const group: VFormGroup = {
             type: VFormNodeType.Group,
             disabled: this.resolveBoolean(node.disabled),
@@ -78,13 +78,13 @@ export class VSampleStagedEnvironment implements VFormStagedEnvironment {
         this.visible.pop();
         return group;
     }
-    beginArray(node: VEnvFormArray): void {
+    beginArray(node: FormSampleArray): void {
         this.visible.push(this.resolveBoolean(node.visible));
     }
-    arrayChildren(node: VEnvFormArray): (VEnvFormNode | VEnvFormPlaceholder)[] {
+    arrayChildren(node: FormSampleArray): (FormSampleNode | FormSamplePlaceholder)[] {
         return node.children;
     }
-    endArray(node: VEnvFormGroup, children: VFormNode[]): VFormNode {
+    endArray(node: FormSampleGroup, children: VFormNode[]): VFormNode {
         const array: VFormArray = {
             type: VFormNodeType.Array,
             disabled: this.resolveBoolean(node.disabled),
@@ -97,7 +97,7 @@ export class VSampleStagedEnvironment implements VFormStagedEnvironment {
         this.visible.pop();
         return array;
     }
-    control(node: VEnvFormControl): VFormControl<any> {
+    control(node: FormSampleControl<any>): VFormControl<any> {
         const visible = this.tryVisible(this.resolveBoolean(node.visible));
         return {
             type: VFormNodeType.Control,
@@ -109,7 +109,7 @@ export class VSampleStagedEnvironment implements VFormStagedEnvironment {
             },
         };
     }
-    native(node: VEnvFormNative): VFormNative<any> {
+    native(node: FormSampleNative<any>): VFormNative<any> {
         return {
             type: VFormNodeType.Native,
             disabled: this.resolveBoolean(node.disabled),
@@ -119,14 +119,14 @@ export class VSampleStagedEnvironment implements VFormStagedEnvironment {
             },
         }
     }
-    portal(node: VEnvFormPortal): VFormPortal {
+    portal(node: FormSamplePortal): VFormPortal {
         return {
             type: VFormNodeType.Portal,
             name: node.name,
         };
     }
 
-    private resolveBoolean(flag: VEnvPredicate): boolean {
+    private resolveBoolean(flag: SampleEnvironmentPredicate): boolean {
         return flag({
             mode: this._mode,
             location: this._options.location,

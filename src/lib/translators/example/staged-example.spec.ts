@@ -1,17 +1,18 @@
 import { getLastFormNode, vForm } from '../..';
-import { buildStagedTranslator } from '../staged';
+import { buildTreeTranslator } from '../tree-translator';
 import { vEnvControl, vEnvRoot } from './basic';
+import { sampleFormFactory } from './builder';
 import { whenAll, whenApac, whenCreateOrEditMode, whenLanguage } from './conditions';
-import { Location, VEnvFormMode } from './model';
-import { VSampleStagedEnvironment } from './translator';
+import { Location, FormSampleMode } from './model';
+import { VSampleTreeVisitor } from './translator';
 
 describe('staged example', () => {
     it('test', () => {
-        const formFactory = vForm.use(buildStagedTranslator(new VSampleStagedEnvironment({
+        const formFactory = sampleFormFactory(buildTreeTranslator(new VSampleTreeVisitor({
             location: Location.APAC,
             language: 'ch',
         })));
-        const form = formFactory(() => vEnvRoot({ mode: VEnvFormMode.View }, {
+        const form = formFactory(() => vEnvRoot({ mode: FormSampleMode.View }, {
             firstName: vEnvControl({
                 visible: true,
                 required: whenAll(whenApac, whenLanguage('ch')),

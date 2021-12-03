@@ -9,7 +9,6 @@ export {
 
 export {
     VFormBuilder,
-    VTranslatedFormBuilderFactory as VEnvFormConstructor,
     VFormBuilderFactory as VFormConstructor,
     vForm,
 } from './builder';
