@@ -153,7 +153,9 @@ export function isAsyncValidatorNode(value: any): value is VAsyncValidatorNode {
 
 type FormGroupValueOf<TValue extends object, TFormGroupChildren extends VFormGroupChildren> = RestoreKeys<TValue, {
     [P in (keyof TFormGroupChildren & keyof TValue)]: ExtractFormValue<Exclude<TValue[P], undefined>, TFormGroupChildren[P]>;
-}>;
+}> & {
+    [P in Exclude<keyof TFormGroupChildren, keyof TValue>]?: GetFormValue<TFormGroupChildren[P]>;
+};
 
 type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends VFormArrayChildren> =
     ExtractFormValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
@@ -166,3 +168,14 @@ export type ExtractFormValue<TValue, TFormNode> =
             : (TFormNode extends (VFormControl<any> | VFormNative<any> | VFormPortal | VFormPlaceholder)
                 ? TValue
                 : never));
+
+export type GetFormValue<TFormNode> =
+    TFormNode extends VFormGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormValue<RGroupChildren[P]> }
+        : (TFormNode extends VFormArray<infer RArrayChildren>
+            ? GetFormValue<ArrayItemOf<RArrayChildren>>[]
+            : (TFormNode extends (VFormControl<infer R> | VFormNative<infer R>)
+                ? R
+                : (TFormNode extends (VFormPortal | VFormPlaceholder)
+                    ? any
+                    : never)));

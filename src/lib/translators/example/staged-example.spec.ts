@@ -1,9 +1,9 @@
-import { getLastFormNode, vForm } from '../..';
+import { getLastFormNode } from '../..';
 import { buildTreeTranslator } from '../tree-translator';
 import { vEnvControl, vEnvRoot } from './basic';
 import { sampleFormFactory } from './builder';
 import { whenAll, whenApac, whenCreateOrEditMode, whenLanguage } from './conditions';
-import { Location, FormSampleMode } from './model';
+import { FormSampleMode, Location } from './model';
 import { VSampleTreeVisitor } from './translator';
 
 describe('staged example', () => {

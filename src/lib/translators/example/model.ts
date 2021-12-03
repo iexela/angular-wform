@@ -87,7 +87,9 @@ export interface FormSampleNodeFactory<TValue, TNode extends FormSampleNode> {
 
 type FormSampleGroupValueOf<TValue extends object, TChildren extends FormSampleGroupChildren> = RestoreKeys<TValue, {
     [P in (keyof TChildren & keyof TValue)]: ExtractFormSampleValue<Exclude<TValue[P], undefined>, TChildren[P]>;
-}>;
+}> & {
+    [P in Exclude<keyof TChildren, keyof TValue>]?: GetFormSampleValue<TChildren[P]>;
+};
 
 type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends FormSampleArrayChildren> =
     ExtractFormSampleValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
@@ -101,4 +103,15 @@ export type ExtractFormSampleValue<TValue, TNode> =
                 ? (TValue extends any[] ? FormArrayValueOf<TValue, RArrayChildren> : never)
                 : (TNode extends (FormSampleControl<any> | FormSampleNative<any> | FormSamplePortal | FormSamplePlaceholder)
                     ? TValue
+                    : never)));
+
+export type GetFormSampleValue<TNode> =
+    TNode extends FormSampleGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormSampleValue<RGroupChildren[P]> }
+        : (TNode extends FormSampleArray<infer RArrayChildren>
+            ? GetFormSampleValue<ArrayItemOf<RArrayChildren>>[]
+            : (TNode extends (FormSampleControl<infer R> | FormSampleNative<infer R>)
+                ? R
+                : (TNode extends (FormSamplePortal | FormSamplePlaceholder)
+                    ? any
                     : never)));
