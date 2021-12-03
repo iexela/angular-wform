@@ -1,6 +1,6 @@
 import { getLastFormNode } from '../..';
 import { buildTreeTranslator } from '../tree-translator';
-import { vEnvControl, vEnvRoot } from './basic';
+import { sControl, sRoot } from './basic';
 import { sampleFormFactory } from './builder';
 import { whenAll, whenApac, whenCreateOrEditMode, whenLanguage } from './conditions';
 import { FormSampleMode, Location } from './model';
@@ -12,12 +12,12 @@ describe('staged example', () => {
             location: Location.APAC,
             language: 'ch',
         })));
-        const form = formFactory(() => vEnvRoot({ mode: FormSampleMode.View }, {
-            firstName: vEnvControl({
+        const form = formFactory(() => sRoot({ mode: FormSampleMode.View }, {
+            firstName: sControl({
                 visible: true,
                 required: whenAll(whenApac, whenLanguage('ch')),
             }),
-            lastName: vEnvControl({
+            lastName: sControl({
                 visible: whenCreateOrEditMode,
             }),
         })).build({ firstName: null, lastName: 'M' });

@@ -39,6 +39,13 @@ function createAsyncValidator(validator?: AnyAsyncValidator): Maybe<VAsyncValida
     return validator ? composeAsyncValidators(...arrayify(validator)) : undefined;
 }
 
+export function vValue<T = any>(value: T, options?: Omit<VFormControlOptions<T>, 'value'>): VFormControl<T> {
+    return vControl({
+        ...options,
+        value,
+    });
+}
+
 export function vControl<T = any>(options?: VFormControlOptions<T>): VFormControl<T> {
     return {
         type: VFormNodeType.Control,

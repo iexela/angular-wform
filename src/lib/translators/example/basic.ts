@@ -46,12 +46,12 @@ function resolveFlag(flag: Maybe<SampleEnvironmentFlag>, defaultValue: boolean):
     return toCondition(defaultValue);
 }
 
-export function vEnvRoot<C extends FormSampleGroupChildren, G extends FormSampleGroup<C>>(options: FormSampleOptionsOptions & FormSampleGroupOptions, children: C): FormSampleOptions<G> {
+export function sRoot<C extends FormSampleGroupChildren, G extends FormSampleGroup<C>>(options: FormSampleOptionsOptions & FormSampleGroupOptions, children: C): FormSampleOptions<G> {
     const { mode, ...groupOptions } = options;
-    return vEnvOptions({ mode }, vEnvGroup(groupOptions, children)) as FormSampleOptions<G>;
+    return sOptions({ mode }, sGroup(groupOptions, children)) as FormSampleOptions<G>;
 }
 
-export function vEnvOptions<C extends FormSampleNoOptionsNoOptions>(options: FormSampleOptionsOptions, node: C): FormSampleOptions<C> {
+export function sOptions<C extends FormSampleNoOptionsNoOptions>(options: FormSampleOptionsOptions, node: C): FormSampleOptions<C> {
     return {
         type: FormSampleNodeType.Options,
         ...options,
@@ -59,7 +59,14 @@ export function vEnvOptions<C extends FormSampleNoOptionsNoOptions>(options: For
     };
 }
 
-export function vEnvControl<T = any>(options?: FormSampleControlOptions<T>): FormSampleControl<T> {
+export function sValue<T = any>(value: T, options?: Omit<FormSampleControlOptions<T>, 'value'>): FormSampleControl<T> {
+    return sControl({
+        ...options,
+        value,
+    });
+}
+
+export function sControl<T = any>(options?: FormSampleControlOptions<T>): FormSampleControl<T> {
     return {
         type: FormSampleNodeType.Control,
         ...options,
@@ -71,9 +78,9 @@ export function vEnvControl<T = any>(options?: FormSampleControlOptions<T>): For
     };
 }
 
-export function vEnvGroup<C extends FormSampleGroupChildren>(children: C): FormSampleGroup<C>;
-export function vEnvGroup<C extends FormSampleGroupChildren>(options: FormSampleGroupOptions, children: C): FormSampleGroup<C>;
-export function vEnvGroup(optionsOrChildren?: FormSampleGroupOptions | FormSampleGroupChildren, childrenOrNil?: FormSampleGroupChildren): FormSampleGroup<any> {
+export function sGroup<C extends FormSampleGroupChildren>(children: C): FormSampleGroup<C>;
+export function sGroup<C extends FormSampleGroupChildren>(options: FormSampleGroupOptions, children: C): FormSampleGroup<C>;
+export function sGroup(optionsOrChildren?: FormSampleGroupOptions | FormSampleGroupChildren, childrenOrNil?: FormSampleGroupChildren): FormSampleGroup<any> {
     const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as FormSampleGroupChildren || {});
     const options = childrenOrNil ? optionsOrChildren as FormSampleGroupOptions : undefined;
     return {
@@ -87,9 +94,9 @@ export function vEnvGroup(optionsOrChildren?: FormSampleGroupOptions | FormSampl
     };
 }
 
-export function vEnvArray<C extends FormSampleArrayChildren>(children: C): FormSampleArray<C>;
-export function vEnvArray<C extends FormSampleArrayChildren>(options: FormSampleArrayOptions, children: C): FormSampleArray<C>;
-export function vEnvArray(optionsOrChildren: FormSampleArrayOptions | FormSampleArrayChildren, childrenOrNil?: FormSampleArrayChildren): FormSampleArray<any> {
+export function sArray<C extends FormSampleArrayChildren>(children: C): FormSampleArray<C>;
+export function sArray<C extends FormSampleArrayChildren>(options: FormSampleArrayOptions, children: C): FormSampleArray<C>;
+export function sArray(optionsOrChildren: FormSampleArrayOptions | FormSampleArrayChildren, childrenOrNil?: FormSampleArrayChildren): FormSampleArray<any> {
     const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as FormSampleArrayChildren || {});
     const options = childrenOrNil ? optionsOrChildren as FormSampleArrayOptions : undefined;
     return {
@@ -103,13 +110,13 @@ export function vEnvArray(optionsOrChildren: FormSampleArrayOptions | FormSample
     };
 }
 
-export function vEnvSkip(): FormSamplePlaceholder {
+export function sSkip(): FormSamplePlaceholder {
     return {
         type: FormSampleNodeType.Placeholder,
     };
 }
 
-export function vEnvNative<T = any>(control?: AbstractControl, options?: FormSampleNativeOptions<T>): FormSampleNative<T> {
+export function sNative<T = any>(control?: AbstractControl, options?: FormSampleNativeOptions<T>): FormSampleNative<T> {
     return {
         type: FormSampleNodeType.Native,
         control,
@@ -121,7 +128,7 @@ export function vEnvNative<T = any>(control?: AbstractControl, options?: FormSam
     };
 }
 
-export function vEnvPortal(name: string): FormSamplePortal {
+export function sPortal(name: string): FormSamplePortal {
     return {
         type: FormSampleNodeType.Portal,
         name,
