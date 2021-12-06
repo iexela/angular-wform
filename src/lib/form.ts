@@ -71,7 +71,7 @@ export class VForm<T> {
         }
     }
 
-    setValue(value: T): void {
+    setValue<U extends T>(value: U): void {
         this._reconcile({
             options: this._options,
             portalHost: this._portalHost,
