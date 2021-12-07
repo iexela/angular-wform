@@ -1,32 +1,32 @@
 import { AbstractControl } from '@angular/forms';
-import { VPathElement } from '..';
-import { VFormNode } from '../model';
-import { VPortalHost } from '../portal-host';
+import { WPathElement } from '..';
+import { WFormNode } from '../model';
+import { WPortalHost } from '../portal-host';
 
-export enum VReconcilationType {
+export enum WReconcilationType {
     Update, Patch
 }
 
-export enum VValidationStrategy {
+export enum WValidationStrategy {
     Append,
     Replace,
 }
 
-export interface VKeyGenerator {
-    (path: VPathElement[], value: any): any;
+export interface WKeyGenerator {
+    (path: WPathElement[], value: any): any;
 }
 
-export interface VFormOptions {
-    validationStrategy: VValidationStrategy;
+export interface WFormOptions {
+    validationStrategy: WValidationStrategy;
     updateOnChange: boolean;
-    keyGenerator: VKeyGenerator;
+    keyGenerator: WKeyGenerator;
     strict: boolean;
 }
 
-export interface VReconcilationRequest {
-    options: VFormOptions;
-    portalHost: VPortalHost;
-    node: VFormNode;
+export interface WReconcilationRequest {
+    options: WFormOptions;
+    portalHost: WPortalHost;
+    node: WFormNode;
     value: any,
     control?: AbstractControl;
 }

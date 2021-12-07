@@ -1,6 +1,6 @@
 import { AbstractControl } from '@angular/forms';
 import { ArrayItemOf, PredicateFn } from '../../common';
-import { VAsyncValidatorNode, VFormHooks, VValidatorNode } from '../../model';
+import { WAsyncValidatorNode, WFormHooks, WValidatorNode } from '../../model';
 
 export enum FormSampleNodeType {
     Control, Group, Array, Native, Portal, Placeholder, Options
@@ -27,14 +27,14 @@ export interface FormSampleNodeBase {
     type: FormSampleNodeType;
     visible: SampleEnvironmentPredicate;
     disabled: SampleEnvironmentPredicate;
-    validator?: VValidatorNode;
-    asyncValidator?: VAsyncValidatorNode;
+    validator?: WValidatorNode;
+    asyncValidator?: WAsyncValidatorNode;
     dirty?: boolean;
     touched?: boolean;
 }
 
 export interface FormSampleNodeCreatedBase extends FormSampleNodeBase {
-    updateOn?: VFormHooks;
+    updateOn?: WFormHooks;
 }
 
 export interface FormSampleControl<T> extends FormSampleNodeCreatedBase {

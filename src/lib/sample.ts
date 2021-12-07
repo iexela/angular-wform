@@ -1,10 +1,10 @@
 import { Validators } from '@angular/forms';
-import { vArray, vControl, vGroup } from './basic';
-import { vForm } from './builder';
-import { vValidator, vValidatorFactory } from './validators';
+import { wArray, wControl, wGroup } from './basic';
+import { wForm } from './builder';
+import { wValidator, wValidatorFactory } from './validators';
 
-const vRequired = vValidator(Validators.required);
-const vMaxLength = vValidatorFactory(Validators.maxLength);
+const vRequired = wValidator(Validators.required);
+const vMaxLength = wValidatorFactory(Validators.maxLength);
 
 const person = {
     firstName: 'Alex',
@@ -15,31 +15,31 @@ const person = {
     }],
 };
 
-const form = vForm(() => vGroup({
+const form = wForm(() => wGroup({
     disabled: true,
     children: {
-        firstName: vControl({
+        firstName: wControl({
             validator: [Validators.required, vMaxLength(10)],
             data: {
                 visible: true,
             },
         }),
-        lastName: vControl({
+        lastName: wControl({
             disabled: true,
-            validator: vValidator(v => null, [1, 2, 3]),
+            validator: wValidator(v => null, [1, 2, 3]),
         }),
-        jobs: vArray({
+        jobs: wArray({
             children: [
-                vGroup({
+                wGroup({
                     key: 1,
                     children: {
-                        address: vControl({
+                        address: wControl({
                             required: true,
                             data: {
                                 visible: true,
                             }
                         }),
-                        name: vControl({
+                        name: wControl({
                             validator: Validators.required,
                         }),
                     },

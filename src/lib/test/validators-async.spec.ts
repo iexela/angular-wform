@@ -1,8 +1,8 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { AbstractControl, AsyncValidatorFn, FormControl, Validators } from '@angular/forms';
-import { VAsyncValidatorNode, vControl, vForm, VValidators } from '..';
-import { VValidationStrategy } from '../reconcilation';
-import { vCompoundValidatorAsync, vValidatorAsync, vValidatorFactoryAsync } from '../validators';
+import { WAsyncValidatorNode, wControl, wForm, WValidators } from '..';
+import { WValidationStrategy } from '../reconcilation';
+import { wCompoundValidatorAsync, wValidatorAsync, wValidatorFactoryAsync } from '../validators';
 import { evenAsync, moreThan10Async } from './test-mocks';
 import { toPromise } from './test-utils';
 
@@ -53,8 +53,8 @@ async function hasControlAsyncValidator(control: AbstractControl, asyncValidator
     return errorsToFindKeys.every(key => foundErrorsKeys.includes(key));
 }
 
-function controlWithValidator(node: VAsyncValidatorNode): AbstractControl {
-    const form = vForm((value) => vControl({ asyncValidator: node })).build(null);
+function controlWithValidator(node: WAsyncValidatorNode): AbstractControl {
+    const form = wForm((value) => wControl({ asyncValidator: node })).build(null);
     return form.control;
 }
 
@@ -64,8 +64,8 @@ describe('async validators', () => {
     describe('simple', () => {
         describe('first render', () => {
             it('should assign validator', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: vValidatorAsync(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: wValidatorAsync(testValidator1),
                 })).build(5);
 
                 expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
@@ -74,8 +74,8 @@ describe('async validators', () => {
 
         describe('reconcilation', () => {
             it('should assign validator', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? undefined : vValidatorAsync(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? undefined : wValidatorAsync(testValidator1),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -84,8 +84,8 @@ describe('async validators', () => {
             });
 
             it('should remove validator', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorAsync(testValidator1) : undefined,
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : undefined,
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -94,8 +94,8 @@ describe('async validators', () => {
             });
 
             it('should not change validator if validator function was not modified', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: vValidatorAsync(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: wValidatorAsync(testValidator1),
                 })).build<number>(5);
 
                 const tracker = trackAsyncValidators(form.control);
@@ -107,8 +107,8 @@ describe('async validators', () => {
             });
 
             it('should change validator if validator function was modified', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorAsync(testValidator1) : vValidatorAsync(testValidator2),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -118,8 +118,8 @@ describe('async validators', () => {
             });
 
             it('should not change validator if locals are empty', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorAsync(testValidator1, []) : vValidatorAsync(testValidator2, []),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorAsync(testValidator1, []) : wValidatorAsync(testValidator2, []),
                 })).build<number>(5);
 
                 const tracker = trackAsyncValidators(form.control);
@@ -131,8 +131,8 @@ describe('async validators', () => {
             });
 
             it('should not change validator if locals are the same', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorAsync(testValidator1, [1, 'abc']) : vValidatorAsync(testValidator2, [1, 'abc']),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorAsync(testValidator1, [1, 'abc']) : wValidatorAsync(testValidator2, [1, 'abc']),
                 })).build<number>(5);
 
                 const tracker = trackAsyncValidators(form.control);
@@ -144,8 +144,8 @@ describe('async validators', () => {
             });
 
             it('should change validator if locals are different', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorAsync(testValidator1, [1, 'abc']) : vValidatorAsync(testValidator2, [2, 'abc']),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorAsync(testValidator1, [1, 'abc']) : wValidatorAsync(testValidator2, [2, 'abc']),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -155,10 +155,10 @@ describe('async validators', () => {
             });
 
             it('should assign another validator if node type of validator was changed', async () => {
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10
-                        ? vValidatorAsync(testValidator1, [1, 'abc'])
-                        : vValidatorFactoryAsync(() => testValidator2)(),
+                        ? wValidatorAsync(testValidator1, [1, 'abc'])
+                        : wValidatorFactoryAsync(() => testValidator2)(),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -172,8 +172,8 @@ describe('async validators', () => {
     describe('factory', () => {
         describe('first render', () => {
             it('should assign created validator', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: vValidatorFactoryAsync(() => testValidator1)(),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: wValidatorFactoryAsync(() => testValidator1)(),
                 })).build(5);
 
                 expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
@@ -182,8 +182,8 @@ describe('async validators', () => {
             it('should create validator with specified arguments and assign it to control', async () => {
                 const factory = jasmine.createSpy<V3>().and.returnValue(testValidator1);
 
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: vValidatorFactoryAsync(factory)(1, 'abc', true),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: wValidatorFactoryAsync(factory)(1, 'abc', true),
                 })).build(5);
 
                 expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
@@ -195,8 +195,8 @@ describe('async validators', () => {
             it('should assign new validator by creating it with specified arguments', async () => {
                 const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
 
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? undefined : vValidatorFactoryAsync(factory)(1, 'abc', true),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? undefined : wValidatorFactoryAsync(factory)(1, 'abc', true),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -208,8 +208,8 @@ describe('async validators', () => {
             it('should remove validator', async () => {
                 const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
 
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorFactoryAsync(factory)(1, 'abc', true) : undefined,
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorFactoryAsync(factory)(1, 'abc', true) : undefined,
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -220,8 +220,8 @@ describe('async validators', () => {
             it('should not recreate validator if arguments are the same', async () => {
                 const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
 
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: vValidatorFactoryAsync(factory)(1, 'abc', true),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: wValidatorFactoryAsync(factory)(1, 'abc', true),
                 })).build<number>(5);
 
                 const tracker = trackAsyncValidators(form.control);
@@ -236,8 +236,8 @@ describe('async validators', () => {
             it('should recreate validator if arguments are different', async () => {
                 const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1, testValidator2);
 
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorFactoryAsync(factory)(1, 'abc', true) : vValidatorFactoryAsync(factory)(1, 'abc', false),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorFactoryAsync(factory)(1, 'abc', true) : wValidatorFactoryAsync(factory)(1, 'abc', false),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -251,8 +251,8 @@ describe('async validators', () => {
                 const factory1 = jasmine.createSpy<V3>().and.returnValues(testValidator1);
                 const factory2 = jasmine.createSpy<V3>().and.returnValues(testValidator2);
 
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorFactoryAsync(factory1)(1, 'abc', false) : vValidatorFactoryAsync(factory2)(1, 'abc', false),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorFactoryAsync(factory1)(1, 'abc', false) : wValidatorFactoryAsync(factory2)(1, 'abc', false),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -265,10 +265,10 @@ describe('async validators', () => {
             });
 
             it('should assign another validator if node type of validator was changed', async () => {
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10
-                        ? vValidatorFactoryAsync(() => testValidator1)()
-                        : vValidatorAsync(testValidator2, [1, 'abc']),
+                        ? wValidatorFactoryAsync(() => testValidator1)()
+                        : wValidatorAsync(testValidator2, [1, 'abc']),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -283,12 +283,12 @@ describe('async validators', () => {
         describe('first render', () => {
             it('should call mixer function with validators created by child validation nodes', async () => {
                 const factory = jasmine.createSpy();
-                const compoundValidator = vCompoundValidatorAsync(factory);
+                const compoundValidator = wCompoundValidatorAsync(factory);
                 
-                vForm((n: number) => vControl({
+                wForm((n: number) => wControl({
                     asyncValidator: compoundValidator(
-                        vValidatorFactoryAsync(() => testValidator1)(),
-                        vValidatorAsync(testValidator2),
+                        wValidatorFactoryAsync(() => testValidator1)(),
+                        wValidatorAsync(testValidator2),
                         testValidator3,
                     ),
                 })).build(5);
@@ -298,9 +298,9 @@ describe('async validators', () => {
 
             it('should assign to control all retrieved validators', async () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
-                const compoundValidator = vCompoundValidatorAsync(factory);
+                const compoundValidator = wCompoundValidatorAsync(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: compoundValidator(testValidator1),
                 })).build(5);
 
@@ -313,12 +313,12 @@ describe('async validators', () => {
         describe('reconcilation', () => {
             it('should assign new validators by creating them from child validators', async () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
-                const compoundValidator = vCompoundValidatorAsync(factory);
+                const compoundValidator = wCompoundValidatorAsync(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? undefined : compoundValidator(
-                        vValidatorFactoryAsync(() => testValidator1)(),
-                        vValidatorAsync(testValidator2),
+                        wValidatorFactoryAsync(() => testValidator1)(),
+                        wValidatorAsync(testValidator2),
                         testValidator3,
                     ),
                 })).build<number>(5);
@@ -335,9 +335,9 @@ describe('async validators', () => {
 
             it('should remove validators', async () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
-                const compoundValidator = vCompoundValidatorAsync(factory);
+                const compoundValidator = wCompoundValidatorAsync(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? compoundValidator(testValidator1) : undefined,
                 })).build<number>(5);
 
@@ -351,18 +351,18 @@ describe('async validators', () => {
             it('should do not recreate validators if child validation nodes were not modified', async () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
                 const factory1 = () => testValidator1;
-                const compoundValidator = vCompoundValidatorAsync(factory);
+                const compoundValidator = wCompoundValidatorAsync(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10
                         ? compoundValidator(
-                            vValidatorFactoryAsync(factory1)(),
-                            vValidatorAsync(testValidator2),
+                            wValidatorFactoryAsync(factory1)(),
+                            wValidatorAsync(testValidator2),
                             testValidator3,
                         )
                         : compoundValidator(
-                            vValidatorFactoryAsync(factory1)(),
-                            vValidatorAsync(testValidator2),
+                            wValidatorFactoryAsync(factory1)(),
+                            wValidatorAsync(testValidator2),
                             testValidator3,
                         ),
                 })).build<number>(5);
@@ -377,17 +377,17 @@ describe('async validators', () => {
             it('should do not recreate validators if child validation nodes were not modified (local args)', async () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
                 const factory1 = () => testValidator1;
-                const compoundValidator = vCompoundValidatorAsync(factory);
+                const compoundValidator = wCompoundValidatorAsync(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10
                         ? compoundValidator(
-                            vValidatorFactoryAsync<V3>(factory1)(),
-                            vValidatorAsync(testValidator2, ['abc']),
+                            wValidatorFactoryAsync<V3>(factory1)(),
+                            wValidatorAsync(testValidator2, ['abc']),
                         )
                         : compoundValidator(
-                            vValidatorFactoryAsync<V3>(factory1)(),
-                            vValidatorAsync(testValidator3, ['abc']),
+                            wValidatorFactoryAsync<V3>(factory1)(),
+                            wValidatorAsync(testValidator3, ['abc']),
                         ),
                 })).build<number>(5);
 
@@ -405,12 +405,12 @@ describe('async validators', () => {
                     .and
                     .returnValue(testValidator5);
                 const factory1 = () => testValidator1;
-                const compoundValidator = vCompoundValidatorAsync(factory);
+                const compoundValidator = wCompoundValidatorAsync(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: compoundValidator(
-                        vValidatorFactoryAsync<V3>(factory1)(),
-                        n < 10 ? vValidatorAsync(testValidator2, ['abc']) : vValidatorAsync(testValidator3, ['def']),
+                        wValidatorFactoryAsync<V3>(factory1)(),
+                        n < 10 ? wValidatorAsync(testValidator2, ['abc']) : wValidatorAsync(testValidator3, ['def']),
                     ),
                 })).build<number>(5);
 
@@ -424,10 +424,10 @@ describe('async validators', () => {
             it('should recreate validators if mixer function is different', async () => {
                 const factory1 = jasmine.createSpy().and.returnValue([testValidator1, testValidator2]);
                 const factory2 = jasmine.createSpy().and.returnValue([testValidator3, testValidator4]);
-                const compoundValidator1 = vCompoundValidatorAsync(factory1);
-                const compoundValidator2 = vCompoundValidatorAsync(factory2);
+                const compoundValidator1 = wCompoundValidatorAsync(factory1);
+                const compoundValidator2 = wCompoundValidatorAsync(factory2);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10
                         ? compoundValidator1(testValidator5)
                         : compoundValidator2(testValidator5),
@@ -445,12 +445,12 @@ describe('async validators', () => {
 
             it('should assign another validator if node type of validator was changed', async () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator1, testValidator2]);
-                const compoundValidator = vCompoundValidatorAsync(factory);
+                const compoundValidator = wCompoundValidatorAsync(factory);
 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10
                         ? compoundValidator(testValidator1)
-                        : vValidatorAsync(testValidator3, [1, 'abc']),
+                        : wValidatorAsync(testValidator3, [1, 'abc']),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -463,10 +463,10 @@ describe('async validators', () => {
     });
 
     describe('side effects', () => {
-        describe(`${VValidationStrategy[VValidationStrategy.Append]} strategy`, () => {
+        describe(`${WValidationStrategy[WValidationStrategy.Append]} strategy`, () => {
             it('should restore removed validator', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: vValidatorAsync(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: wValidatorAsync(testValidator1),
                 })).build(5);
     
                 form.control.setAsyncValidators(null);
@@ -479,8 +479,8 @@ describe('async validators', () => {
             });
     
             it('should not remove other validators', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: vValidatorAsync(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: wValidatorAsync(testValidator1),
                 })).build(5);
     
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator2]);
@@ -495,8 +495,8 @@ describe('async validators', () => {
             });
     
             it('should not remove other validators, if set of validators was modified', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorAsync(testValidator1) : vValidatorAsync(testValidator2),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
                 })).build<number>(5);
                 
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator3]);
@@ -513,8 +513,8 @@ describe('async validators', () => {
             });
     
             it('should update set of validators, even if initial validator was composed', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorAsync(testValidator1) : vValidatorAsync(testValidator2),
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
                 })).build<number>(5);
                 
                 form.control.setAsyncValidators(Validators.composeAsync([form.control.asyncValidator!, testValidator3]));
@@ -531,11 +531,11 @@ describe('async validators', () => {
             });
         });
 
-        describe(`${VValidationStrategy[VValidationStrategy.Replace]} strategy`, () => {
+        describe(`${WValidationStrategy[WValidationStrategy.Replace]} strategy`, () => {
             it('should restore removed validator', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: vValidatorAsync(testValidator1),
-                })).validationStrategy(VValidationStrategy.Replace).build(5);
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: wValidatorAsync(testValidator1),
+                })).validationStrategy(WValidationStrategy.Replace).build(5);
     
                 form.control.setAsyncValidators(null);
     
@@ -547,9 +547,9 @@ describe('async validators', () => {
             });
     
             it('should remove other validators', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: vValidatorAsync(testValidator1),
-                })).validationStrategy(VValidationStrategy.Replace).build(5);
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: wValidatorAsync(testValidator1),
+                })).validationStrategy(WValidationStrategy.Replace).build(5);
     
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator2]);
     
@@ -563,9 +563,9 @@ describe('async validators', () => {
             });
     
             it('should remove other validators, if set of validators was modified', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorAsync(testValidator1) : vValidatorAsync(testValidator2),
-                })).validationStrategy(VValidationStrategy.Replace).build<number>(5);
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
+                })).validationStrategy(WValidationStrategy.Replace).build<number>(5);
     
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator3]);
     
@@ -581,9 +581,9 @@ describe('async validators', () => {
             });
     
             it('should replace set of validators, even if initial validator was composed', async () => {
-                const form = vForm((n: number) => vControl({
-                    asyncValidator: n < 10 ? vValidatorAsync(testValidator1) : vValidatorAsync(testValidator2),
-                })).validationStrategy(VValidationStrategy.Replace).build<number>(5);
+                const form = wForm((n: number) => wControl({
+                    asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
+                })).validationStrategy(WValidationStrategy.Replace).build<number>(5);
     
                 form.control.setAsyncValidators(Validators.composeAsync([form.control.asyncValidator!, testValidator3]));
     
@@ -603,12 +603,12 @@ describe('async validators', () => {
     describe('instances', () => {
         describe('compose', () => {
             it('should not assign validator when there is no child validator', fakeAsync(() => {
-                const no = controlWithValidator(VValidators.composeAsync());
+                const no = controlWithValidator(WValidators.composeAsync());
                 expect(no.asyncValidator).toBeFalsy();
             }));
 
             it('should return results of the single assigned validator', fakeAsync(() => {
-                const single = controlWithValidator(VValidators.composeAsync(evenAsync));
+                const single = controlWithValidator(WValidators.composeAsync(evenAsync));
 
                 single.setValue(1);
                 tick();
@@ -620,7 +620,7 @@ describe('async validators', () => {
             }));
 
             it('should successed if all validators are successed', fakeAsync(() => {
-                const many = controlWithValidator(VValidators.composeAsync(evenAsync, moreThan10Async));
+                const many = controlWithValidator(WValidators.composeAsync(evenAsync, moreThan10Async));
 
                 many.setValue(100);
                 tick();
@@ -628,7 +628,7 @@ describe('async validators', () => {
             }));
 
             it('should fail and return merged results of all assigned validators, if at least one validator is failed', fakeAsync(() => {
-                const many = controlWithValidator(VValidators.composeAsync(evenAsync, moreThan10Async));
+                const many = controlWithValidator(WValidators.composeAsync(evenAsync, moreThan10Async));
 
                 many.setValue(5);
                 tick();
@@ -646,13 +646,13 @@ describe('async validators', () => {
 
         describe('and', () => {
             it('should not assign validator when there is no child validator', fakeAsync(() => {
-                const no = controlWithValidator(VValidators.andAsync());
+                const no = controlWithValidator(WValidators.andAsync());
                 tick();
                 expect(no.asyncValidator).toBeFalsy();
             }));
 
             it('should return results of the single assigned validator', fakeAsync(() => {
-                const single = controlWithValidator(VValidators.andAsync(evenAsync));
+                const single = controlWithValidator(WValidators.andAsync(evenAsync));
 
                 single.setValue(1);
                 tick();
@@ -664,7 +664,7 @@ describe('async validators', () => {
             }));
 
             it('should return results of the first failed validator', fakeAsync(() => {
-                const many = controlWithValidator(VValidators.andAsync(evenAsync, moreThan10Async));
+                const many = controlWithValidator(WValidators.andAsync(evenAsync, moreThan10Async));
 
                 many.setValue(5);
                 tick();
@@ -680,7 +680,7 @@ describe('async validators', () => {
             }));
 
             it('should successed if no any and validator is failed', fakeAsync(() => {
-                const many = controlWithValidator(VValidators.andAsync(evenAsync, moreThan10Async));
+                const many = controlWithValidator(WValidators.andAsync(evenAsync, moreThan10Async));
 
                 many.setValue(100);
                 tick();
@@ -690,13 +690,13 @@ describe('async validators', () => {
 
         describe('or', () => {
             it('should not assign validator when there is no child validator', fakeAsync(() => {
-                const no = controlWithValidator(VValidators.orAsync());
+                const no = controlWithValidator(WValidators.orAsync());
                 tick();
                 expect(no.asyncValidator).toBeFalsy();
             }));
 
             it('should return results of the single assigned validator', fakeAsync(() => {
-                const single = controlWithValidator(VValidators.orAsync(evenAsync));
+                const single = controlWithValidator(WValidators.orAsync(evenAsync));
 
                 single.setValue(1);
                 tick();
@@ -708,7 +708,7 @@ describe('async validators', () => {
             }));
 
             it('should successed if at least one validator is successed', fakeAsync(() => {
-                const many = controlWithValidator(VValidators.orAsync(evenAsync, moreThan10Async));
+                const many = controlWithValidator(WValidators.orAsync(evenAsync, moreThan10Async));
 
                 many.setValue(4);
                 tick();
@@ -724,7 +724,7 @@ describe('async validators', () => {
             }));
 
             it('should fail and return merged results if all validators are failed', fakeAsync(() => {
-                const many = controlWithValidator(VValidators.orAsync(evenAsync, moreThan10Async));
+                const many = controlWithValidator(WValidators.orAsync(evenAsync, moreThan10Async));
 
                 many.setValue(5);
                 tick();

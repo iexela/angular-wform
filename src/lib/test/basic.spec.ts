@@ -1,16 +1,16 @@
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
-import { getLastFormNode, vArray, vControl, vForm, VFormGroup, VFormNodeType, vGroup, VValidators } from '..';
-import { vNative, vPortal, vSkip } from '../basic';
-import { belarusToAustralia, belarusToRussia, Box, createFlightForm, createFlightVNode, createTaxControl, elephant, Flight, mouse, russiaToBelarus, vTaxModel, vTaxModelWithKeys } from './test-mocks';
+import { getLastFormNode, wArray, wControl, wForm, WFormGroup, WFormNodeType, wGroup, WValidators } from '..';
+import { wNative, wPortal, wSkip } from '../basic';
+import { belarusToAustralia, belarusToRussia, Box, createFlightForm, createFlightWNode, createTaxControl, elephant, Flight, mouse, russiaToBelarus, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
-const flightFactory = (value: Flight) => vGroup({
-    name: vControl(),
-    route: vArray(value.route.map(() => vControl())),
-    cost: vGroup({
-        price: vControl(),
-        discount: vControl(),
+const flightFactory = (value: Flight) => wGroup({
+    name: wControl(),
+    route: wArray(value.route.map(() => wControl())),
+    cost: wGroup({
+        price: wControl(),
+        discount: wControl(),
     }),
-    time: vControl({ disabled: true }),
+    time: wControl({ disabled: true }),
 });
 
 function errorHasMessage(...strs: string[]): RegExp {
@@ -20,16 +20,16 @@ function errorHasMessage(...strs: string[]): RegExp {
 describe('basic', () => {
     describe('virtual function', () => {
         it('should accept initial value', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(vControl());
-            vForm(fn).build(1 as number);
+            const fn = jasmine.createSpy('virtual-fn').and.returnValue(wControl());
+            wForm(fn).build(1 as number);
     
             expect(fn.calls.count()).toBe(1);
             expect(fn.calls.mostRecent().args[0]).toBe(1);
         });
     
         it('should accept value passed into "setValue" method', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.callFake(vControl);
-            const form = vForm(fn).build(1 as number);
+            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
+            const form = wForm(fn).build(1 as number);
     
             form.setValue(5);
     
@@ -38,8 +38,8 @@ describe('basic', () => {
         });
     
         it('should accept current value if "update" is called', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.callFake(vControl);
-            const form = vForm(fn).build(1 as number);
+            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
+            const form = wForm(fn).build(1 as number);
     
             form.update();
     
@@ -48,8 +48,8 @@ describe('basic', () => {
         });
     
         it('should not be called if value was changed using "control.setValue"', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.callFake(vControl);
-            const form = vForm(fn).build(1 as number);
+            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
+            const form = wForm(fn).build(1 as number);
     
             form.control.setValue(5);
     
@@ -59,10 +59,10 @@ describe('basic', () => {
     });
 
     describe('attach', () => {
-        it('should attach existing reactive form to vform', () => {
+        it('should attach existing reactive form to wform', () => {
             const control = createFlightForm(belarusToRussia);
 
-            const form = vForm(createFlightVNode).attach(control);
+            const form = wForm(createFlightWNode).attach(control);
 
             expect(form.value).toEqual(belarusToRussia);
             expect(form.control).toBe(control);
@@ -81,7 +81,7 @@ describe('basic', () => {
         it('should leave builder in "strict" mode', () => {
             const control = createFlightForm(belarusToRussia);
 
-            const form = vForm(createFlightVNode).attach(control);
+            const form = wForm(createFlightWNode).attach(control);
 
             const group = form.control as FormGroup;
 
@@ -95,7 +95,7 @@ describe('basic', () => {
         it('should update form as soon as some value has changed', () => {
             const factory = jasmine.createSpy('virtual-fn').and.callFake(flightFactory);
 
-            const form = vForm(factory)
+            const form = wForm(factory)
                 .updateOnChange()
                 .build(belarusToAustralia);
 
@@ -118,7 +118,7 @@ describe('basic', () => {
         it('should update form as soon as some value has changed (even when corresponding control is disabled)', () => {
             const factory = jasmine.createSpy('virtual-fn').and.callFake(flightFactory);
 
-            const form = vForm(factory)
+            const form = wForm(factory)
                 .updateOnChange()
                 .build(belarusToAustralia);
 
@@ -138,8 +138,8 @@ describe('basic', () => {
     describe('keyGenerator', () => {
         it('key generator does not generate key for existing controls', () => {
             const keyGenerator = jasmine.createSpy();
-            vForm(() =>
-                vGroup({ abc: vTaxModel }),
+            wForm(() =>
+                wGroup({ abc: vTaxModel }),
             ).keyGenerator(keyGenerator).build({ abc: { tax1: 1, tax2: [3, 4] } });
 
             expect(keyGenerator).not.toHaveBeenCalled();
@@ -147,8 +147,8 @@ describe('basic', () => {
 
         it('key generator generates key for each restored control', () => {
             const keyGenerator = jasmine.createSpy().and.returnValues([1, 2, 3, 4, 5]);
-            const form = vForm<boolean>((flag) =>
-                vGroup(flag
+            const form = wForm<boolean>((flag) =>
+                wGroup(flag
                         ? { abc: vTaxModel, tax: vTaxModelWithKeys }
                         : { abc: vTaxModel }),
             ).keyGenerator(keyGenerator).lenient().build(false);
@@ -178,13 +178,13 @@ describe('basic', () => {
             const subscriber = jasmine.createSpy('subscriber')
             const rawSubscriber = jasmine.createSpy('raw-subscriber')
 
-            const form = vForm((value: Box) => vGroup({
-                name: vControl(),
-                weight: vControl({
+            const form = wForm((value: Box) => wGroup({
+                name: wControl(),
+                weight: wControl({
                     disabled: value.volume! > 100,
-                    validator: value.name === 'mouse' ? VValidators.max(10) : VValidators.max(10000),
+                    validator: value.name === 'mouse' ? WValidators.max(10) : WValidators.max(10000),
                 }),
-                volume: vControl({
+                volume: wControl({
                     disabled: value.weight! < 10,
                 }),
             })).build(mouse);
@@ -203,12 +203,12 @@ describe('basic', () => {
 
     describe('errors', () => {
         it('"getControl" should throw error if control does not exist', () => {
-            const form = vForm(() => vGroup({
-                nested: vGroup({
-                    arr: vArray([
-                        vControl(),
-                        vGroup({
-                            field: vControl({ value: 'abc' }),
+            const form = wForm(() => wGroup({
+                nested: wGroup({
+                    arr: wArray([
+                        wControl(),
+                        wGroup({
+                            field: wControl({ value: 'abc' }),
                         }),
                     ]),
                 }),
@@ -222,11 +222,11 @@ describe('basic', () => {
         });
 
         it('"array reconcilation" should throw error if several items have the same key', () => {
-            const form = vForm(() => vGroup({
-                group: vGroup({
-                    nested: vArray([
-                        vControl({ key: 'abracadabra' }),
-                        vControl({ key: 'abracadabra' }),
+            const form = wForm(() => wGroup({
+                group: wGroup({
+                    nested: wArray([
+                        wControl({ key: 'abracadabra' }),
+                        wControl({ key: 'abracadabra' }),
                     ]),
                 }),
             })).build({});
@@ -234,68 +234,68 @@ describe('basic', () => {
             expect(() => form.update()).toThrowError(errorHasMessage('abracadabra', 'group.nested.{0, 1}'));
         });
 
-        it('"render operation" should throw error if type of vnode is unknown', () => {
-            expect(() => vForm(() => vGroup({
-                group: vGroup({
-                    nested: vArray([
-                        vControl({ key: 1 }),
+        it('"render operation" should throw error if type of wnode is unknown', () => {
+            expect(() => wForm(() => wGroup({
+                group: wGroup({
+                    nested: wArray([
+                        wControl({ key: 1 }),
                         { type: 100 },
-                        vControl({ key: 2 }),
+                        wControl({ key: 2 }),
                     ]),
                 }),
             })).build({})).toThrowError(errorHasMessage('group.nested.1'));
         });
 
-        it('"reconcilation of VFormControl" should throw error if type of vnode is different', () => {
-            const form = vForm<boolean>((flag: boolean) => vGroup({
-                group: vGroup({
-                    nested: vArray([
-                        vControl({ key: 1 }),
-                        flag ? vGroup({ key: 2 }, {}) : vControl({ key: 2 }),
-                        vControl({ key: 3 }),
+        it('"reconcilation of WFormControl" should throw error if type of wnode is different', () => {
+            const form = wForm<boolean>((flag: boolean) => wGroup({
+                group: wGroup({
+                    nested: wArray([
+                        wControl({ key: 1 }),
+                        flag ? wGroup({ key: 2 }, {}) : wControl({ key: 2 }),
+                        wControl({ key: 3 }),
                     ]),
                 }),
             })).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError(errorHasMessage(
                 'group.nested.1',
-                `requestedType = ${VFormNodeType[VFormNodeType.Group]}`,
+                `requestedType = ${WFormNodeType[WFormNodeType.Group]}`,
                 'control = FormControl',
             ));
         });
 
-        it('"reconcilation of VFormGroup" should throw error if type of vnode is different', () => {
-            const form = vForm<boolean>((flag: boolean) => vGroup({
-                group: vGroup({
-                    nested: vArray([
-                        vControl({ key: 1 }),
-                        flag ? vArray({ key: 2 }, []) : vGroup({ key: 2 }, {}),
-                        vControl({ key: 3 }),
+        it('"reconcilation of WFormGroup" should throw error if type of wnode is different', () => {
+            const form = wForm<boolean>((flag: boolean) => wGroup({
+                group: wGroup({
+                    nested: wArray([
+                        wControl({ key: 1 }),
+                        flag ? wArray({ key: 2 }, []) : wGroup({ key: 2 }, {}),
+                        wControl({ key: 3 }),
                     ]),
                 }),
             })).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError(errorHasMessage(
                 'group.nested.1',
-                `requestedType = ${VFormNodeType[VFormNodeType.Array]}`,
+                `requestedType = ${WFormNodeType[WFormNodeType.Array]}`,
                 'control = FormGroup',
             ));
         });
 
-        it('"reconcilation of VFormArray" should throw error if type of vnode is different', () => {
-            const form = vForm<boolean>((flag: boolean) => vGroup({
-                group: vGroup({
-                    nested: vArray([
-                        vControl({ key: 1 }),
-                        flag ? vControl({ key: 2 }) : vArray({ key: 2 }, []),
-                        vControl({ key: 3 }),
+        it('"reconcilation of WFormArray" should throw error if type of wnode is different', () => {
+            const form = wForm<boolean>((flag: boolean) => wGroup({
+                group: wGroup({
+                    nested: wArray([
+                        wControl({ key: 1 }),
+                        flag ? wControl({ key: 2 }) : wArray({ key: 2 }, []),
+                        wControl({ key: 3 }),
                     ]),
                 }),
             })).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError(errorHasMessage(
                 'group.nested.1',
-                `requestedType = ${VFormNodeType[VFormNodeType.Control]}`,
+                `requestedType = ${WFormNodeType[WFormNodeType.Control]}`,
                 'control = FormArray',
             ));
         });
@@ -305,7 +305,7 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if validation strategy is unknown', () => {
-            const form = vForm(() => vControl({ required: true }))
+            const form = wForm(() => wControl({ required: true }))
                 .validationStrategy(123 as any)
                 .build(1);
 
@@ -313,11 +313,11 @@ describe('basic', () => {
         });
 
         it('"reconcilation operation" should throw error if unmanaged control is found in strict mode', () => {
-            const form = vForm(() => vGroup({
-                group: vGroup({
-                    nested: vArray([
-                        vControl({ key: 'abracadabra' }),
-                        vControl({ key: 'abracadabra' }),
+            const form = wForm(() => wGroup({
+                group: wGroup({
+                    nested: wArray([
+                        wControl({ key: 'abracadabra' }),
+                        wControl({ key: 'abracadabra' }),
                     ]),
                 }),
             })).build({});
@@ -330,35 +330,35 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if root node is nil', () => {
-            expect(() => vForm(() => null as any).build(1)).toThrowError();
+            expect(() => wForm(() => null as any).build(1)).toThrowError();
         });
 
         it('"render operation" should throw error if root node is a placeholder', () => {
-            expect(() => vForm(() => vSkip() as any).build(1)).toThrowError();
+            expect(() => wForm(() => wSkip() as any).build(1)).toThrowError();
         });
 
         it('"render operation" should throw error if root node is a portal', () => {
-            expect(() => vForm(() => vPortal('name')).build(1)).toThrowError();
+            expect(() => wForm(() => wPortal('name')).build(1)).toThrowError();
         });
 
         it('"reconcilation operation" should throw error if root node is nil', () => {
-            const form = vForm((n: number) => n < 0 ? null as any : vControl()).build(1 as number);
+            const form = wForm((n: number) => n < 0 ? null as any : wControl()).build(1 as number);
 
             expect(() => form.setValue(-1)).toThrowError();
         });
 
         it('"render operation" should throw error if child of group is nil', () => {
-            expect(() => vForm(() => vGroup({
-                group: vGroup({
+            expect(() => wForm(() => wGroup({
+                group: wGroup({
                     nested: null as any,
                 }),
             })).build({})).toThrowError(errorHasMessage('group.nested'));
         });
 
         it('"reconcilation operation" should throw error if child of group is nil', () => {
-            const form = vForm<boolean>((flag: boolean) => vGroup({
-                group: vGroup({
-                    nested: flag ? null as any : vControl({ key: 2 }),
+            const form = wForm<boolean>((flag: boolean) => wGroup({
+                group: wGroup({
+                    nested: flag ? null as any : wControl({ key: 2 }),
                 }),
             })).build(false as boolean);
 
@@ -366,24 +366,24 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if child of array is nil', () => {
-            expect(() => vForm(() => vGroup({
-                group: vGroup({
-                    nested: vArray([
-                        vControl({ key: 1 }),
+            expect(() => wForm(() => wGroup({
+                group: wGroup({
+                    nested: wArray([
+                        wControl({ key: 1 }),
                         null as any,
-                        vControl({ key: 3 }),
+                        wControl({ key: 3 }),
                     ]),
                 }),
             })).build({})).toThrowError(errorHasMessage('group.nested.1'));
         });
 
         it('"reconcilation operation" should throw error if child of array is nil', () => {
-            const form = vForm<boolean>((flag: boolean) => vGroup({
-                group: vGroup({
-                    nested: vArray([
-                        vControl({ key: 1 }),
-                        flag ? null as any : vControl({ key: 2 }),
-                        vControl({ key: 3 }),
+            const form = wForm<boolean>((flag: boolean) => wGroup({
+                group: wGroup({
+                    nested: wArray([
+                        wControl({ key: 1 }),
+                        flag ? null as any : wControl({ key: 2 }),
+                        wControl({ key: 3 }),
                     ]),
                 }),
             })).build(false as boolean);
@@ -392,12 +392,12 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if native control is rendered into nil', () => {
-            expect(() => vForm(() => vNative()).build(1)).toThrowError()
+            expect(() => wForm(() => wNative()).build(1)).toThrowError()
         });
 
         it('"reconcilation operation" should throw error if native control is rendered into nil', () => {
             const control = new FormControl();
-            const form = vForm((flag: boolean) => vNative(flag ? undefined : control)).build(false as boolean);
+            const form = wForm((flag: boolean) => wNative(flag ? undefined : control)).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError()
         });
@@ -411,12 +411,12 @@ describe('basic', () => {
         });
 
         it('"array reconcilation" should print warning if item does not have a key', () => {
-            const form = vForm(() => vGroup({
-                group: vGroup({
-                    nested: vArray([
-                        vControl({ key: 1 }),
-                        vControl(),
-                        vControl({ key: 3 }),
+            const form = wForm(() => wGroup({
+                group: wGroup({
+                    nested: wArray([
+                        wControl({ key: 1 }),
+                        wControl(),
+                        wControl({ key: 3 }),
                     ]),
                 }),
             })).build({});

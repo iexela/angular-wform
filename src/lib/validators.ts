@@ -1,56 +1,56 @@
 import { AsyncValidatorFn, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { concat, defer, forkJoin } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { isAsyncValidatorNode, VAsyncCompoundValidatorNode, VAsyncFactoryValidatorNode, VAsyncSimpleValidatorNode, VAsyncValidatorFactory, VAsyncValidatorMixer, VAsyncValidatorNode, VAsyncValidatorNodeType } from '.';
+import { isAsyncValidatorNode, WAsyncCompoundValidatorNode, WAsyncFactoryValidatorNode, WAsyncSimpleValidatorNode, WAsyncValidatorFactory, WAsyncValidatorMixer, WAsyncValidatorNode, WAsyncValidatorNodeType } from '.';
 import { Nullable } from './common';
-import { isValidatorNode, VCompoundValidatorNode, VFactoryValidatorNode, VSimpleValidatorNode, VValidatorFactory, VValidatorMixer, VValidatorNode, VValidatorNodeType } from './model';
+import { isValidatorNode, WCompoundValidatorNode, WFactoryValidatorNode, WSimpleValidatorNode, WValidatorFactory, WValidatorMixer, WValidatorNode, WValidatorNodeType } from './model';
 
 // Validators
 
-export function vValidator<T>(validator: ValidatorFn, locals?: any[]): VSimpleValidatorNode {
+export function wValidator<T>(validator: ValidatorFn, locals?: any[]): WSimpleValidatorNode {
     return {
-        type: VValidatorNodeType.Simple,
+        type: WValidatorNodeType.Simple,
         validator,
         locals,
     };
 }
 
-export type VValidatorFactory0<T> = () => ValidatorFn;
-export type VValidatorFactory1<T, A1> = (a1: A1) => ValidatorFn;
-export type VValidatorFactory2<T, A1, A2> = (a1: A1, a2: A2) => ValidatorFn;
-export type VValidatorFactory3<T, A1, A2, A3> = (a1: A1, a2: A2, a3: A3) => ValidatorFn;
+export type WValidatorFactory0<T> = () => ValidatorFn;
+export type WValidatorFactory1<T, A1> = (a1: A1) => ValidatorFn;
+export type WValidatorFactory2<T, A1, A2> = (a1: A1, a2: A2) => ValidatorFn;
+export type WValidatorFactory3<T, A1, A2, A3> = (a1: A1, a2: A2, a3: A3) => ValidatorFn;
 
-export function vValidatorFactory<T>(factory: VValidatorFactory0<T>): () => VFactoryValidatorNode;
-export function vValidatorFactory<T, A1>(factory: VValidatorFactory1<T, A1>): (a1: A1) => VFactoryValidatorNode;
-export function vValidatorFactory<T, A1, A2>(factory: VValidatorFactory2<T, A1, A2>): (a1: A1, a2: A2) => VFactoryValidatorNode;
-export function vValidatorFactory<T, A1, A2, A3>(factory: VValidatorFactory3<T, A1, A2, A3>): (a1: A1, a2: A2, a3: A3) => VFactoryValidatorNode;
-export function vValidatorFactory<T>(factory: VValidatorFactory): (args: any[]) => VFactoryValidatorNode {
+export function wValidatorFactory<T>(factory: WValidatorFactory0<T>): () => WFactoryValidatorNode;
+export function wValidatorFactory<T, A1>(factory: WValidatorFactory1<T, A1>): (a1: A1) => WFactoryValidatorNode;
+export function wValidatorFactory<T, A1, A2>(factory: WValidatorFactory2<T, A1, A2>): (a1: A1, a2: A2) => WFactoryValidatorNode;
+export function wValidatorFactory<T, A1, A2, A3>(factory: WValidatorFactory3<T, A1, A2, A3>): (a1: A1, a2: A2, a3: A3) => WFactoryValidatorNode;
+export function wValidatorFactory<T>(factory: WValidatorFactory): (args: any[]) => WFactoryValidatorNode {
     return (...args) => ({
-        type: VValidatorNodeType.Factory,
+        type: WValidatorNodeType.Factory,
         factory,
         args,
     });
 }
 
-export function vCompoundValidator<T>(mixer: VValidatorMixer<T>): (...validatorsAndNodes: (ValidatorFn | VValidatorNode)[]) => VCompoundValidatorNode {
+export function wCompoundValidator<T>(mixer: WValidatorMixer<T>): (...validatorsAndNodes: (ValidatorFn | WValidatorNode)[]) => WCompoundValidatorNode {
     return function() {
-        const nodes = Array.from(arguments).map(item => isValidatorNode(item) ? item : vValidator(item));
+        const nodes = Array.from(arguments).map(item => isValidatorNode(item) ? item : wValidator(item));
         return {
-            type: VValidatorNodeType.Compound,
+            type: WValidatorNodeType.Compound,
             mixer,
             children: nodes,
         };
     };
 }
 
-export const andValidators = vCompoundValidator(validators => {
+export const andValidators = wCompoundValidator(validators => {
     if (validators.length === 0) {
         return validators;
     }
     return control => validators.reduce((errors, validator) => errors || validator(control), null as ReturnType<ValidatorFn>);
 });
 
-export const orValidators = vCompoundValidator(validators => {
+export const orValidators = wCompoundValidator(validators => {
     if (validators.length === 0) {
         return validators;
     }
@@ -60,47 +60,47 @@ export const orValidators = vCompoundValidator(validators => {
     };
 });
     
-export const composeValidators = vCompoundValidator(validators => validators);
+export const composeValidators = wCompoundValidator(validators => validators);
 
 // Async validators
 
-export function vValidatorAsync<T>(validator: AsyncValidatorFn, locals?: any[]): VAsyncSimpleValidatorNode {
+export function wValidatorAsync<T>(validator: AsyncValidatorFn, locals?: any[]): WAsyncSimpleValidatorNode {
     return {
-        type: VAsyncValidatorNodeType.Simple,
+        type: WAsyncValidatorNodeType.Simple,
         validator,
         locals,
     };
 }
 
-export type VAsyncValidatorFactory0<T> = () => AsyncValidatorFn;
-export type VAsyncValidatorFactory1<T, A1> = (a1: A1) => AsyncValidatorFn;
-export type VAsyncValidatorFactory2<T, A1, A2> = (a1: A1, a2: A2) => AsyncValidatorFn;
-export type VAsyncValidatorFactory3<T, A1, A2, A3> = (a1: A1, a2: A2, a3: A3) => AsyncValidatorFn;
+export type WAsyncValidatorFactory0<T> = () => AsyncValidatorFn;
+export type WAsyncValidatorFactory1<T, A1> = (a1: A1) => AsyncValidatorFn;
+export type WAsyncValidatorFactory2<T, A1, A2> = (a1: A1, a2: A2) => AsyncValidatorFn;
+export type WAsyncValidatorFactory3<T, A1, A2, A3> = (a1: A1, a2: A2, a3: A3) => AsyncValidatorFn;
 
-export function vValidatorFactoryAsync<T>(factory: VAsyncValidatorFactory0<T>): () => VAsyncFactoryValidatorNode;
-export function vValidatorFactoryAsync<T, A1>(factory: VAsyncValidatorFactory1<T, A1>): (a1: A1) => VAsyncFactoryValidatorNode;
-export function vValidatorFactoryAsync<T, A1, A2>(factory: VAsyncValidatorFactory2<T, A1, A2>): (a1: A1, a2: A2) => VAsyncFactoryValidatorNode;
-export function vValidatorFactoryAsync<T, A1, A2, A3>(factory: VAsyncValidatorFactory3<T, A1, A2, A3>): (a1: A1, a2: A2, a3: A3) => VAsyncFactoryValidatorNode;
-export function vValidatorFactoryAsync<T>(factory: VAsyncValidatorFactory): (args: any[]) => VAsyncFactoryValidatorNode {
+export function wValidatorFactoryAsync<T>(factory: WAsyncValidatorFactory0<T>): () => WAsyncFactoryValidatorNode;
+export function wValidatorFactoryAsync<T, A1>(factory: WAsyncValidatorFactory1<T, A1>): (a1: A1) => WAsyncFactoryValidatorNode;
+export function wValidatorFactoryAsync<T, A1, A2>(factory: WAsyncValidatorFactory2<T, A1, A2>): (a1: A1, a2: A2) => WAsyncFactoryValidatorNode;
+export function wValidatorFactoryAsync<T, A1, A2, A3>(factory: WAsyncValidatorFactory3<T, A1, A2, A3>): (a1: A1, a2: A2, a3: A3) => WAsyncFactoryValidatorNode;
+export function wValidatorFactoryAsync<T>(factory: WAsyncValidatorFactory): (args: any[]) => WAsyncFactoryValidatorNode {
     return (...args) => ({
-        type: VAsyncValidatorNodeType.Factory,
+        type: WAsyncValidatorNodeType.Factory,
         factory,
         args,
     });
 }
 
-export function vCompoundValidatorAsync<T>(mixer: VAsyncValidatorMixer<T>): (...validatorsAndNodes: (AsyncValidatorFn | VAsyncValidatorNode)[]) => VAsyncCompoundValidatorNode {
+export function wCompoundValidatorAsync<T>(mixer: WAsyncValidatorMixer<T>): (...validatorsAndNodes: (AsyncValidatorFn | WAsyncValidatorNode)[]) => WAsyncCompoundValidatorNode {
     return function() {
-        const nodes = Array.from(arguments).map(item => isAsyncValidatorNode(item) ? item : vValidatorAsync(item));
+        const nodes = Array.from(arguments).map(item => isAsyncValidatorNode(item) ? item : wValidatorAsync(item));
         return {
-            type: VAsyncValidatorNodeType.Compound,
+            type: WAsyncValidatorNodeType.Compound,
             mixer,
             children: nodes,
         };
     };
 }
 
-export const andAsyncValidators = vCompoundValidatorAsync(validators => {
+export const andAsyncValidators = wCompoundValidatorAsync(validators => {
     if (validators.length === 0) {
         return validators;
     }
@@ -109,7 +109,7 @@ export const andAsyncValidators = vCompoundValidatorAsync(validators => {
             .pipe(first<Nullable<ValidationErrors>>(Boolean, null));
 });
 
-export const orAsyncValidators = vCompoundValidatorAsync(validators => {
+export const orAsyncValidators = wCompoundValidatorAsync(validators => {
     if (validators.length === 0) {
         return validators;
     }
@@ -118,20 +118,20 @@ export const orAsyncValidators = vCompoundValidatorAsync(validators => {
             .pipe(map(errors => errors.every(Boolean) ? mergeErrors(errors) : null));
 });
     
-export const composeAsyncValidators = vCompoundValidatorAsync(validators => validators);
+export const composeAsyncValidators = wCompoundValidatorAsync(validators => validators);
 
 // Validator factories
 
-export const VValidators = {
-    min: vValidatorFactory(Validators.min),
-    max: vValidatorFactory(Validators.max),
-    required: vValidator(Validators.required),
-    requiredTrue: vValidator(Validators.requiredTrue),
-    email: vValidator(Validators.email),
-    minLength: vValidatorFactory(Validators.minLength),
-    maxLength: vValidatorFactory(Validators.maxLength),
-    pattern: vValidatorFactory(Validators.pattern),
-    nullValidator: vValidator(Validators.nullValidator),
+export const WValidators = {
+    min: wValidatorFactory(Validators.min),
+    max: wValidatorFactory(Validators.max),
+    required: wValidator(Validators.required),
+    requiredTrue: wValidator(Validators.requiredTrue),
+    email: wValidator(Validators.email),
+    minLength: wValidatorFactory(Validators.minLength),
+    maxLength: wValidatorFactory(Validators.maxLength),
+    pattern: wValidatorFactory(Validators.pattern),
+    nullValidator: wValidator(Validators.nullValidator),
     compose: composeValidators,
     and: andValidators,
     or: orValidators,

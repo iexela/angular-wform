@@ -1,20 +1,20 @@
 export {
-    VFormArrayOptions,
-    VFormControlOptions,
-    VFormGroupOptions,
-    vArray,
-    vControl,
-    vGroup,
+    WFormArrayOptions,
+    WFormControlOptions,
+    WFormGroupOptions,
+    wArray,
+    wControl,
+    wGroup,
 } from './basic';
 
 export {
-    VFormBuilder,
-    VFormBuilderFactory as VFormConstructor,
-    vForm,
+    WFormBuilder,
+    WFormBuilderFactory,
+    wForm,
 } from './builder';
 
 export {
-    VForm,
+    WForm,
 } from './form';
 
 export * from './model';
@@ -25,8 +25,8 @@ export {
 
 export {
     composeValidators,
-    vCompoundValidator,
-    vValidator,
-    vValidatorFactory,
-    VValidators,
+    wCompoundValidator,
+    wValidator,
+    wValidatorFactory,
+    WValidators,
 } from './validators';

@@ -1,3 +1,3 @@
 export { reconcile } from './root';
 export { getLastFormNode } from './registry';
-export { VFormOptions, VValidationStrategy, VReconcilationRequest, VReconcilationType, VKeyGenerator } from './model';
+export { WFormOptions, WValidationStrategy, WReconcilationRequest, WReconcilationType, WKeyGenerator } from './model';

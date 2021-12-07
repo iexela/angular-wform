@@ -1,154 +1,154 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
 import { ArrayItemOf } from './common';
 
-export type VPathElement = string | number;
+export type WPathElement = string | number;
 
 // Validators
 
-export enum VValidatorNodeType {
+export enum WValidatorNodeType {
     Compound, Simple, Factory
 }
 
-export interface VValidatorFactory {
+export interface WValidatorFactory {
     (...args: any[]): ValidatorFn;
 }
 
-export interface VValidatorMixer<T> {
+export interface WValidatorMixer<T> {
     (validators: ValidatorFn[]): ValidatorFn | ValidatorFn[];
 }
 
-export interface VCompoundValidatorNode {
-    type: VValidatorNodeType.Compound;
-    mixer: VValidatorMixer<any>;
-    children: VValidatorNode[];
+export interface WCompoundValidatorNode {
+    type: WValidatorNodeType.Compound;
+    mixer: WValidatorMixer<any>;
+    children: WValidatorNode[];
 }
 
-export interface VSimpleValidatorNode {
-    type: VValidatorNodeType.Simple;
+export interface WSimpleValidatorNode {
+    type: WValidatorNodeType.Simple;
     validator: ValidatorFn;
     locals?: any[];
 }
 
-export interface VFactoryValidatorNode {
-    type: VValidatorNodeType.Factory;
-    factory: VValidatorFactory;
+export interface WFactoryValidatorNode {
+    type: WValidatorNodeType.Factory;
+    factory: WValidatorFactory;
     args: any[];
 }
 
-export type VValidatorNode = VCompoundValidatorNode | VSimpleValidatorNode | VFactoryValidatorNode;
+export type WValidatorNode = WCompoundValidatorNode | WSimpleValidatorNode | WFactoryValidatorNode;
 
 // Async validators
 
-export enum VAsyncValidatorNodeType {
+export enum WAsyncValidatorNodeType {
     Compound, Simple, Factory
 }
 
-export interface VAsyncValidatorFactory {
+export interface WAsyncValidatorFactory {
     (...args: any[]): AsyncValidatorFn;
 }
 
-export interface VAsyncValidatorMixer<T> {
+export interface WAsyncValidatorMixer<T> {
     (validators: AsyncValidatorFn[]): AsyncValidatorFn | AsyncValidatorFn[];
 }
 
-export interface VAsyncCompoundValidatorNode {
-    type: VAsyncValidatorNodeType.Compound;
-    mixer: VAsyncValidatorMixer<any>;
-    children: VAsyncValidatorNode[];
+export interface WAsyncCompoundValidatorNode {
+    type: WAsyncValidatorNodeType.Compound;
+    mixer: WAsyncValidatorMixer<any>;
+    children: WAsyncValidatorNode[];
 }
 
-export interface VAsyncSimpleValidatorNode {
-    type: VAsyncValidatorNodeType.Simple;
+export interface WAsyncSimpleValidatorNode {
+    type: WAsyncValidatorNodeType.Simple;
     validator: AsyncValidatorFn;
     locals?: any[];
 }
 
-export interface VAsyncFactoryValidatorNode {
-    type: VAsyncValidatorNodeType.Factory;
-    factory: VAsyncValidatorFactory;
+export interface WAsyncFactoryValidatorNode {
+    type: WAsyncValidatorNodeType.Factory;
+    factory: WAsyncValidatorFactory;
     args: any[];
 }
 
-export type VAsyncValidatorNode = VAsyncCompoundValidatorNode | VAsyncSimpleValidatorNode | VAsyncFactoryValidatorNode;
+export type WAsyncValidatorNode = WAsyncCompoundValidatorNode | WAsyncSimpleValidatorNode | WAsyncFactoryValidatorNode;
 
 // Form nodes
 
-export enum VFormNodeType {
+export enum WFormNodeType {
     Control, Group, Array, Native, Portal, Placeholder
 }
 
-export enum VFormHooks {
+export enum WFormHooks {
     Change = 'change',
     Blur = 'blur',
     Submit = 'submit',
 }
 
-export interface VFormNodeBase {
+export interface WFormNodeBase {
     key?: any;
-    type: VFormNodeType;
+    type: WFormNodeType;
     data: Record<string, any>;
     disabled: boolean;
-    validator?: VValidatorNode;
-    asyncValidator?: VAsyncValidatorNode;
+    validator?: WValidatorNode;
+    asyncValidator?: WAsyncValidatorNode;
     dirty?: boolean;
     touched?: boolean;
 }
 
-export interface VFormNodeCreatedBase extends VFormNodeBase {
-    updateOn?: VFormHooks;
+export interface WFormNodeCreatedBase extends WFormNodeBase {
+    updateOn?: WFormHooks;
 }
 
-export interface VFormControl<T> extends VFormNodeCreatedBase {
-    type: VFormNodeType.Control;
+export interface WFormControl<T> extends WFormNodeCreatedBase {
+    type: WFormNodeType.Control;
     value?: T;
 }
 
-export type VFormGroupChildren = { [name: string]: VFormNode | VFormPlaceholder };
+export type WFormGroupChildren = { [name: string]: WFormNode | WFormPlaceholder };
 
-export interface VFormGroup<C extends VFormGroupChildren = VFormGroupChildren> extends VFormNodeCreatedBase {
-    type: VFormNodeType.Group;
+export interface WFormGroup<C extends WFormGroupChildren = WFormGroupChildren> extends WFormNodeCreatedBase {
+    type: WFormNodeType.Group;
     children: C;
 }
 
-export type VFormArrayChildren = (VFormNode | VFormPlaceholder)[];
+export type WFormArrayChildren = (WFormNode | WFormPlaceholder)[];
 
-export interface VFormArray<C extends VFormArrayChildren = VFormArrayChildren> extends VFormNodeCreatedBase {
-    type: VFormNodeType.Array;
+export interface WFormArray<C extends WFormArrayChildren = WFormArrayChildren> extends WFormNodeCreatedBase {
+    type: WFormNodeType.Array;
     children: C;
 }
 
-export interface VFormNative<T> extends VFormNodeBase {
-    type: VFormNodeType.Native;
+export interface WFormNative<T> extends WFormNodeBase {
+    type: WFormNodeType.Native;
     control?: AbstractControl;
     value?: T;
 }
 
-export interface VFormPortal {
-    type: VFormNodeType.Portal;
+export interface WFormPortal {
+    type: WFormNodeType.Portal;
     name: string;
 }
 
-export interface VFormPlaceholder {
-    type: VFormNodeType.Placeholder;
+export interface WFormPlaceholder {
+    type: WFormNodeType.Placeholder;
 }
 
-export type VThisFormNode = VFormGroup<any> | VFormArray<any> | VFormControl<any> | VFormNative<any>;
-export type VFormNode = VThisFormNode | VFormPortal;
+export type WThisFormNode = WFormGroup<any> | WFormArray<any> | WFormControl<any> | WFormNative<any>;
+export type WFormNode = WThisFormNode | WFormPortal;
 
-export interface VFormNodeFactory<TValue, TFormNode extends VFormNode> {
+export interface WFormNodeFactory<TValue, TFormNode extends WFormNode> {
     (value: TValue): TFormNode;
 }
 
-export interface VFormNodePatcher {
-    (control: AbstractControl): VFormNode;
+export interface WFormNodePatcher {
+    (control: AbstractControl): WFormNode;
 }
 
-export function isValidatorNode(value: any): value is VValidatorNode {
-    return !!VValidatorNodeType[value['type']];
+export function isValidatorNode(value: any): value is WValidatorNode {
+    return !!WValidatorNodeType[value['type']];
 }
 
-export function isAsyncValidatorNode(value: any): value is VAsyncValidatorNode {
-    return !!VAsyncValidatorNodeType[value['type']];
+export function isAsyncValidatorNode(value: any): value is WAsyncValidatorNode {
+    return !!WAsyncValidatorNodeType[value['type']];
 }
 
 const FIELD_TO_REMOVE = Symbol('field-to-remove');
@@ -156,35 +156,35 @@ type FieldToRemove = typeof FIELD_TO_REMOVE;
 
 type CleanRemovedFields<T> = Omit<T, { [P in keyof T]: FieldToRemove extends T[P] ? P : never }[keyof T]>;
 
-type FormGroupValueOf<TValue extends object, TFormGroupChildren extends VFormGroupChildren> = CleanRemovedFields<{
+type FormGroupValueOf<TValue extends object, TFormGroupChildren extends WFormGroupChildren> = CleanRemovedFields<{
     [P in keyof TValue]: P extends keyof TFormGroupChildren
         ? ExtractFormValue<TValue[P], TFormGroupChildren[P]>
         : FieldToRemove;
 }>;
 
-type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends VFormArrayChildren> =
+type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends WFormArrayChildren> =
     ExtractFormValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
 
 export type ExtractFormValue<TValue, TFormNode> =
     {} extends TValue
         ? GetFormValue<TFormNode>
-        : (TFormNode extends VFormGroup<infer RGroupChildren>
+        : (TFormNode extends WFormGroup<infer RGroupChildren>
             ? (TValue extends object ? FormGroupValueOf<TValue, RGroupChildren> : never)
-            : (TFormNode extends VFormArray<infer RArrayChildren>
+            : (TFormNode extends WFormArray<infer RArrayChildren>
                 ? (TValue extends any[] ? FormArrayValueOf<TValue, RArrayChildren> : never)
-                : (TFormNode extends (VFormControl<infer R> | VFormNative<infer R>)
+                : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
                     ? TValue | (any extends R ? never : R)
-                    : (TFormNode extends (VFormPortal | VFormPlaceholder)
+                    : (TFormNode extends (WFormPortal | WFormPlaceholder)
                         ? any
                         : never))));
 
 export type GetFormValue<TFormNode> =
-    TFormNode extends VFormGroup<infer RGroupChildren>
+    TFormNode extends WFormGroup<infer RGroupChildren>
         ? { [P in keyof RGroupChildren]?: GetFormValue<RGroupChildren[P]> }
-        : (TFormNode extends VFormArray<infer RArrayChildren>
+        : (TFormNode extends WFormArray<infer RArrayChildren>
             ? GetFormValue<ArrayItemOf<RArrayChildren>>[]
-            : (TFormNode extends (VFormControl<infer R> | VFormNative<infer R>)
+            : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
                 ? R
-                : (TFormNode extends (VFormPortal | VFormPlaceholder)
+                : (TFormNode extends (WFormPortal | WFormPlaceholder)
                     ? any
                     : never)));

@@ -1,13 +1,13 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
-import { VAsyncValidatorNode, VValidatorNode } from 'src/lib';
+import { WAsyncValidatorNode, WValidatorNode } from 'src/lib';
 import { Maybe } from 'src/lib/common';
 import { arrayify } from '../../utils';
 import { composeAsyncValidators, composeValidators } from '../../validators';
 import { toCondition, whenAll } from './conditions';
 import { FormSampleArray, FormSampleControl, FormSampleGroup, FormSampleNative, FormSampleNode, FormSampleNodeType, FormSampleNoOptionsNoOptions, FormSampleOptions, FormSamplePlaceholder, FormSamplePortal, SampleEnvironmentPredicate } from './model';
 
-type AnyValidator = ValidatorFn | VValidatorNode | (ValidatorFn | VValidatorNode)[];
-type AnyAsyncValidator = AsyncValidatorFn | VAsyncValidatorNode | (AsyncValidatorFn | VAsyncValidatorNode)[];
+type AnyValidator = ValidatorFn | WValidatorNode | (ValidatorFn | WValidatorNode)[];
+type AnyAsyncValidator = AsyncValidatorFn | WAsyncValidatorNode | (AsyncValidatorFn | WAsyncValidatorNode)[];
 
 type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator' | 'asyncValidator' | 'disabled' | 'visible'>> & {
     disabled?: SampleEnvironmentFlag;
@@ -26,11 +26,11 @@ export type FormSampleArrayChildren = (FormSampleNode | FormSamplePlaceholder)[]
 export type FormSampleNativeOptions<T> = Omit<MakeOptions<FormSampleNative<T>>, 'control'>;
 export type FormSampleOptionsOptions = Omit<FormSampleOptions<any>, 'type' | 'child'>;
 
-function createValidator(validator?: AnyValidator): Maybe<VValidatorNode> {
+function createValidator(validator?: AnyValidator): Maybe<WValidatorNode> {
     return validator ? composeValidators(...arrayify(validator)) : undefined;
 }
 
-function createAsyncValidator(validator?: AnyAsyncValidator): Maybe<VAsyncValidatorNode> {
+function createAsyncValidator(validator?: AnyAsyncValidator): Maybe<WAsyncValidatorNode> {
     return validator ? composeAsyncValidators(...arrayify(validator)) : undefined;
 }
 

@@ -1,39 +1,39 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
 import { getLastFormNode } from '.';
-import { VFormGroupChildren, VFormNative, VFormPlaceholder, VFormPortal, VPathElement, VThisFormNode } from '..';
+import { WFormNative, WFormPlaceholder, WFormPortal, WPathElement, WThisFormNode } from '..';
 import { Maybe } from '../common';
-import { VFormArray, VFormArrayChildren, VFormControl, VFormGroup, VFormNode, VFormNodeType } from '../model';
+import { WFormArray, WFormControl, WFormGroup, WFormNode, WFormNodeType } from '../model';
 import { arrayDiff, getControlTypeName, hasField, isControlValue, mapValues, objectDiff, pickBy } from '../utils';
 import { getLastFormNodeOrNothing, registerRenderResult, registerRoot } from './registry';
-import { VRenderContext } from './render-context';
+import { WRenderContext } from './render-context';
 import { processValidators } from './validators';
 import { processAsyncValidators } from './validators-async';
 
-export function processNode(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNode | VFormPlaceholder, value: any, control?: AbstractControl): AbstractControl {
+export function processNode(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFormNode | WFormPlaceholder, value: any, control?: AbstractControl): AbstractControl {
     if (node == null) {
         throw Error(`Node is nil: ${ctx.pathTo(name).join('.')}`);
     }
 
     switch (node.type) {
-        case VFormNodeType.Control:
+        case WFormNodeType.Control:
             return processControl(ctx, name, node, value, control);
-        case VFormNodeType.Group:
+        case WFormNodeType.Group:
             return processGroup(ctx, name, node, value, control as FormGroup);
-        case VFormNodeType.Array:
+        case WFormNodeType.Array:
             return processArray(ctx, name, node, value, control as FormArray);
-        case VFormNodeType.Native:
+        case WFormNodeType.Native:
             return processNative(ctx, name, node, value);
-        case VFormNodeType.Portal:
+        case WFormNodeType.Portal:
             return processPortal(ctx, name, node, value, control);
         default:
-            throw Error(`Unsupported node type (${VFormNodeType[node.type] || node.type}): ${ctx.pathTo(name).join('.')}`);
+            throw Error(`Unsupported node type (${WFormNodeType[node.type] || node.type}): ${ctx.pathTo(name).join('.')}`);
     }
 }
 
-function processPortal(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormPortal, value: any, control?: AbstractControl): AbstractControl {
+function processPortal(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFormPortal, value: any, control?: AbstractControl): AbstractControl {
     const form = ctx.portalHost.getForm(node.name);
     if (form == null) {
-        throw Error(`Portal node is rendered when it is not bound to the vform: ${ctx.pathTo(name).join('.')}
+        throw Error(`Portal node is rendered when it is not bound to the wform: ${ctx.pathTo(name).join('.')}
                     Typically this happens when portal is used in the root of the form.
                     But portal is not allowed to use in the root of the form.`);
     }
@@ -50,7 +50,7 @@ function processPortal(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFo
     return form.control;
 }
 
-function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormNative<any>, value: any): AbstractControl {
+function processNative(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFormNative<any>, value: any): AbstractControl {
     value = node.hasOwnProperty('value') ? node.value : value;
     
     const { control } = node;
@@ -87,7 +87,7 @@ function processNative(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFo
     return control;
 }
 
-function processControl(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormControl<any>, value: any, control?: AbstractControl): AbstractControl {
+function processControl(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFormControl<any>, value: any, control?: AbstractControl): AbstractControl {
     value = node.hasOwnProperty('value') ? node.value : value;
 
     if (!node || !control) {
@@ -110,7 +110,7 @@ function processControl(ctx: VRenderContext, name: Maybe<VPathElement>, node: VF
     }
 
     if (!(control instanceof FormControl)) {
-        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Control, control);
+        throw makeNodeTypeModifiedError(ctx.pathTo(name), WFormNodeType.Control, control);
     }
 
     const nextDisabled = ctx.tryDisabled(node.disabled);
@@ -140,7 +140,7 @@ function processControl(ctx: VRenderContext, name: Maybe<VPathElement>, node: VF
     return control;
 }
 
-function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VFormGroup, value: any, control?: FormGroup): AbstractControl {
+function processGroup(ctx: WRenderContext,name: Maybe<WPathElement>, node: WFormGroup, value: any, control?: FormGroup): AbstractControl {
     if (!control) {
         ctx.push(name, node);
 
@@ -149,7 +149,7 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
         const group = new FormGroup(
             mapValues(
                 pickBy(node.children, ctx.isUsedNode),
-                (child, key) => processNode(ctx, key, child as VFormNode, value?.[key])),
+                (child, key) => processNode(ctx, key, child as WFormNode, value?.[key])),
             {
                 validators: validator.compiled,
                 asyncValidators: asyncValidator.compiled,
@@ -171,7 +171,7 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
     }
 
     if (!(control instanceof FormGroup)) {
-        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Group, control);
+        throw makeNodeTypeModifiedError(ctx.pathTo(name), WFormNodeType.Group, control);
     }
 
     ctx.push(name, node);
@@ -187,10 +187,10 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
     const { added, removed, updated } = objectDiff(currentChildrenNodes, pickBy(node.children, ctx.isUsedNode));
     added.forEach(key => control.setControl(
         key,
-        processNode(ctx, key, node.children[key] as VFormNode, value?.[key]),
+        processNode(ctx, key, node.children[key] as WFormNode, value?.[key]),
     ));
     removed.forEach(key => control.removeControl(key));
-    updated.forEach(key => processNode(ctx, key, node.children[key] as VFormNode, value?.[key], control.controls[key]));
+    updated.forEach(key => processNode(ctx, key, node.children[key] as WFormNode, value?.[key], control.controls[key]));
 
     // if (control.disabled !== nextDisabled && nextDisabled) {
     //     control.disable();
@@ -213,7 +213,7 @@ function processGroup(ctx: VRenderContext,name: Maybe<VPathElement>, node: VForm
     return control;
 }
 
-function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFormArray, value: any, control?: FormArray): AbstractControl {
+function processArray(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFormArray, value: any, control?: FormArray): AbstractControl {
     if (!control) {
         ctx.push(name, node);
 
@@ -243,7 +243,7 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     }
 
     if (!(control instanceof FormArray)) {
-        throw makeNodeTypeModifiedError(ctx.pathTo(name), VFormNodeType.Array, control);
+        throw makeNodeTypeModifiedError(ctx.pathTo(name), WFormNodeType.Array, control);
     }
 
     ctx.push(name, node);
@@ -284,12 +284,12 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     removed.reverse().forEach(index => control.removeAt(index));
     added.forEach(index => control.insert(
         index,
-        processNode(ctx, index, nextChildrenNodes[index] as VFormNode, value?.[index]),
+        processNode(ctx, index, nextChildrenNodes[index] as WFormNode, value?.[index]),
     ));
     updated.forEach(({ previous, next }) => {
         const nextControl = indexToControl[previous];
 
-        processNode(ctx, next, nextChildrenNodes[next] as VFormNode, value?.[next], nextControl);
+        processNode(ctx, next, nextChildrenNodes[next] as WFormNode, value?.[next], nextControl);
 
         if (control.controls[next] !== nextControl) {
             control.setControl(next, nextControl);
@@ -324,7 +324,7 @@ function processArray(ctx: VRenderContext, name: Maybe<VPathElement>, node: VFor
     return control;
 }
 
-function processTinyFlags(node: VThisFormNode, control: AbstractControl): void {
+function processTinyFlags(node: WThisFormNode, control: AbstractControl): void {
     if (hasField(node, 'touched') && node.touched !== control.touched) {
         if (node.touched) {
             control.markAsTouched();
@@ -346,7 +346,7 @@ interface VKeyOnlyFormNode {
     key: any;
 }
 
-function getOrRestoreFormNodeWithKey(ctx: VRenderContext, name: Maybe<VPathElement>, control: AbstractControl): VFormNode | VKeyOnlyFormNode {
+function getOrRestoreFormNodeWithKey(ctx: WRenderContext, name: Maybe<WPathElement>, control: AbstractControl): WFormNode | VKeyOnlyFormNode {
     const node = getLastFormNodeOrNothing(control);
     if (node) {
         return node;
@@ -354,7 +354,7 @@ function getOrRestoreFormNodeWithKey(ctx: VRenderContext, name: Maybe<VPathEleme
 
     if (ctx.options.strict) {
         throw Error(`Unexpected control found: ${ctx.pathTo(name).join('.')}
-                    Since vform works in strict mode, unmanaged controls are not allowed.
+                    Since wform works in strict mode, unmanaged controls are not allowed.
                     You need to do one of the following
                     * Get rid of adding unmanaged controls
                     * If you really need to add controls manually, try to use vNative/vPortal
@@ -366,12 +366,12 @@ function getOrRestoreFormNodeWithKey(ctx: VRenderContext, name: Maybe<VPathEleme
     };
 }
 
-function makeNodeTypeModifiedError(path: VPathElement[], requestedType: VFormNodeType, control: AbstractControl): Error {
+function makeNodeTypeModifiedError(path: WPathElement[], requestedType: WFormNodeType, control: AbstractControl): Error {
     throw Error(`Changing of form control type is not supported: ${path.join('.')},
-                 requestedType = ${VFormNodeType[requestedType]},
+                 requestedType = ${WFormNodeType[requestedType]},
                  control = ${getControlTypeName(control)}`);
 }
 
-function isPortalNode(node: VFormNode | VKeyOnlyFormNode): node is VFormPortal {
-    return (node as VFormNode).type === VFormNodeType.Portal;
+function isPortalNode(node: WFormNode | VKeyOnlyFormNode): node is WFormPortal {
+    return (node as WFormNode).type === WFormNodeType.Portal;
 }

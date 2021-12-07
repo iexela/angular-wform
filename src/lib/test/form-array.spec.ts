@@ -1,17 +1,17 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormArray, FormControl } from '@angular/forms';
-import { getLastFormNode, vArray, vControl, VForm, vForm, VFormArrayChildren, VFormArrayOptions, VFormBuilder, VFormControlOptions, VFormHooks, vGroup, vValidator } from '..';
-import { vNative, vPortal, vSkip } from '../basic';
-import { vValidatorAsync } from '../validators';
+import { getLastFormNode, wArray, wControl, WForm, wForm, WFormArrayChildren, WFormArrayOptions, WFormBuilder, WFormControlOptions, WFormHooks, wGroup, wValidator } from '..';
+import { wNative, wPortal, wSkip } from '../basic';
+import { wValidatorAsync } from '../validators';
 import { Box, createTaxControl, elephant, even, krokodile, moreThan10, mouse, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
-function defaultItemRenderer<T>(value: T, index: number): VFormControlOptions<T> {
+function defaultItemRenderer<T>(value: T, index: number): WFormControlOptions<T> {
     return { key: index, value };
 }
 
-function withItem<T>(items: T[], fn: (value: T, index: number) => VFormControlOptions<T> = defaultItemRenderer): VFormArrayChildren {
-    return (items || []).map((item, index) => vControl(fn(item, index)));
+function withItem<T>(items: T[], fn: (value: T, index: number) => WFormControlOptions<T> = defaultItemRenderer): WFormArrayChildren {
+    return (items || []).map((item, index) => wControl(fn(item, index)));
 }
 
 const fibonaci5 = [0, 1, 1, 2, 3];
@@ -20,47 +20,47 @@ const fibonaci10 = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34];
 const fibonaci2_5 = [1, 2, 3, 5, 8];
 const fibonaci2_10 = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
 
-const lengthLessThan10 = vValidator(control => control.value.length >= 10 ? { length: true } : null);
-const startedFrom0 = vValidator(control => control.value[0] !== 0 ? { zero: true } : null);
+const lengthLessThan10 = wValidator(control => control.value.length >= 10 ? { length: true } : null);
+const startedFrom0 = wValidator(control => control.value[0] !== 0 ? { zero: true } : null);
 
-const lengthLessThan10Async = vValidatorAsync(control => Promise.resolve(control.value.length >= 10 ? { length: true } : null));
-const startedFrom0Async = vValidatorAsync(control => Promise.resolve(control.value[0] !== 0 ? { zero: true } : null));
+const lengthLessThan10Async = wValidatorAsync(control => Promise.resolve(control.value.length >= 10 ? { length: true } : null));
+const startedFrom0Async = wValidatorAsync(control => Promise.resolve(control.value[0] !== 0 ? { zero: true } : null));
 
-function renderArray(initial: number[], options: VFormArrayOptions = {}, children?: VFormArrayChildren): VForm<number[]> {
-    return vForm((current: number[]) => vArray(options, children || withItem(current))).lenient().build(initial);
+function renderArray(initial: number[], options: WFormArrayOptions = {}, children?: WFormArrayChildren): WForm<number[]> {
+    return wForm((current: number[]) => wArray(options, children || withItem(current))).lenient().build(initial);
 }
 
 function renderConditionalArray(initial: number[],
                                 anchor: number,
-                                [optionsLess, childrenLess]: [VFormArrayOptions, VFormArrayChildren?],
-                                [optionsMore, childrenMore]: [VFormArrayOptions, VFormArrayChildren?]): VForm<number[]> {
-    return vForm((value: number[]) => {
+                                [optionsLess, childrenLess]: [WFormArrayOptions, WFormArrayChildren?],
+                                [optionsMore, childrenMore]: [WFormArrayOptions, WFormArrayChildren?]): WForm<number[]> {
+    return wForm((value: number[]) => {
         const isLess = value.every(v => v < anchor);
-        return vArray(isLess ? optionsLess : optionsMore, (isLess ? childrenLess : childrenMore) || withItem(value));
+        return wArray(isLess ? optionsLess : optionsMore, (isLess ? childrenLess : childrenMore) || withItem(value));
     }).lenient().build(initial);
 }
 
-function renderDisabledConditionalGroup(initial: number[], anchor: number): VForm<number[]> {
+function renderDisabledConditionalGroup(initial: number[], anchor: number): WForm<number[]> {
     return renderConditionalArray(initial, anchor, [{ disabled: true }], [{ disabled: false }]);
 }
 
-function boxArrayFormBuilder(): VFormBuilder<Box[]> {
-    return vForm((boxes: Box[]) => vArray(boxes.map(box => vGroup({ key: box.name }, {
-        name: vControl(),
-        weight: vControl(),
-        volume: vControl(),
+function boxArrayFormBuilder(): WFormBuilder<Box[]> {
+    return wForm((boxes: Box[]) => wArray(boxes.map(box => wGroup({ key: box.name }, {
+        name: wControl(),
+        weight: wControl(),
+        volume: wControl(),
     }))));
 }
 
-function boxArrayFormBuilderWithoutKeys(): VFormBuilder<Box[]> {
-    return vForm((boxes: Box[]) => vArray(boxes.map(box => vGroup({
-        name: vControl(),
-        weight: vControl(),
-        volume: vControl(),
+function boxArrayFormBuilderWithoutKeys(): WFormBuilder<Box[]> {
+    return wForm((boxes: Box[]) => wArray(boxes.map(box => wGroup({
+        name: wControl(),
+        weight: wControl(),
+        volume: wControl(),
     }))));
 }
 
-describe('VFormArray', () => {
+describe('WFormArray', () => {
     describe('first render', () => {
         it('should render control', () => {
             expect(renderArray(fibonaci5).control).toBeTruthy();
@@ -205,10 +205,10 @@ describe('VFormArray', () => {
         });
 
         it('should not render skipped control', () => {
-            const form = vForm((numbers: number[]) => vArray([
-                vSkip(),
-                vControl({ key: 1, value: numbers[0] }),
-                vControl({ key: 2, value: numbers[1] }),
+            const form = wForm((numbers: number[]) => wArray([
+                wSkip(),
+                wControl({ key: 1, value: numbers[0] }),
+                wControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -217,10 +217,10 @@ describe('VFormArray', () => {
         });
 
         it('should not render native control, if it is not bound', () => {
-            const form = vForm((numbers: number[]) => vArray([
-                vNative(),
-                vControl({ key: 1, value: numbers[0] }),
-                vControl({ key: 2, value: numbers[1] }),
+            const form = wForm((numbers: number[]) => wArray([
+                wNative(),
+                wControl({ key: 1, value: numbers[0] }),
+                wControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -230,10 +230,10 @@ describe('VFormArray', () => {
 
         it('should render native control, if it is bound', () => {
             const control = new FormControl(999);
-            const form = vForm((numbers: number[]) => vArray([
-                vNative(control, { key: 999, value: control.value }),
-                vControl({ key: 1, value: numbers[0] }),
-                vControl({ key: 2, value: numbers[1] }),
+            const form = wForm((numbers: number[]) => wArray([
+                wNative(control, { key: 999, value: control.value }),
+                wControl({ key: 1, value: numbers[0] }),
+                wControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -242,10 +242,10 @@ describe('VFormArray', () => {
         });
 
         it('should not render portal control, if it is not connected', () => {
-            const form = vForm((numbers: number[]) => vArray([
-                vPortal('start'),
-                vControl({ key: 1, value: numbers[0] }),
-                vControl({ key: 2, value: numbers[1] }),
+            const form = wForm((numbers: number[]) => wArray([
+                wPortal('start'),
+                wControl({ key: 1, value: numbers[0] }),
+                wControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -256,26 +256,26 @@ describe('VFormArray', () => {
         it('should set updateOn flag to "change", by default', () => {
             const form = renderArray(fibonaci5, {});
 
-            expect(form.control.updateOn).toBe(VFormHooks.Change);
-            expect(form.get('1').updateOn).toBe(VFormHooks.Change);
+            expect(form.control.updateOn).toBe(WFormHooks.Change);
+            expect(form.get('1').updateOn).toBe(WFormHooks.Change);
         });
 
         it('should allow to set updateOn flag', () => {
-            const form = renderArray(fibonaci5, { updateOn: VFormHooks.Blur });
+            const form = renderArray(fibonaci5, { updateOn: WFormHooks.Blur });
 
-            expect(form.control.updateOn).toBe(VFormHooks.Blur);
-            expect(form.get('1').updateOn).toBe(VFormHooks.Blur);
+            expect(form.control.updateOn).toBe(WFormHooks.Blur);
+            expect(form.get('1').updateOn).toBe(WFormHooks.Blur);
         });
 
         it('should allow to redeclare updateOn flag on child level', () => {
             const form = renderArray(
                 fibonaci5,
-                { updateOn: VFormHooks.Blur },
-                withItem(fibonaci5, (_, i) => (i === 1 ? { updateOn: VFormHooks.Submit } : {})));
+                { updateOn: WFormHooks.Blur },
+                withItem(fibonaci5, (_, i) => (i === 1 ? { updateOn: WFormHooks.Submit } : {})));
 
-            expect(form.control.updateOn).toBe(VFormHooks.Blur);
-            expect(form.get('0').updateOn).toBe(VFormHooks.Blur);
-            expect(form.get('1').updateOn).toBe(VFormHooks.Submit);
+            expect(form.control.updateOn).toBe(WFormHooks.Blur);
+            expect(form.get('0').updateOn).toBe(WFormHooks.Blur);
+            expect(form.get('1').updateOn).toBe(WFormHooks.Submit);
         });
     });
 
@@ -285,13 +285,13 @@ describe('VFormArray', () => {
         });
     
         it('should return only fields mapped to controls', () => {
-            const form = vForm(() => vArray(withItem(fibonaci5))).build(fibonaci10);
+            const form = wForm(() => wArray(withItem(fibonaci5))).build(fibonaci10);
 
             expect(form.value).toEqual(fibonaci5);
         });
     
         it('should return all fields mapped to controls', () => {
-            const form = vForm(() => vArray(withItem(fibonaci10))).build(fibonaci5);
+            const form = wForm(() => wArray(withItem(fibonaci10))).build(fibonaci5);
 
             expect(form.value).toEqual(fibonaci10);
         });
@@ -415,8 +415,8 @@ describe('VFormArray', () => {
             expect(form.get('1').disabled).toBeFalse();
         });
 
-        it('should do nothing if disabled flag was not modified in vform tree', () => {
-            const form = vForm(() => vArray({ disabled: true }, withItem(fibonaci5))).build(fibonaci5);
+        it('should do nothing if disabled flag was not modified in wform tree', () => {
+            const form = wForm(() => wArray({ disabled: true }, withItem(fibonaci5))).build(fibonaci5);
     
             const tracker = trackControl(form.control);
     
@@ -535,7 +535,7 @@ describe('VFormArray', () => {
             });
     
             it('should do nothing if validators were not changed', () => {
-                const form = vForm(() => vArray({
+                const form = wForm(() => wArray({
                     validator: [lengthLessThan10, startedFrom0],
                 }, withItem(fibonaci5))).build(fibonaci5);
         
@@ -607,7 +607,7 @@ describe('VFormArray', () => {
             }));
     
             it('should do nothing if async validators were not changed', fakeAsync(() => {
-                const form = vForm(() => vArray({
+                const form = wForm(() => wArray({
                     asyncValidator: [lengthLessThan10Async, startedFrom0Async],
                 }, withItem(fibonaci5))).build(fibonaci5);
         
@@ -717,7 +717,7 @@ describe('VFormArray', () => {
             expect(form.control).toBe(control);
         });
 
-        it('should append new control if it appears in the end of the vform description', () => {
+        it('should append new control if it appears in the end of the wform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
             const krokodileControl = form.get('0');
@@ -733,7 +733,7 @@ describe('VFormArray', () => {
             expect(form.get('2')).toBeTruthy();
         });
 
-        it('should prepend new control if it appears in the beginning of the vform description', () => {
+        it('should prepend new control if it appears in the beginning of the wform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
             const krokodileControl = form.get('0');
@@ -749,7 +749,7 @@ describe('VFormArray', () => {
             expect(form.get('2')).toBe(elephantControl);
         });
 
-        it('should insert new control if it appears in the middle of the vform description', () => {
+        it('should insert new control if it appears in the middle of the wform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
             const krokodileControl = form.get('0');
@@ -765,7 +765,7 @@ describe('VFormArray', () => {
             expect(form.get('2')).toBe(elephantControl);
         });
 
-        it('should move controls if they positions were chnaged in the vform description', () => {
+        it('should move controls if they positions were chnaged in the wform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
             const krokodileControl = form.get('0');
@@ -781,7 +781,7 @@ describe('VFormArray', () => {
             expect(form.get('2')).toBe(krokodileControl);
         });
 
-        it('should remove control if it disappears from the vform description', () => {
+        it('should remove control if it disappears from the wform description', () => {
             const form = boxArrayFormBuilder().build([krokodile, elephant]);
 
             const krokodileControl = form.get('0');
@@ -822,10 +822,10 @@ describe('VFormArray', () => {
         });
 
         it('should add control if it is switched from vSkip', () => {
-            const form = vForm((numbers: number[]) => vArray([
-                numbers.some(n => n < 0) ? vSkip() : vControl({ key: 'sum', value: numbers[0] + numbers[1] }),
-                vControl({ key: 1, value: numbers[0] }),
-                vControl({ key: 2, value: numbers[1] }),
+            const form = wForm((numbers: number[]) => wArray([
+                numbers.some(n => n < 0) ? wSkip() : wControl({ key: 'sum', value: numbers[0] + numbers[1] }),
+                wControl({ key: 1, value: numbers[0] }),
+                wControl({ key: 2, value: numbers[1] }),
             ])).build([-10, -20]);
 
             const array = form.control as FormArray;
@@ -840,10 +840,10 @@ describe('VFormArray', () => {
         });
 
         it('should remove control if it is switched to vSkip', () => {
-            const form = vForm((numbers: number[]) => vArray([
-                numbers.some(n => n < 0) ? vSkip() : vControl({ key: 'sum', value: numbers[0] + numbers[1] }),
-                vControl({ key: 1, value: numbers[0] }),
-                vControl({ key: 2, value: numbers[1] }),
+            const form = wForm((numbers: number[]) => wArray([
+                numbers.some(n => n < 0) ? wSkip() : wControl({ key: 'sum', value: numbers[0] + numbers[1] }),
+                wControl({ key: 1, value: numbers[0] }),
+                wControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -859,10 +859,10 @@ describe('VFormArray', () => {
 
         it('should add native control, if it is switched to bind', () => {
             const control = new FormControl(999);
-            const form = vForm((numbers: number[]) => vArray([
-                vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum', value: control.value }),
-                vControl({ key: 1, value: numbers[0] }),
-                vControl({ key: 2, value: numbers[1] }),
+            const form = wForm((numbers: number[]) => wArray([
+                wNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum', value: control.value }),
+                wControl({ key: 1, value: numbers[0] }),
+                wControl({ key: 2, value: numbers[1] }),
             ])).build([-10, -20]);
 
             const array = form.control as FormArray;
@@ -878,10 +878,10 @@ describe('VFormArray', () => {
 
         it('should remove native control if it is switched to unbind', () => {
             const control = new FormControl(999);
-            const form = vForm((numbers: number[]) => vArray([
-                vNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum', value: control.value }),
-                vControl({ key: 1, value: numbers[0] }),
-                vControl({ key: 2, value: numbers[1] }),
+            const form = wForm((numbers: number[]) => wArray([
+                wNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum', value: control.value }),
+                wControl({ key: 1, value: numbers[0] }),
+                wControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             const array = form.control as FormArray;
@@ -896,11 +896,11 @@ describe('VFormArray', () => {
         });
 
         it('should add portal control, if it was connected', () => {
-            const startForm = vForm((value: number) => vControl()).build(999);
-            const form = vForm((numbers: number[]) => vArray([
-                vPortal('start'),
-                vControl({ key: 1, value: numbers[0] }),
-                vControl({ key: 2, value: numbers[1] }),
+            const startForm = wForm((value: number) => wControl()).build(999);
+            const form = wForm((numbers: number[]) => wArray([
+                wPortal('start'),
+                wControl({ key: 1, value: numbers[0] }),
+                wControl({ key: 2, value: numbers[1] }),
             ])).build([10, 20]);
 
             form.connect('start', startForm);
@@ -912,11 +912,11 @@ describe('VFormArray', () => {
         });
 
         it('should remove portal control, if it was disconnected', () => {
-            const startForm = vForm((value: number) => vControl({ key: 999 })).build(999);
-            const form = vForm((numbers: number[]) => vArray([
-                vPortal('start'),
-                vControl({ key: 1, value: numbers[numbers.length - 2] }),
-                vControl({ key: 2, value: numbers[numbers.length - 1] }),
+            const startForm = wForm((value: number) => wControl({ key: 999 })).build(999);
+            const form = wForm((numbers: number[]) => wArray([
+                wPortal('start'),
+                wControl({ key: 1, value: numbers[numbers.length - 2] }),
+                wControl({ key: 2, value: numbers[numbers.length - 1] }),
             ])).build([10, 20]);
 
             form.connect('start', startForm);
@@ -931,27 +931,27 @@ describe('VFormArray', () => {
             const form = renderConditionalArray(
                 fibonaci10,
                 50,
-                [{ updateOn: VFormHooks.Change }],
-                [{ updateOn: VFormHooks.Blur }]);
+                [{ updateOn: WFormHooks.Change }],
+                [{ updateOn: WFormHooks.Blur }]);
     
             form.setValue(fibonaci2_10);
             
-            expect(form.control.updateOn).toBe(VFormHooks.Change);
+            expect(form.control.updateOn).toBe(WFormHooks.Change);
         });
     });
 
     describe('getLastFormNode', () => {
         it('should return node from the latest render operation', () => {
-            const node1 = vArray(withItem(fibonaci10));
-            const node2 = vArray({
+            const node1 = wArray(withItem(fibonaci10));
+            const node2 = wArray({
                 validator: moreThan10,
             }, withItem(fibonaci10));
-            const node3 = vArray({
+            const node3 = wArray({
                 validator: even,
             }, withItem(fibonaci10));
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = vForm(fn).build(fibonaci10);
+            const form = wForm(fn).build(fibonaci10);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

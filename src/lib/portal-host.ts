@@ -1,13 +1,13 @@
-import { VForm } from './form';
+import { WForm } from './form';
 
-export class VPortalHost {
-    connections: Record<string, VForm<any>> = {};
+export class WPortalHost {
+    connections: Record<string, WForm<any>> = {};
 
-    setForm(name: string, form: VForm<any>): void {
+    setForm(name: string, form: WForm<any>): void {
         this.connections[name] = form;
     }
 
-    getForm(name: string): VForm<any> {
+    getForm(name: string): WForm<any> {
         return this.connections[name];
     }
 

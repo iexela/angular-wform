@@ -1,6 +1,5 @@
-import { vControl, vForm, vGroup } from '..';
-import { OptionalKeys } from '../common';
-import { GetField, HasField, Is, IsNil, IsNilable, IsOptional, IsUndefined, must } from './test-types';
+import { wControl, wForm, wGroup } from '..';
+import { GetField, HasField, Is, must } from './test-types';
 
 interface Spaceship {
     name: string;
@@ -15,49 +14,49 @@ const first: Spaceship = {
 describe('type', () => {
     describe('control', () => {
         it('should be "any" if value is undefined', () => {
-            const form = vForm(() => vControl()).build(1);
+            const form = wForm(() => wControl()).build(1);
     
             must<Is<typeof form.value, any>>(true);
         });
 
         it('should take into account type of value passed into control when root value is undefined', () => {
-            const form = vForm(() => vControl({ value: '1' })).build('1');
+            const form = wForm(() => wControl({ value: '1' })).build('1');
     
             must<Is<typeof form.value, string>>(true);
         });
     
         it('should be equal to value type', () => {
-            const form = vForm((n: number) => vControl()).build(1);
+            const form = wForm((n: number) => wControl()).build(1);
     
             must<Is<typeof form.value, number>>(true);
         });
     
         it('should be equal to value type (complex type)', () => {
-            const form = vForm((n: Spaceship) => vControl()).build(first);
+            const form = wForm((n: Spaceship) => wControl()).build(first);
     
             must<Is<typeof form.value, Spaceship>>(true);
         });
     
         it('should be equal to value type (| undefined)', () => {
-            const form = vForm((n: number | undefined) => vControl()).build(1);
+            const form = wForm((n: number | undefined) => wControl()).build(1);
     
             must<Is<typeof form.value, number | undefined>>(true);
         });
     
         it('should be equal to value type (| null)', () => {
-            const form = vForm((n: number | null) => vControl()).build(1);
+            const form = wForm((n: number | null) => wControl()).build(1);
     
             must<Is<typeof form.value, number | null>>(true);
         });
     
         it('should be equal to value type (| null | undefined)', () => {
-            const form = vForm((n: number | null | undefined) => vControl()).build(1);
+            const form = wForm((n: number | null | undefined) => wControl()).build(1);
     
             must<Is<typeof form.value, number | null | undefined>>(true);
         });
 
         it('should take into account type of value passed into control when root is defined', () => {
-            const form = vForm((n: number) => vControl({ value: 1 })).build(1);
+            const form = wForm((n: number) => wControl({ value: 1 })).build(1);
     
             must<Is<typeof form.value, number>>(true);
         });
@@ -65,9 +64,9 @@ describe('type', () => {
 
     describe('group', () => {
         it('should declare all fields as "any | undefined" if value is undefined', () => {
-            const form = vForm(() => vGroup({
-                a: vControl(),
-                b: vControl(),
+            const form = wForm(() => wGroup({
+                a: wControl(),
+                b: wControl(),
             })).build({});
 
             form.value
@@ -77,9 +76,9 @@ describe('type', () => {
         });
 
         it('should declare all fields as "<type> | undefined" if value is passed into some controls and root value is undefined', () => {
-            const form = vForm(() => vGroup({
-                a: vControl({ value: '1' }),
-                b: vControl(),
+            const form = wForm(() => wGroup({
+                a: wControl({ value: '1' }),
+                b: wControl(),
             })).build({});
 
             must<Is<GetField<typeof form.value, 'a'>, string | undefined>>(true);
@@ -92,9 +91,9 @@ describe('type', () => {
                 speed: number | null;
             };
 
-            const form = vForm((s: TestSpaceship) => vGroup({
-                name: vControl(),
-                speed: vControl(),
+            const form = wForm((s: TestSpaceship) => wGroup({
+                name: wControl(),
+                speed: wControl(),
             })).build(first);
 
             must<Is<GetField<typeof form.value, 'name'>, string | undefined>>(true);
@@ -107,9 +106,9 @@ describe('type', () => {
                 speed: number;
             };
 
-            const form = vForm((s: TestSpaceship) => vGroup({
-                name: vControl(),
-                speed: vControl(),
+            const form = wForm((s: TestSpaceship) => wGroup({
+                name: wControl(),
+                speed: wControl(),
             })).build(first);
 
             must<Is<GetField<typeof form.value, 'name'>, string | undefined>>(true);
@@ -121,9 +120,9 @@ describe('type', () => {
                 speed: number;
             };
 
-            const form = vForm((s: TestSpaceship) => vGroup({
-                name: vControl(),
-                speed: vControl(),
+            const form = wForm((s: TestSpaceship) => wGroup({
+                name: wControl(),
+                speed: wControl(),
             })).build(first);
 
             must<Is<GetField<typeof form.value, 'name'>, string>>(true);
@@ -136,11 +135,11 @@ describe('type', () => {
                 speed: number;
                 volume?: number;
             };
-            const fn = (s: TestSpaceship) => vGroup({
-                name: vControl(),
-                speed: vControl(),
+            const fn = (s: TestSpaceship) => wGroup({
+                name: wControl(),
+                speed: wControl(),
             });
-            const form = vForm<TestSpaceship, ReturnType<typeof fn>>(fn).build(first);
+            const form = wForm<TestSpaceship, ReturnType<typeof fn>>(fn).build(first);
 
             must<Is<GetField<typeof form.value, 'name'>, string>>(true);
             must<Is<GetField<typeof form.value, 'speed'>, number>>(true);
@@ -153,10 +152,10 @@ describe('type', () => {
                 speed: number;
                 volume?: number;
             };
-            const form = vForm((s: TestSpaceship) => vGroup({
-                name: vControl(),
-                speed: vControl(),
-                price: vControl(),
+            const form = wForm((s: TestSpaceship) => wGroup({
+                name: wControl(),
+                speed: wControl(),
+                price: wControl(),
             })).build(first);
 
             must<Is<GetField<typeof form.value, 'name'>, string>>(true);

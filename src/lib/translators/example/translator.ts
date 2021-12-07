@@ -1,10 +1,10 @@
 import { Validators } from '@angular/forms';
-import { composeValidators, VFormArray, VFormControl, VFormGroup, VFormNative, VFormNodeType, VFormPortal, vValidator, VValidatorNode } from 'src/lib';
+import { composeValidators, WFormArray, WFormControl, WFormGroup, WFormNative, WFormNodeType, WFormPortal, wValidator, WValidatorNode } from 'src/lib';
 import { Maybe } from 'src/lib/common';
-import { VFormNode } from 'src/lib/model';
+import { WFormNode } from 'src/lib/model';
 import { arrayify } from 'src/lib/utils';
 import { andValidators } from 'src/lib/validators';
-import { VFormTreeVisitor, VFormTreeNodeType } from '../tree-translator';
+import { WFormTreeVisitor, WFormTreeNodeType } from '../tree-translator';
 import { Location, FormSampleArray, FormSampleControl, FormSampleGroup, FormSampleMode, FormSampleNative, FormSampleNode, FormSampleNodeType, FormSampleOptions, FormSamplePlaceholder, FormSamplePortal, SampleEnvironmentPredicate } from './model';
 
 interface Options {
@@ -12,7 +12,7 @@ interface Options {
     language: string;
 }
 
-export class VSampleTreeVisitor implements VFormTreeVisitor {
+export class VSampleTreeVisitor implements WFormTreeVisitor {
     private _options: Options;
     private _mode = FormSampleMode.View;
     private visible: boolean[] = [];
@@ -30,22 +30,22 @@ export class VSampleTreeVisitor implements VFormTreeVisitor {
 
     }
 
-    resolveType(node: FormSampleNode | FormSamplePlaceholder | FormSampleOptions): VFormTreeNodeType {
+    resolveType(node: FormSampleNode | FormSamplePlaceholder | FormSampleOptions): WFormTreeNodeType {
         switch (node.type) {
             case FormSampleNodeType.Array:
-                return VFormTreeNodeType.Array;
+                return WFormTreeNodeType.Array;
             case FormSampleNodeType.Group:
-                return VFormTreeNodeType.Group;
+                return WFormTreeNodeType.Group;
             case FormSampleNodeType.Control:
-                return VFormTreeNodeType.Control;
+                return WFormTreeNodeType.Control;
             case FormSampleNodeType.Native:
-                return VFormTreeNodeType.Native;
+                return WFormTreeNodeType.Native;
             case FormSampleNodeType.Placeholder:
-                return VFormTreeNodeType.Placeholder;
+                return WFormTreeNodeType.Placeholder;
             case FormSampleNodeType.Portal:
-                return VFormTreeNodeType.Portal;
+                return WFormTreeNodeType.Portal;
             case FormSampleNodeType.Options:
-                return VFormTreeNodeType.Options;
+                return WFormTreeNodeType.Options;
             default:
                 throw new Error('Unknown node type');
         }
@@ -65,9 +65,9 @@ export class VSampleTreeVisitor implements VFormTreeVisitor {
     groupChildren(node: FormSampleGroup): Record<string, FormSampleNode | FormSamplePlaceholder> {
         return node.children;
     }
-    endGroup(node: FormSampleGroup, children: Record<string, VFormNode>): VFormNode {
-        const group: VFormGroup = {
-            type: VFormNodeType.Group,
+    endGroup(node: FormSampleGroup, children: Record<string, WFormNode>): WFormNode {
+        const group: WFormGroup = {
+            type: WFormNodeType.Group,
             disabled: this.resolveBoolean(node.disabled),
             ...pick(node, ['dirty', 'touched', 'updateOn', 'key', 'validator', 'asyncValidator']),
             data: {
@@ -84,9 +84,9 @@ export class VSampleTreeVisitor implements VFormTreeVisitor {
     arrayChildren(node: FormSampleArray): (FormSampleNode | FormSamplePlaceholder)[] {
         return node.children;
     }
-    endArray(node: FormSampleGroup, children: VFormNode[]): VFormNode {
-        const array: VFormArray = {
-            type: VFormNodeType.Array,
+    endArray(node: FormSampleGroup, children: WFormNode[]): WFormNode {
+        const array: WFormArray = {
+            type: WFormNodeType.Array,
             disabled: this.resolveBoolean(node.disabled),
             ...pick(node, ['dirty', 'touched', 'updateOn', 'key', 'validator', 'asyncValidator']),
             data: {
@@ -97,10 +97,10 @@ export class VSampleTreeVisitor implements VFormTreeVisitor {
         this.visible.pop();
         return array;
     }
-    control(node: FormSampleControl<any>): VFormControl<any> {
+    control(node: FormSampleControl<any>): WFormControl<any> {
         const visible = this.tryVisible(this.resolveBoolean(node.visible));
         return {
-            type: VFormNodeType.Control,
+            type: WFormNodeType.Control,
             disabled: !visible || this.resolveBoolean(node.disabled),
             ...pick(node, ['value', 'dirty', 'touched', 'updateOn', 'key', 'asyncValidator']),
             validator: createControlValidator(node.validator, this.resolveBoolean(node.required)),
@@ -109,9 +109,9 @@ export class VSampleTreeVisitor implements VFormTreeVisitor {
             },
         };
     }
-    native(node: FormSampleNative<any>): VFormNative<any> {
+    native(node: FormSampleNative<any>): WFormNative<any> {
         return {
-            type: VFormNodeType.Native,
+            type: WFormNodeType.Native,
             disabled: this.resolveBoolean(node.disabled),
             ...pick(node, ['value', 'dirty', 'touched', 'key', 'validator', 'asyncValidator']),
             data: {
@@ -119,9 +119,9 @@ export class VSampleTreeVisitor implements VFormTreeVisitor {
             },
         }
     }
-    portal(node: FormSamplePortal): VFormPortal {
+    portal(node: FormSamplePortal): WFormPortal {
         return {
-            type: VFormNodeType.Portal,
+            type: WFormNodeType.Portal,
             name: node.name,
         };
     }
@@ -150,13 +150,13 @@ function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): { [P in K
     return result;
 }
 
-function createControlValidator(validator: Maybe<VValidatorNode>, required: boolean): Maybe<VValidatorNode> {
+function createControlValidator(validator: Maybe<WValidatorNode>, required: boolean): Maybe<WValidatorNode> {
     if (validator && required) {
         return andValidators(Validators.required, composeValidators(...arrayify(validator)));
     } else if (validator) {
         return validator;
     } else if (required) {
-        return vValidator(Validators.required);
+        return wValidator(Validators.required);
     }
     return;
 }

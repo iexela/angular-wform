@@ -1,20 +1,20 @@
-import { vForm } from '../builder';
-import { vGroup, vPortal } from '../basic';
-import { vControl } from '..';
+import { wForm } from '../builder';
+import { wGroup, wPortal } from '../basic';
+import { wControl } from '..';
 
-describe('VFormPortal', () => {
+describe('WFormPortal', () => {
     it('should not render control when portal is not connected', () => {
-        const form = vForm(() => vGroup({
-            portal: vPortal('site'),
+        const form = wForm(() => wGroup({
+            portal: wPortal('site'),
         })).build({});
 
         expect(form.control.get('portal')).toBeFalsy();
     });
 
     it('should render root control of the form when portal is connected', () => {
-        const siteForm = vForm(() => vControl()).build(1);
-        const form = vForm(() => vGroup({
-            portal: vPortal('site'),
+        const siteForm = wForm(() => wControl()).build(1);
+        const form = wForm(() => wGroup({
+            portal: wPortal('site'),
         })).build({});
 
         form.connect('site', siteForm);
@@ -22,9 +22,9 @@ describe('VFormPortal', () => {
     });
 
     it('should not render control when portal is disconnected', () => {
-        const siteForm = vForm(() => vControl()).build(1);
-        const form = vForm(() => vGroup({
-            portal: vPortal('site'),
+        const siteForm = wForm(() => wControl()).build(1);
+        const form = wForm(() => wGroup({
+            portal: wPortal('site'),
         })).build({});
 
         form.connect('site', siteForm);
@@ -34,10 +34,10 @@ describe('VFormPortal', () => {
     });
 
     it('should update child form on connect', () => {
-        const siteForm = vForm(() => vControl()).build(1);
+        const siteForm = wForm(() => wControl()).build(1);
         const spy = spyOn(siteForm, 'update').and.callThrough();
-        const form = vForm(() => vGroup({
-            portal: vPortal('site'),
+        const form = wForm(() => wGroup({
+            portal: wPortal('site'),
         })).build({ portal: 10 });
 
         form.connect('site', siteForm);
@@ -47,10 +47,10 @@ describe('VFormPortal', () => {
     });
 
     it('should set value for the child form when setValue is called for the parent form', () => {
-        const siteForm = vForm(() => vControl()).build(1);
+        const siteForm = wForm(() => wControl()).build(1);
         const spy = spyOn(siteForm, 'setValue').and.callThrough();
-        const form = vForm(() => vGroup({
-            portal: vPortal('site'),
+        const form = wForm(() => wGroup({
+            portal: wPortal('site'),
         })).build({ portal: 10 });
 
         form.connect('site', siteForm);
@@ -62,10 +62,10 @@ describe('VFormPortal', () => {
     });
 
     it('should set value for the child form when update is called for the parent form', () => {
-        const siteForm = vForm(() => vControl()).build(1);
+        const siteForm = wForm(() => wControl()).build(1);
         const spy = spyOn(siteForm, 'setValue').and.callThrough();
-        const form = vForm(() => vGroup({
-            portal: vPortal('site'),
+        const form = wForm(() => wGroup({
+            portal: wPortal('site'),
         })).build({ portal: 10 });
 
         form.connect('site', siteForm);
@@ -77,9 +77,9 @@ describe('VFormPortal', () => {
     });
 
     it('should enable child form if parent form is enabled', () => {
-        const siteForm = vForm(() => vControl()).build(1);
-        const form = vForm(() => vGroup({
-            portal: vPortal('site'),
+        const siteForm = wForm(() => wControl()).build(1);
+        const form = wForm(() => wGroup({
+            portal: wPortal('site'),
         })).build({ portal: 10 });
 
         form.connect('site', siteForm);
@@ -88,9 +88,9 @@ describe('VFormPortal', () => {
     });
 
     it('should disable child form if parent form is disabled', () => {
-        const siteForm = vForm(() => vControl()).build(1);
-        const form = vForm(() => vGroup({ disabled: true }, {
-            portal: vPortal('site'),
+        const siteForm = wForm(() => wControl()).build(1);
+        const form = wForm(() => wGroup({ disabled: true }, {
+            portal: wPortal('site'),
         })).build({ portal: 10 });
 
         form.connect('site', siteForm);
@@ -99,9 +99,9 @@ describe('VFormPortal', () => {
     });
 
     it('should disable child form (regardless of its "disabled" flag) if parent form is disabled', () => {
-        const siteForm = vForm(() => vControl({ disabled: false })).build(1);
-        const form = vForm(() => vGroup({ disabled: true }, {
-            portal: vPortal('site'),
+        const siteForm = wForm(() => wControl({ disabled: false })).build(1);
+        const form = wForm(() => wGroup({ disabled: true }, {
+            portal: wPortal('site'),
         })).build({ portal: 10 });
 
         form.connect('site', siteForm);
@@ -110,9 +110,9 @@ describe('VFormPortal', () => {
     });
 
     it('should disable child form if it is disabled and parent form is enabled', () => {
-        const siteForm = vForm(() => vControl({ disabled: true })).build(1);
-        const form = vForm(() => vGroup({
-            portal: vPortal('site'),
+        const siteForm = wForm(() => wControl({ disabled: true })).build(1);
+        const form = wForm(() => wGroup({
+            portal: wPortal('site'),
         })).build({ portal: 10 });
 
         form.connect('site', siteForm);
@@ -121,10 +121,10 @@ describe('VFormPortal', () => {
     });
 
     it('should switch "disabled" flag from enabled to disabled, when it is changed for the parent form', () => {
-        const siteForm = vForm(() => vControl()).build(1);
-        const form = vForm(({ value }: { value: number }) => vGroup({ disabled: value < 0 }, {
-            value: vControl(),
-            portal: vPortal('site'),
+        const siteForm = wForm(() => wControl()).build(1);
+        const form = wForm(({ value }: { value: number }) => wGroup({ disabled: value < 0 }, {
+            value: wControl(),
+            portal: wPortal('site'),
         })).build({ value: 10 });
 
         form.connect('site', siteForm);
@@ -137,10 +137,10 @@ describe('VFormPortal', () => {
     });
 
     it('should switch "disabled" flag from disabled to enabled, when it is changed for the parent form', () => {
-        const siteForm = vForm(() => vControl()).build(1);
-        const form = vForm(({ value }: { value: number }) => vGroup({ disabled: value < 0 }, {
-            value: vControl(),
-            portal: vPortal('site'),
+        const siteForm = wForm(() => wControl()).build(1);
+        const form = wForm(({ value }: { value: number }) => wGroup({ disabled: value < 0 }, {
+            value: wControl(),
+            portal: wPortal('site'),
         })).build({ value: -10 });
 
         form.connect('site', siteForm);

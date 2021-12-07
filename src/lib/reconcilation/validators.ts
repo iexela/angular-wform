@@ -1,11 +1,11 @@
 import { AbstractControl, ValidatorFn } from '@angular/forms';
-import { VValidatorNode,VValidatorNodeType } from '../model';
+import { WValidatorNode,WValidatorNodeType } from '../model';
 import { arrayDiffUnordered, arrayify, flatMap } from '../utils';
 import { canAccessListOfValidators, canManageValidatorsIndividually } from './flags';
 import { createValidatorBundle, ValidatorBundle } from './internal-model';
-import { VValidationStrategy } from './model';
+import { WValidationStrategy } from './model';
 import { getLastFormNodeOrNothing, getLastValidatorBundleOrCreate } from './registry';
-import { VRenderContext } from './render-context';
+import { WRenderContext } from './render-context';
 
 interface Control12ValidatorsApi {
     hasValidator(validator: ValidatorFn): boolean;
@@ -13,7 +13,7 @@ interface Control12ValidatorsApi {
     removeValidators(validator: ValidatorFn): void;
 }
 
-export function processValidators(ctx: VRenderContext, node?: VValidatorNode, control?: AbstractControl): ValidatorBundle {    
+export function processValidators(ctx: WRenderContext, node?: WValidatorNode, control?: AbstractControl): ValidatorBundle {    
     if (!control) {
         return createValidatorBundle(createValidators(node));
     }
@@ -30,13 +30,13 @@ export function processValidators(ctx: VRenderContext, node?: VValidatorNode, co
     );
 }
 
-function applyValidators(ctx: VRenderContext,
-                         strategy: VValidationStrategy,
+function applyValidators(ctx: WRenderContext,
+                         strategy: WValidationStrategy,
                          control: AbstractControl,
                          lastValidatorBundle: ValidatorBundle,
                          nextValidators: ValidatorFn[]): ValidatorBundle {
     switch (strategy) {
-        case VValidationStrategy.Append:
+        case WValidationStrategy.Append:
             if (canManageValidatorsIndividually) {
                 return appendValidatorsIndividually(ctx, control as Control12ValidatorsApi, lastValidatorBundle, nextValidators);
             } else if (canAccessListOfValidators) {
@@ -44,14 +44,14 @@ function applyValidators(ctx: VRenderContext,
             } else {
                 return appendValidatorsByComposing(ctx, control, lastValidatorBundle, nextValidators);
             }
-        case VValidationStrategy.Replace:
+        case WValidationStrategy.Replace:
             return replaceValidators(ctx, control, lastValidatorBundle, nextValidators);
         default:
-            throw Error(`Unsupported validation strategy: '${VValidationStrategy[strategy]}'`);
+            throw Error(`Unsupported validation strategy: '${WValidationStrategy[strategy]}'`);
     }
 }
 
-function appendValidatorsIndividually(ctx: VRenderContext, control: Control12ValidatorsApi, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+function appendValidatorsIndividually(ctx: WRenderContext, control: Control12ValidatorsApi, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const hasCompiledValidator = lastValidatorBundle.compiled && control.hasValidator(lastValidatorBundle.compiled);
@@ -83,7 +83,7 @@ function appendValidatorsIndividually(ctx: VRenderContext, control: Control12Val
     return lastValidatorBundle;
 }
 
-function appendValidatorsInBulk(ctx: VRenderContext, control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+function appendValidatorsInBulk(ctx: WRenderContext, control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const validators = getControlValidators(control);
@@ -116,7 +116,7 @@ function appendValidatorsInBulk(ctx: VRenderContext, control: AbstractControl, l
     return lastValidatorBundle;
 }
 
-function appendValidatorsByComposing(ctx: VRenderContext, control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+function appendValidatorsByComposing(ctx: WRenderContext, control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
@@ -148,7 +148,7 @@ function appendValidatorsByComposing(ctx: VRenderContext, control: AbstractContr
     return lastValidatorBundle;
 }
 
-function replaceValidators(ctx: VRenderContext, control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
+function replaceValidators(ctx: WRenderContext, control: AbstractControl, lastValidatorBundle: ValidatorBundle, nextValidators: ValidatorFn[]): ValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
@@ -199,7 +199,7 @@ function getControlValidators(control: AbstractControl): ValidatorFn[] {
     return arrayify((control as any)._rawValidators);
 }
 
-function areValidatorsChanged(a?: VValidatorNode, b?: VValidatorNode): boolean {
+function areValidatorsChanged(a?: WValidatorNode, b?: WValidatorNode): boolean {
     if ((a == null) !== (b == null)) {
         return true;
     }
@@ -211,8 +211,8 @@ function areValidatorsChanged(a?: VValidatorNode, b?: VValidatorNode): boolean {
     return !isValidatorEqual(a, b);
 }
 
-function isValidatorEqual(a: VValidatorNode, b: VValidatorNode): boolean {
-    if (a.type === VValidatorNodeType.Simple && b.type === VValidatorNodeType.Simple) {
+function isValidatorEqual(a: WValidatorNode, b: WValidatorNode): boolean {
+    if (a.type === WValidatorNodeType.Simple && b.type === WValidatorNodeType.Simple) {
         if (a.validator === b.validator) {
             return true;
         }
@@ -226,7 +226,7 @@ function isValidatorEqual(a: VValidatorNode, b: VValidatorNode): boolean {
         return a.locals.every((l, i) => l === b.locals![i]);
     }
 
-    if (a.type === VValidatorNodeType.Factory && b.type === VValidatorNodeType.Factory) {
+    if (a.type === WValidatorNodeType.Factory && b.type === WValidatorNodeType.Factory) {
         if (a.factory !== b.factory || a.args.length !== b.args.length) {
             return false;
         }
@@ -234,7 +234,7 @@ function isValidatorEqual(a: VValidatorNode, b: VValidatorNode): boolean {
         return a.args.every((arg, i) => arg === b.args[i]);
     }
 
-    if (a.type === VValidatorNodeType.Compound && b.type === VValidatorNodeType.Compound) {
+    if (a.type === WValidatorNodeType.Compound && b.type === WValidatorNodeType.Compound) {
         if (a.mixer !== b.mixer || a.children.length !== b.children.length) {
             return false;
         }
@@ -245,14 +245,14 @@ function isValidatorEqual(a: VValidatorNode, b: VValidatorNode): boolean {
     return false;
 }
 
-function createValidators(node?: VValidatorNode): ValidatorFn[] {
+function createValidators(node?: WValidatorNode): ValidatorFn[] {
     return node ? arrayify(createValidator(node)) : [];
 }
 
-function createValidator(node: VValidatorNode): ValidatorFn | ValidatorFn[] {
-    if (node.type === VValidatorNodeType.Simple) {
+function createValidator(node: WValidatorNode): ValidatorFn | ValidatorFn[] {
+    if (node.type === WValidatorNodeType.Simple) {
         return node.validator;
-    } else if (node.type === VValidatorNodeType.Factory) {
+    } else if (node.type === WValidatorNodeType.Factory) {
         return node.factory(...node.args);
     } else {
         return node.mixer(flatMap(node.children, child => arrayify(createValidator(child))));

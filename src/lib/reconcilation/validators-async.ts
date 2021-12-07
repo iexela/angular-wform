@@ -1,11 +1,11 @@
 import { AbstractControl, AsyncValidatorFn } from '@angular/forms';
-import { VValidationStrategy } from '.';
-import { VAsyncValidatorNode, VAsyncValidatorNodeType } from '..';
+import { WAsyncValidatorNode, WAsyncValidatorNodeType } from '..';
 import { arrayDiffUnordered, arrayify, flatMap } from '../utils';
 import { canAccessListOfValidators, canManageValidatorsIndividually } from './flags';
 import { AsyncValidatorBundle, createAsyncValidatorBundle } from './internal-model';
+import { WValidationStrategy } from './model';
 import { getLastAsyncValidatorBundle, getLastFormNodeOrNothing } from './registry';
-import { VRenderContext } from './render-context';
+import { WRenderContext } from './render-context';
 
 interface Control12AsyncValidatorsApi {
     hasAsyncValidator(validator: AsyncValidatorFn): boolean;
@@ -13,7 +13,7 @@ interface Control12AsyncValidatorsApi {
     removeAsyncValidators(validator: AsyncValidatorFn): void;
 }
 
-export function processAsyncValidators(ctx: VRenderContext, node?: VAsyncValidatorNode, control?: AbstractControl): AsyncValidatorBundle {
+export function processAsyncValidators(ctx: WRenderContext, node?: WAsyncValidatorNode, control?: AbstractControl): AsyncValidatorBundle {
     if (!control) {
         return createAsyncValidatorBundle(createValidators(node));
     }
@@ -30,13 +30,13 @@ export function processAsyncValidators(ctx: VRenderContext, node?: VAsyncValidat
     );
 }
 
-function applyValidators(ctx: VRenderContext,
-                         strategy: VValidationStrategy,
+function applyValidators(ctx: WRenderContext,
+                         strategy: WValidationStrategy,
                          control: AbstractControl,
                          lastValidatorBundle: AsyncValidatorBundle,
                          nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
     switch (strategy) {
-        case VValidationStrategy.Append:
+        case WValidationStrategy.Append:
             if (canManageValidatorsIndividually) {
                 return appendValidatorsIndividually(ctx, control as Control12AsyncValidatorsApi, lastValidatorBundle, nextValidators);
             } else if (canAccessListOfValidators) {
@@ -44,14 +44,14 @@ function applyValidators(ctx: VRenderContext,
             } else {
                 return appendValidatorsByComposing(ctx, control, lastValidatorBundle, nextValidators);
             }
-        case VValidationStrategy.Replace:
+        case WValidationStrategy.Replace:
             return replaceValidators(ctx, control, lastValidatorBundle, nextValidators);
         default:
-            throw new Error(`Unsupported validation strategy: '${VValidationStrategy[strategy]}'`);
+            throw new Error(`Unsupported validation strategy: '${WValidationStrategy[strategy]}'`);
     }
 }
 
-function appendValidatorsIndividually(ctx: VRenderContext, control: Control12AsyncValidatorsApi, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
+function appendValidatorsIndividually(ctx: WRenderContext, control: Control12AsyncValidatorsApi, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const hasCompiledValidator = lastValidatorBundle.compiled && control.hasAsyncValidator(lastValidatorBundle.compiled);
@@ -83,7 +83,7 @@ function appendValidatorsIndividually(ctx: VRenderContext, control: Control12Asy
     return lastValidatorBundle;
 }
 
-function appendValidatorsInBulk(ctx: VRenderContext, control: AbstractControl, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
+function appendValidatorsInBulk(ctx: WRenderContext, control: AbstractControl, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const validators = getControlAsyncValidators(control);
@@ -116,7 +116,7 @@ function appendValidatorsInBulk(ctx: VRenderContext, control: AbstractControl, l
     return lastValidatorBundle;
 }
 
-function appendValidatorsByComposing(ctx: VRenderContext, control: AbstractControl, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
+function appendValidatorsByComposing(ctx: WRenderContext, control: AbstractControl, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
@@ -148,7 +148,7 @@ function appendValidatorsByComposing(ctx: VRenderContext, control: AbstractContr
     return lastValidatorBundle;
 }
 
-function replaceValidators(ctx: VRenderContext, control: AbstractControl, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
+function replaceValidators(ctx: WRenderContext, control: AbstractControl, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
     const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
@@ -199,7 +199,7 @@ function getControlAsyncValidators(control: AbstractControl): AsyncValidatorFn[]
     return arrayify((control as any)._rawAsyncValidators);
 }
 
-function areValidatorsChanged(a?: VAsyncValidatorNode, b?: VAsyncValidatorNode): boolean {
+function areValidatorsChanged(a?: WAsyncValidatorNode, b?: WAsyncValidatorNode): boolean {
     if ((a == null) !== (b == null)) {
         return true;
     }
@@ -211,8 +211,8 @@ function areValidatorsChanged(a?: VAsyncValidatorNode, b?: VAsyncValidatorNode):
     return !isValidatorEqual(a, b);
 }
 
-function isValidatorEqual(a: VAsyncValidatorNode, b: VAsyncValidatorNode): boolean {
-    if (a.type === VAsyncValidatorNodeType.Simple && b.type === VAsyncValidatorNodeType.Simple) {
+function isValidatorEqual(a: WAsyncValidatorNode, b: WAsyncValidatorNode): boolean {
+    if (a.type === WAsyncValidatorNodeType.Simple && b.type === WAsyncValidatorNodeType.Simple) {
         if (a.validator === b.validator) {
             return true;
         }
@@ -226,7 +226,7 @@ function isValidatorEqual(a: VAsyncValidatorNode, b: VAsyncValidatorNode): boole
         return a.locals.every((l, i) => l === b.locals![i]);
     }
 
-    if (a.type === VAsyncValidatorNodeType.Factory && b.type === VAsyncValidatorNodeType.Factory) {
+    if (a.type === WAsyncValidatorNodeType.Factory && b.type === WAsyncValidatorNodeType.Factory) {
         if (a.factory !== b.factory || a.args.length !== b.args.length) {
             return false;
         }
@@ -234,7 +234,7 @@ function isValidatorEqual(a: VAsyncValidatorNode, b: VAsyncValidatorNode): boole
         return a.args.every((arg, i) => arg === b.args[i]);
     }
 
-    if (a.type === VAsyncValidatorNodeType.Compound && b.type === VAsyncValidatorNodeType.Compound) {
+    if (a.type === WAsyncValidatorNodeType.Compound && b.type === WAsyncValidatorNodeType.Compound) {
         if (a.mixer !== b.mixer || a.children.length !== b.children.length) {
             return false;
         }
@@ -245,14 +245,14 @@ function isValidatorEqual(a: VAsyncValidatorNode, b: VAsyncValidatorNode): boole
     return false;
 }
 
-function createValidators(node?: VAsyncValidatorNode): AsyncValidatorFn[] {
+function createValidators(node?: WAsyncValidatorNode): AsyncValidatorFn[] {
     return node ? arrayify(createValidator(node)) : [];
 }
 
-function createValidator(node: VAsyncValidatorNode): AsyncValidatorFn | AsyncValidatorFn[] {
-    if (node.type === VAsyncValidatorNodeType.Simple) {
+function createValidator(node: WAsyncValidatorNode): AsyncValidatorFn | AsyncValidatorFn[] {
+    if (node.type === WAsyncValidatorNodeType.Simple) {
         return node.validator;
-    } else if (node.type === VAsyncValidatorNodeType.Factory) {
+    } else if (node.type === WAsyncValidatorNodeType.Factory) {
         return node.factory(...node.args);
     } else {
         return node.mixer(flatMap(node.children, child => arrayify(createValidator(child))));

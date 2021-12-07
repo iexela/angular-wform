@@ -1,21 +1,21 @@
-import { getLastFormNode, vControl, VForm, vForm, VFormControlOptions, VFormHooks } from '..';
+import { getLastFormNode, wControl, WForm, wForm, WFormControlOptions, WFormHooks } from '..';
 import { andTick, trackControl } from './test-utils';
 import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
 import { fakeAsync, tick } from '@angular/core/testing';
 
-function renderNumber(n: number, options?: VFormControlOptions<number>): VForm<number> {
-    return vForm(() => vControl(options)).build(n);
+function renderNumber(n: number, options?: WFormControlOptions<number>): WForm<number> {
+    return wForm(() => wControl(options)).build(n);
 }
 
-function renderConditionalNumber(initial: number, anchor: number, optionsLess: VFormControlOptions<number>, optionsMore: VFormControlOptions<number>): VForm<number> {
-    return vForm((value: number) => vControl(value < anchor ? optionsLess : optionsMore)).build(initial);
+function renderConditionalNumber(initial: number, anchor: number, optionsLess: WFormControlOptions<number>, optionsMore: WFormControlOptions<number>): WForm<number> {
+    return wForm((value: number) => wControl(value < anchor ? optionsLess : optionsMore)).build(initial);
 }
 
-function renderDisabledConditionalNumber(initial: number, anchor: number): VForm<number> {
+function renderDisabledConditionalNumber(initial: number, anchor: number): WForm<number> {
     return renderConditionalNumber(initial, anchor, { disabled: true }, { disabled: false });
 }
 
-describe('VFormControl', () => {
+describe('WFormControl', () => {
     describe('first render', () => {
         it('should render control', () => {
             expect(renderNumber(1).control).toBeTruthy();
@@ -107,8 +107,8 @@ describe('VFormControl', () => {
             expect(andTick(renderNumber(100, options)).control.errors).toBeFalsy();
         }));
 
-        it('should render value passed into vnode', () => {
-            const form = vForm((value: number) => vControl({ value: value + 1 })).build(1 as number);
+        it('should render value passed into wnode', () => {
+            const form = wForm((value: number) => wControl({ value: value + 1 })).build(1 as number);
 
             expect(form.value).toBe(2);
         });
@@ -152,13 +152,13 @@ describe('VFormControl', () => {
         it('should set updateOn flag to "change", by default', () => {
             const form = renderNumber(2, {});
 
-            expect(form.control.updateOn).toBe(VFormHooks.Change);
+            expect(form.control.updateOn).toBe(WFormHooks.Change);
         });
 
         it('should allow to set updateOn flag', () => {
-            const form = renderNumber(2, { updateOn: VFormHooks.Blur });
+            const form = renderNumber(2, { updateOn: WFormHooks.Blur });
 
-            expect(form.control.updateOn).toBe(VFormHooks.Blur);
+            expect(form.control.updateOn).toBe(WFormHooks.Blur);
         });
     });
 
@@ -248,8 +248,8 @@ describe('VFormControl', () => {
             expect(form.control.disabled).toBeFalse();
         });
 
-        it('should do nothing if disabled flag was not modified in vform tree', () => {
-            const form = vForm((v: number) => vControl({ disabled: true })).build(2);
+        it('should do nothing if disabled flag was not modified in wform tree', () => {
+            const form = wForm((v: number) => wControl({ disabled: true })).build(2);
     
             const tracker = trackControl(form.control);
     
@@ -302,7 +302,7 @@ describe('VFormControl', () => {
             });
     
             it('should do nothing if validators were not changed', () => {
-                const form = vForm((v: number) => vControl({ required: true, validator: [moreThan10, even] })).build(1);
+                const form = wForm((v: number) => wControl({ required: true, validator: [moreThan10, even] })).build(1);
         
                 const tracker = trackControl(form.control);
         
@@ -372,7 +372,7 @@ describe('VFormControl', () => {
             }));
     
             it('should do nothing if async validators were not changed', fakeAsync(() => {
-                const form = vForm((v: number) => vControl({ required: true, validator: [moreThan10, even] })).build(1);
+                const form = wForm((v: number) => wControl({ required: true, validator: [moreThan10, even] })).build(1);
         
                 tick();
 
@@ -386,8 +386,8 @@ describe('VFormControl', () => {
             }));
         });
 
-        it('should update value by value passed into vnode', () => {
-            const form = vForm((value: number) => vControl({ value: value + 1 })).build(1 as number);
+        it('should update value by value passed into wnode', () => {
+            const form = wForm((value: number) => wControl({ value: value + 1 })).build(1 as number);
 
             form.setValue(10);
 
@@ -489,22 +489,22 @@ describe('VFormControl', () => {
         });
 
         it('should not update "updateOn" flag', () => {
-            const form = renderConditionalNumber(2, 5, { updateOn: VFormHooks.Change }, { updateOn: VFormHooks.Blur });
+            const form = renderConditionalNumber(2, 5, { updateOn: WFormHooks.Change }, { updateOn: WFormHooks.Blur });
 
             form.setValue(7);
             
-            expect(form.control.updateOn).toBe(VFormHooks.Change);
+            expect(form.control.updateOn).toBe(WFormHooks.Change);
         });
     });
 
     describe('getLastFormNode', () => {
         it('should return node from the latest render operation', () => {
-            const node1 = vControl();
-            const node2 = vControl({ validator: moreThan10 });
-            const node3 = vControl({ validator: even });
+            const node1 = wControl();
+            const node2 = wControl({ validator: moreThan10 });
+            const node3 = wControl({ validator: even });
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = vForm(fn).build(1);
+            const form = wForm(fn).build(1);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

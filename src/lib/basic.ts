@@ -1,54 +1,54 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn, Validators } from '@angular/forms';
-import { VAsyncValidatorNode, VFormNative, VFormNode, VFormPlaceholder, VFormPortal } from '.';
-import { Maybe, Nilable } from './common';
-import { VFormArray, VFormArrayChildren, VFormControl, VFormGroup, VFormGroupChildren, VFormNodeType, VValidatorNode } from './model';
+import { WAsyncValidatorNode, WFormNative, WFormPlaceholder, WFormPortal } from '.';
+import { Maybe } from './common';
+import { WFormArray, WFormArrayChildren, WFormControl, WFormGroup, WFormGroupChildren, WFormNodeType, WValidatorNode } from './model';
 import { arrayify } from './utils';
-import { andValidators, composeAsyncValidators, composeValidators, vValidator } from './validators';
+import { andValidators, composeAsyncValidators, composeValidators, wValidator } from './validators';
 
-type AnyValidator = ValidatorFn | VValidatorNode | (ValidatorFn | VValidatorNode)[];
-type AnyAsyncValidator = AsyncValidatorFn | VAsyncValidatorNode | (AsyncValidatorFn | VAsyncValidatorNode)[];
+type AnyValidator = ValidatorFn | WValidatorNode | (ValidatorFn | WValidatorNode)[];
+type AnyAsyncValidator = AsyncValidatorFn | WAsyncValidatorNode | (AsyncValidatorFn | WAsyncValidatorNode)[];
 
 type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator' | 'asyncValidator'>> & {
     validator?: AnyValidator,
     asyncValidator?: AnyAsyncValidator,
 };
 
-export type VFormControlOptions<T> = MakeOptions<VFormControl<T>> & { required?: boolean };
-export type VFormGroupOptions = Omit<MakeOptions<VFormGroup<any>>, 'children'>;
-export type VFormArrayOptions = Omit<MakeOptions<VFormArray<any>>, 'children'>;
-export type VFormNativeOptions<T> = Omit<MakeOptions<VFormNative<T>>, 'control'>;
+export type WFormControlOptions<T> = MakeOptions<WFormControl<T>> & { required?: boolean };
+export type WFormGroupOptions = Omit<MakeOptions<WFormGroup<any>>, 'children'>;
+export type WFormArrayOptions = Omit<MakeOptions<WFormArray<any>>, 'children'>;
+export type WFormNativeOptions<T> = Omit<MakeOptions<WFormNative<T>>, 'control'>;
 
 const EMPTY_DATA = Object.freeze({});
 
-function createControlValidator<T>(options: VFormControlOptions<T>): Maybe<VValidatorNode> {
+function createControlValidator<T>(options: WFormControlOptions<T>): Maybe<WValidatorNode> {
     if (options.validator && options.required) {
         return andValidators(Validators.required, composeValidators(...arrayify(options.validator)));
     } else if (options.validator) {
         return createValidator(options.validator);
     } else if (options.required) {
-        return vValidator(Validators.required);
+        return wValidator(Validators.required);
     }
     return;
 }
 
-function createValidator(validator?: AnyValidator): Maybe<VValidatorNode> {
+function createValidator(validator?: AnyValidator): Maybe<WValidatorNode> {
     return validator ? composeValidators(...arrayify(validator)) : undefined;
 }
 
-function createAsyncValidator(validator?: AnyAsyncValidator): Maybe<VAsyncValidatorNode> {
+function createAsyncValidator(validator?: AnyAsyncValidator): Maybe<WAsyncValidatorNode> {
     return validator ? composeAsyncValidators(...arrayify(validator)) : undefined;
 }
 
-export function vValue<T = any>(value: T, options?: Omit<VFormControlOptions<T>, 'value'>): VFormControl<T> {
-    return vControl({
+export function wValue<T = any>(value: T, options?: Omit<WFormControlOptions<T>, 'value'>): WFormControl<T> {
+    return wControl({
         ...options,
         value,
     });
 }
 
-export function vControl<T = any>(options?: VFormControlOptions<T>): VFormControl<T> {
+export function wControl<T = any>(options?: WFormControlOptions<T>): WFormControl<T> {
     return {
-        type: VFormNodeType.Control,
+        type: WFormNodeType.Control,
         disabled: false,
         data: EMPTY_DATA,
         ...options,
@@ -57,13 +57,13 @@ export function vControl<T = any>(options?: VFormControlOptions<T>): VFormContro
     };
 }
 
-export function vGroup<C extends VFormGroupChildren>(children: C): VFormGroup<C>;
-export function vGroup<C extends VFormGroupChildren>(options: VFormGroupOptions, children: C): VFormGroup<C>;
-export function vGroup(optionsOrChildren?: VFormGroupOptions | VFormGroupChildren, childrenOrNil?: VFormGroupChildren): VFormGroup<any> {
-    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as VFormGroupChildren || {});
-    const options = childrenOrNil ? optionsOrChildren as VFormGroupOptions : undefined;
+export function wGroup<C extends WFormGroupChildren>(children: C): WFormGroup<C>;
+export function wGroup<C extends WFormGroupChildren>(options: WFormGroupOptions, children: C): WFormGroup<C>;
+export function wGroup(optionsOrChildren?: WFormGroupOptions | WFormGroupChildren, childrenOrNil?: WFormGroupChildren): WFormGroup<any> {
+    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as WFormGroupChildren || {});
+    const options = childrenOrNil ? optionsOrChildren as WFormGroupOptions : undefined;
     return {
-        type: VFormNodeType.Group,
+        type: WFormNodeType.Group,
         disabled: false,
         data: EMPTY_DATA,
         ...options,
@@ -73,13 +73,13 @@ export function vGroup(optionsOrChildren?: VFormGroupOptions | VFormGroupChildre
     };
 }
 
-export function vArray<C extends VFormArrayChildren>(children: C): VFormArray<C>;
-export function vArray<C extends VFormArrayChildren>(options: VFormArrayOptions, children: C): VFormArray<C>;
-export function vArray(optionsOrChildren: VFormArrayOptions | VFormArrayChildren, childrenOrNil?: VFormArrayChildren): VFormArray<any> {
-    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as VFormArrayChildren || {});
-    const options = childrenOrNil ? optionsOrChildren as VFormArrayOptions : undefined;
+export function wArray<C extends WFormArrayChildren>(children: C): WFormArray<C>;
+export function wArray<C extends WFormArrayChildren>(options: WFormArrayOptions, children: C): WFormArray<C>;
+export function wArray(optionsOrChildren: WFormArrayOptions | WFormArrayChildren, childrenOrNil?: WFormArrayChildren): WFormArray<any> {
+    const children = childrenOrNil ? childrenOrNil : (optionsOrChildren as WFormArrayChildren || {});
+    const options = childrenOrNil ? optionsOrChildren as WFormArrayOptions : undefined;
     return {
-        type: VFormNodeType.Array,
+        type: WFormNodeType.Array,
         disabled: false,
         data: EMPTY_DATA,
         ...options,
@@ -89,15 +89,15 @@ export function vArray(optionsOrChildren: VFormArrayOptions | VFormArrayChildren
     };
 }
 
-export function vSkip(): VFormPlaceholder {
+export function wSkip(): WFormPlaceholder {
     return {
-        type: VFormNodeType.Placeholder,
+        type: WFormNodeType.Placeholder,
     };
 }
 
-export function vNative<T = any>(control?: AbstractControl, options?: VFormNativeOptions<T>): VFormNative<T> {
+export function wNative<T = any>(control?: AbstractControl, options?: WFormNativeOptions<T>): WFormNative<T> {
     return {
-        type: VFormNodeType.Native,
+        type: WFormNodeType.Native,
         control,
         disabled: false,
         data: EMPTY_DATA,
@@ -107,9 +107,9 @@ export function vNative<T = any>(control?: AbstractControl, options?: VFormNativ
     };
 }
 
-export function vPortal(name: string): VFormPortal {
+export function wPortal(name: string): WFormPortal {
     return {
-        type: VFormNodeType.Portal,
+        type: WFormNodeType.Portal,
         name,
     };
 }

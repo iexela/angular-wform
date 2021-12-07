@@ -1,18 +1,18 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
-import { vArray, vControl, vForm, VFormBuilder, VFormNode, vGroup, vValidator } from '..';
-import { vValidatorAsync } from '../validators';
+import { wGroup, wValidator, wArray, wControl } from '..';
+import { wValidatorAsync } from '../validators';
 
-export const moreThan10 = vValidator(control => control.value <= 10 ? { min: true } : null);
-export const even = vValidator(control => (control.value % 2) === 1 ? { even: true } : null);
+export const moreThan10 = wValidator(control => control.value <= 10 ? { min: true } : null);
+export const even = wValidator(control => (control.value % 2) === 1 ? { even: true } : null);
 
-export const small = vValidator(control => control.value.volume >= 80 ? { small: true } : null);
-export const light = vValidator(control => control.value.weight >= 80 ? { light: true } : null);
+export const small = wValidator(control => control.value.volume >= 80 ? { small: true } : null);
+export const light = wValidator(control => control.value.weight >= 80 ? { light: true } : null);
 
-export const moreThan10Async = vValidatorAsync(control => Promise.resolve(control.value <= 10 ? { min: true } : null));
-export const evenAsync = vValidatorAsync(control => Promise.resolve((control.value % 2) === 1 ? { even: true } : null));
+export const moreThan10Async = wValidatorAsync(control => Promise.resolve(control.value <= 10 ? { min: true } : null));
+export const evenAsync = wValidatorAsync(control => Promise.resolve((control.value % 2) === 1 ? { even: true } : null));
 
-export const smallAsync = vValidatorAsync(control => Promise.resolve(control.value.volume >= 80 ? { small: true } : null));
-export const lightAsync = vValidatorAsync(control => Promise.resolve(control.value.weight >= 80 ? { light: true } : null));
+export const smallAsync = wValidatorAsync(control => Promise.resolve(control.value.volume >= 80 ? { small: true } : null));
+export const lightAsync = wValidatorAsync(control => Promise.resolve(control.value.weight >= 80 ? { light: true } : null));
 
 export interface Box {
     name?: string;
@@ -115,14 +115,14 @@ export const taxData = {
     tax2: [4, 5],
 }
 
-export const vTaxModel = vGroup({
-    tax1: vControl({ value: 123 }),
-    tax2: vArray([vControl({ value: 4 }), vControl({ value: 5 })])
+export const vTaxModel = wGroup({
+    tax1: wControl({ value: 123 }),
+    tax2: wArray([wControl({ value: 4 }), wControl({ value: 5 })])
 });
 
-export const vTaxModelWithKeys = vGroup({ key: 1 }, {
-    tax1: vControl({ key: 2, value: 123 }),
-    tax2: vArray({ key: 3 }, [vControl({ key: 4, value: 4 }), vControl({ key: 5, value: 5 })])
+export const vTaxModelWithKeys = wGroup({ key: 1 }, {
+    tax1: wControl({ key: 2, value: 123 }),
+    tax2: wArray({ key: 3 }, [wControl({ key: 4, value: 4 }), wControl({ key: 5, value: 5 })])
 });
 
 export function createTaxControl(): AbstractControl {
@@ -132,13 +132,13 @@ export function createTaxControl(): AbstractControl {
     })
 }
 
-export function createFlightVNode(value: Flight) {
-    return vGroup({
-        name: vControl(),
-        route: vArray(value.route.map(() => vControl())),
-        cost: vGroup({
-            price: vControl(),
-            discount: vControl(),
+export function createFlightWNode(value: Flight) {
+    return wGroup({
+        name: wControl(),
+        route: wArray(value.route.map(() => wControl())),
+        cost: wGroup({
+            price: wControl(),
+            discount: wControl(),
         }),
     });
 }

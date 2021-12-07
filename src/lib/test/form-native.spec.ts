@@ -1,23 +1,23 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { AbstractControl, FormControl } from '@angular/forms';
-import { getLastFormNode, vForm, VForm } from '..';
-import { VFormNativeOptions, vNative } from '../basic';
+import { getLastFormNode, wForm, WForm } from '..';
+import { WFormNativeOptions, wNative } from '../basic';
 import { belarusToRussia, createFlightForm, even, evenAsync, moreThan10, moreThan10Async, russiaToBelarus } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
-function renderControl(control: AbstractControl, options?: VFormNativeOptions<number>): VForm<number> {
-    return vForm(() => vNative(control, options)).build(control.value);
+function renderControl(control: AbstractControl, options?: WFormNativeOptions<number>): WForm<number> {
+    return wForm(() => wNative(control, options)).build(control.value);
 }
 
-function renderConditionalControl(control: AbstractControl, anchor: number, optionsLess: VFormNativeOptions<number>, optionsMore: VFormNativeOptions<number>): VForm<number> {
-    return vForm((value: number) => vNative(control, value < anchor ? optionsLess : optionsMore)).build(control.value);
+function renderConditionalControl(control: AbstractControl, anchor: number, optionsLess: WFormNativeOptions<number>, optionsMore: WFormNativeOptions<number>): WForm<number> {
+    return wForm((value: number) => wNative(control, value < anchor ? optionsLess : optionsMore)).build(control.value);
 }
 
 function testControl(n: number): FormControl {
     return new FormControl(n);
 }
 
-describe('VFormNative', () => {
+describe('WFormNative', () => {
     describe('first render', () => {
         it('should leave the same control', () => {
             const control = testControl(1);
@@ -107,8 +107,8 @@ describe('VFormNative', () => {
             expect(andTick(renderControl(testControl(100), options)).control.errors).toBeFalsy();
         }));
 
-        it('should render value passed into vnode', () => {
-            const form = vForm((value: number) => vNative(testControl(1), { value: value + 1 })).build(1 as number);
+        it('should render value passed into wnode', () => {
+            const form = wForm((value: number) => wNative(testControl(1), { value: value + 1 })).build(1 as number);
 
             expect(form.value).toBe(2);
         });
@@ -240,7 +240,7 @@ describe('VFormNative', () => {
     
         it('should not modify control if value is the same', () => {
             const control = createFlightForm(belarusToRussia);
-            const form = vForm(() => vNative(control)).build(belarusToRussia);
+            const form = wForm(() => wNative(control)).build(belarusToRussia);
     
             const tracker = trackControl(form.control);
     
@@ -251,7 +251,7 @@ describe('VFormNative', () => {
     
         it('should modify control if value is different', () => {
             const control = createFlightForm(belarusToRussia);
-            const form = vForm(() => vNative(control)).build(belarusToRussia);
+            const form = wForm(() => wNative(control)).build(belarusToRussia);
     
             const tracker = trackControl(form.control);
     
@@ -288,7 +288,7 @@ describe('VFormNative', () => {
     describe('reconcilation', () => {
         it('should not update control if it was not changed', () => {
             const control = new FormControl();
-            const form = vForm(() => vNative(control)).build(1);
+            const form = wForm(() => wNative(control)).build(1);
 
             expect(form.control).toBe(control);
             form.update();
@@ -298,8 +298,8 @@ describe('VFormNative', () => {
         it('should update control if it was changed', () => {
             const control1 = new FormControl();
             const control2 = new FormControl();
-            const factory = jasmine.createSpy().and.returnValues(vNative(control1), vNative(control2));
-            const form = vForm(factory).build(1);
+            const factory = jasmine.createSpy().and.returnValues(wNative(control1), wNative(control2));
+            const form = wForm(factory).build(1);
 
             expect(form.control).toBe(control1);
             form.update();
@@ -328,9 +328,9 @@ describe('VFormNative', () => {
             expect(form.control.disabled).toBeFalse();
         });
 
-        it('should do nothing if disabled flag was not modified in vform tree', () => {
+        it('should do nothing if disabled flag was not modified in wform tree', () => {
             const control = testControl(1);
-            const form = vForm(() => vNative(control, { disabled: true })).build(2);
+            const form = wForm(() => wNative(control, { disabled: true })).build(2);
     
             const tracker = trackControl(form.control);
     
@@ -384,7 +384,7 @@ describe('VFormNative', () => {
     
             it('should do nothing if validators were not changed', () => {
                 const control = testControl(1);
-                const form = vForm(() => vNative(control, { validator: [moreThan10, even] })).build(1);
+                const form = wForm(() => wNative(control, { validator: [moreThan10, even] })).build(1);
         
                 const tracker = trackControl(form.control);
         
@@ -455,7 +455,7 @@ describe('VFormNative', () => {
     
             it('should do nothing if async validators were not changed', fakeAsync(() => {
                 const control = testControl(1);
-                const form = vForm((v: number) => vNative(control, { validator: [moreThan10, even] })).build(1);
+                const form = wForm((v: number) => wNative(control, { validator: [moreThan10, even] })).build(1);
         
                 tick();
 
@@ -469,9 +469,9 @@ describe('VFormNative', () => {
             }));
         });
 
-        it('should update value by value passed into vnode', () => {
+        it('should update value by value passed into wnode', () => {
             const control = testControl(1);
-            const form = vForm((value: number) => vNative(control, { value: value + 1 })).build(1 as number);
+            const form = wForm((value: number) => wNative(control, { value: value + 1 })).build(1 as number);
 
             form.setValue(10);
 
@@ -588,12 +588,12 @@ describe('VFormNative', () => {
     describe('getLastFormNode', () => {
         it('should return node from the latest render operation', () => {
             const control = testControl(1);
-            const node1 = vNative(control);
-            const node2 = vNative(control, { validator: moreThan10 });
-            const node3 = vNative(control, { validator: even });
+            const node1 = wNative(control);
+            const node2 = wNative(control, { validator: moreThan10 });
+            const node3 = wNative(control, { validator: even });
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = vForm(fn).build(1);
+            const form = wForm(fn).build(1);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

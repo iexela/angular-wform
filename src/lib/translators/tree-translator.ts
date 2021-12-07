@@ -1,16 +1,16 @@
-import { VFormNode, VFormNodeType, VFormPlaceholder } from '../model';
+import { WFormNode, WFormNodeType, WFormPlaceholder } from '../model';
 import { Maybe, TransformFn } from '../common';
 import { mapValues, pickBy } from '../utils';
 
-export enum VFormTreeNodeType {
+export enum WFormTreeNodeType {
     Control, Group, Array, Native, Portal, Placeholder, Options
 }
 
-export interface VFormTreeVisitor {
+export interface WFormTreeVisitor {
     begin(): void;
     end(): void;
 
-    resolveType(node: any): VFormTreeNodeType;
+    resolveType(node: any): WFormTreeNodeType;
     
     beginOptions(node: any): void;
     optionsChild(node: any): any;
@@ -18,23 +18,23 @@ export interface VFormTreeVisitor {
 
     beginGroup(node: any): void;
     groupChildren(node: any): Record<string, any>;
-    endGroup(node: any, nodes: Record<string, VFormNode>): VFormNode;
+    endGroup(node: any, nodes: Record<string, WFormNode>): WFormNode;
 
     beginArray(node: any): void;
     arrayChildren(node: any): any[];
-    endArray(node: any, nodes: VFormNode[]): VFormNode;
+    endArray(node: any, nodes: WFormNode[]): WFormNode;
 
-    control(node: any): VFormNode;
+    control(node: any): WFormNode;
 
-    native(node: any): VFormNode;
+    native(node: any): WFormNode;
 
-    portal(node: any): VFormNode;
+    portal(node: any): WFormNode;
 }
 
-export function buildTreeTranslator(env: VFormTreeVisitor): TransformFn<any, VFormNode> {
+export function buildTreeTranslator(env: WFormTreeVisitor): TransformFn<any, WFormNode> {
     return rootNode => {
         env.begin();
-        const node = translateNode(rootNode) as VFormNode;
+        const node = translateNode(rootNode) as WFormNode;
         env.end();
 
         if (!node) {
@@ -44,34 +44,34 @@ export function buildTreeTranslator(env: VFormTreeVisitor): TransformFn<any, VFo
         return node;
     };
 
-    function translateNode(node: any): Maybe<VFormNode | VFormPlaceholder> {
+    function translateNode(node: any): Maybe<WFormNode | WFormPlaceholder> {
         const type = env.resolveType(node);
         switch (type) {
-            case VFormTreeNodeType.Options:
+            case WFormTreeNodeType.Options:
                 env.beginOptions(node);
                 const nextNode = translateNode(env.optionsChild(node));
                 env.endOptions(node);
                 return nextNode;
-            case VFormTreeNodeType.Array:
+            case WFormTreeNodeType.Array:
                 env.beginArray(node);
                 return env.endArray(node, env.arrayChildren(node)
                     .map(translateNode)
-                    .filter(Boolean) as VFormNode[]);
-            case VFormTreeNodeType.Group:
+                    .filter(Boolean) as WFormNode[]);
+            case WFormTreeNodeType.Group:
                 env.beginGroup(node);
                 const children = pickBy(
                     mapValues(
                         env.groupChildren(node),
                         translateNode),
-                    Boolean) as { [name: string]: VFormNode };
+                    Boolean) as { [name: string]: WFormNode };
                 return env.endGroup(node, children);
-            case VFormTreeNodeType.Control:
+            case WFormTreeNodeType.Control:
                 return env.control(node);
-            case VFormTreeNodeType.Native:
+            case WFormTreeNodeType.Native:
                 return env.native(node);
-            case VFormTreeNodeType.Placeholder:
-                return { type: VFormNodeType.Placeholder };
-            case VFormTreeNodeType.Portal:
+            case WFormTreeNodeType.Placeholder:
+                return { type: WFormNodeType.Placeholder };
+            case WFormTreeNodeType.Portal:
                 return env.portal(node);
             default:
                 throw new Error(`Unknown translate form node type: ${type}`);

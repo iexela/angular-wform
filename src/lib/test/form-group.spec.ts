@@ -1,51 +1,51 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormControl, FormGroup } from '@angular/forms';
-import { getLastFormNode, vControl, VForm, vForm, VFormBuilder, VFormControlOptions, VFormGroupChildren, VFormGroupOptions, VFormHooks, vGroup } from '..';
-import { vNative, vPortal, vSkip } from '../basic';
-import { belarusToAustralia, belarusToRussia, Box, createFlightVNode, createTaxControl, elephant, even, Flight, fragileParcel, heavyAndLargeParcel, heavyParcel, largeParcel, light, lightAsync, moreThan10, mouse, parcel, parcelWithoutVolume, small, smallAsync, taxData, vTaxModel } from './test-mocks';
+import { getLastFormNode, wControl, WForm, wForm, WFormBuilder, WFormControlOptions, WFormGroupChildren, WFormGroupOptions, WFormHooks, wGroup } from '..';
+import { wNative, wPortal, wSkip } from '../basic';
+import { belarusToAustralia, belarusToRussia, Box, createFlightWNode, createTaxControl, elephant, even, Flight, fragileParcel, heavyAndLargeParcel, heavyParcel, largeParcel, light, lightAsync, moreThan10, mouse, parcel, parcelWithoutVolume, small, smallAsync, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
-function withVolume(box: Box, options: VFormControlOptions<number> = {}): VFormGroupChildren {
+function withVolume(box: Box, options: WFormControlOptions<number> = {}): WFormGroupChildren {
     return withWeightAndVolume(box, {}, options);
 }
 
-function withDisabledVolume(box: Box): VFormGroupChildren {
+function withDisabledVolume(box: Box): WFormGroupChildren {
     return withVolume(box, { disabled: true });
 }
 
-function withWeightAndVolume(box: Box, weight?: VFormControlOptions<number>, volume?: VFormControlOptions<number>): VFormGroupChildren {
+function withWeightAndVolume(box: Box, weight?: WFormControlOptions<number>, volume?: WFormControlOptions<number>): WFormGroupChildren {
     return {
-        weight: vControl(weight),
-        volume: vControl(volume),
+        weight: wControl(weight),
+        volume: wControl(volume),
     };
 }
 
-function renderGroup(initial: Box, options: VFormGroupOptions = {}, children?: VFormGroupChildren): VForm<Box> {
-    return vForm((current: Box) => vGroup(options, children || withWeightAndVolume(current))).lenient().build(initial);
+function renderGroup(initial: Box, options: WFormGroupOptions = {}, children?: WFormGroupChildren): WForm<Box> {
+    return wForm((current: Box) => wGroup(options, children || withWeightAndVolume(current))).lenient().build(initial);
 }
 
 function renderConditionalGroup(initial: Box,
                                 anchor: number,
-                                [optionsLess, childrenLess]: [VFormGroupOptions, VFormGroupChildren?],
-                                [optionsMore, childrenMore]: [VFormGroupOptions, VFormGroupChildren?]): VForm<Box> {
-    return vForm((value: Box) => {
+                                [optionsLess, childrenLess]: [WFormGroupOptions, WFormGroupChildren?],
+                                [optionsMore, childrenMore]: [WFormGroupOptions, WFormGroupChildren?]): WForm<Box> {
+    return wForm((value: Box) => {
         const isLess = value.volume! < anchor;
-        return vGroup(
+        return wGroup(
             isLess ? optionsLess : optionsMore,
             (isLess ? childrenLess : childrenMore) || withWeightAndVolume(value),
         );
     }).lenient().build(initial);
 }
 
-function renderDisabledConditionalGroup(initial: Box, anchor: number): VForm<Box> {
+function renderDisabledConditionalGroup(initial: Box, anchor: number): WForm<Box> {
     return renderConditionalGroup(initial, anchor, [{ disabled: true }], [{ disabled: false }]);
 }
 
-function flightFormBuilder(): VFormBuilder<Flight> {
-    return vForm(createFlightVNode);
+function flightFormBuilder(): WFormBuilder<Flight> {
+    return wForm(createFlightWNode);
 }
 
-describe('VFormGroup', () => {
+describe('WFormGroup', () => {
     describe('first render', () => {
         it('should render control', () => {
             expect(renderGroup(parcel).control).toBeTruthy();
@@ -157,7 +157,7 @@ describe('VFormGroup', () => {
             expect(andTick(renderGroup(parcel, options)).control.errors).toBeFalsy();
         }));
 
-        it('should render nested vform containers', () => {
+        it('should render nested wform containers', () => {
             const form = flightFormBuilder().build(belarusToAustralia);
 
             expect(form.value).toEqual(belarusToAustralia);
@@ -200,10 +200,10 @@ describe('VFormGroup', () => {
         });
 
         it('should not render skipped control', () => {
-            const form = vForm(() => vGroup({
-                name: vControl(),
-                weight: vSkip(),
-                volume: vControl(),
+            const form = wForm(() => wGroup({
+                name: wControl(),
+                weight: wSkip(),
+                volume: wControl(),
             })).build(elephant);
 
             expect(form.value).toEqual({
@@ -214,10 +214,10 @@ describe('VFormGroup', () => {
         });
 
         it('should not render native control, if it is not bound', () => {
-            const form = vForm((current: Box) => vGroup({
-                name: vControl(),
-                weight: vNative(),
-                volume: vControl(),
+            const form = wForm((current: Box) => wGroup({
+                name: wControl(),
+                weight: wNative(),
+                volume: wControl(),
             })).build(elephant);
 
             expect(form.value).toEqual({
@@ -229,10 +229,10 @@ describe('VFormGroup', () => {
 
         it('should render native control, if it is bound', () => {
             const control = new FormControl(999);
-            const form = vForm((current: Box) => vGroup({
-                name: vControl(),
-                weight: vNative(control),
-                volume: vControl(),
+            const form = wForm((current: Box) => wGroup({
+                name: wControl(),
+                weight: wNative(control),
+                volume: wControl(),
             })).build(elephant);
 
             expect(form.value).toEqual(elephant);
@@ -240,10 +240,10 @@ describe('VFormGroup', () => {
         });
 
         it('should not render portal control, if it is not connected', () => {
-            const form = vForm((current: Box) => vGroup({
-                name: vControl(),
-                weight: vPortal('weight'),
-                volume: vControl(),
+            const form = wForm((current: Box) => wGroup({
+                name: wControl(),
+                weight: wPortal('weight'),
+                volume: wControl(),
             })).build(elephant);
 
             expect(form.value).toEqual({
@@ -256,23 +256,23 @@ describe('VFormGroup', () => {
         it('should set updateOn flag to "change", by default', () => {
             const form = renderGroup(parcel, {});
 
-            expect(form.control.updateOn).toBe(VFormHooks.Change);
-            expect(form.get('volume').updateOn).toBe(VFormHooks.Change);
+            expect(form.control.updateOn).toBe(WFormHooks.Change);
+            expect(form.get('volume').updateOn).toBe(WFormHooks.Change);
         });
 
         it('should allow to set updateOn flag', () => {
-            const form = renderGroup(parcel, { updateOn: VFormHooks.Blur });
+            const form = renderGroup(parcel, { updateOn: WFormHooks.Blur });
 
-            expect(form.control.updateOn).toBe(VFormHooks.Blur);
-            expect(form.get('volume').updateOn).toBe(VFormHooks.Blur);
+            expect(form.control.updateOn).toBe(WFormHooks.Blur);
+            expect(form.get('volume').updateOn).toBe(WFormHooks.Blur);
         });
 
         it('should allow to redeclare updateOn flag on child level', () => {
-            const form = renderGroup(parcel, { updateOn: VFormHooks.Blur }, withWeightAndVolume(parcel, {}, { updateOn: VFormHooks.Submit }));
+            const form = renderGroup(parcel, { updateOn: WFormHooks.Blur }, withWeightAndVolume(parcel, {}, { updateOn: WFormHooks.Submit }));
 
-            expect(form.control.updateOn).toBe(VFormHooks.Blur);
-            expect(form.get('weight').updateOn).toBe(VFormHooks.Blur);
-            expect(form.get('volume').updateOn).toBe(VFormHooks.Submit);
+            expect(form.control.updateOn).toBe(WFormHooks.Blur);
+            expect(form.get('weight').updateOn).toBe(WFormHooks.Blur);
+            expect(form.get('volume').updateOn).toBe(WFormHooks.Submit);
         });
     });
 
@@ -405,8 +405,8 @@ describe('VFormGroup', () => {
             expect(form.get('volume').disabled).toBeFalse();
         });
 
-        it('should do nothing if disabled flag was not modified in vform tree', () => {
-            const form = vForm(() => vGroup({ disabled: true }, withWeightAndVolume(parcel))).build(parcel);
+        it('should do nothing if disabled flag was not modified in wform tree', () => {
+            const form = wForm(() => wGroup({ disabled: true }, withWeightAndVolume(parcel))).build(parcel);
     
             const tracker = trackControl(form.control);
     
@@ -525,7 +525,7 @@ describe('VFormGroup', () => {
             });
     
             it('should do nothing if validators were not changed', () => {
-                const form = vForm(() => vGroup({ validator: [small, light] }, withWeightAndVolume(parcel))).build(parcel);
+                const form = wForm(() => wGroup({ validator: [small, light] }, withWeightAndVolume(parcel))).build(parcel);
         
                 const tracker = trackControl(form.control);
         
@@ -595,7 +595,7 @@ describe('VFormGroup', () => {
             }));
     
             it('should do nothing if async validators were not changed', fakeAsync(() => {
-                const form = vForm(() => vGroup({ asyncValidator: [smallAsync, lightAsync] }, withWeightAndVolume(parcel))).build(parcel);
+                const form = wForm(() => wGroup({ asyncValidator: [smallAsync, lightAsync] }, withWeightAndVolume(parcel))).build(parcel);
         
                 tick();
 
@@ -703,21 +703,21 @@ describe('VFormGroup', () => {
             expect(form.control).toBe(control);
         });
 
-        it('should create control if it appears in the vform description', () => {
+        it('should create control if it appears in the wform description', () => {
             const form = renderConditionalGroup(
                 parcel,
                 50,
                 [
                     {},
                     {
-                        weight: vControl(),
+                        weight: wControl(),
                     },
                 ],
                 [
                     {},
                     {
-                        weight: vControl(),
-                        volume: vControl(),
+                        weight: wControl(),
+                        volume: wControl(),
                     },
                 ]);
     
@@ -731,21 +731,21 @@ describe('VFormGroup', () => {
             expect(form.has('volume')).toBeTrue();
         });
 
-        it('should remove control if it disappears from the vform description', () => {
+        it('should remove control if it disappears from the wform description', () => {
             const form = renderConditionalGroup(
                 parcel,
                 50,
                 [
                     {},
                     {
-                        weight: vControl(),
-                        volume: vControl(),
+                        weight: wControl(),
+                        volume: wControl(),
                     },
                 ],
                 [
                     {},
                     {
-                        weight: vControl(),
+                        weight: wControl(),
                     },
                 ]);
     
@@ -761,10 +761,10 @@ describe('VFormGroup', () => {
         });
 
         it('should add control if it is switched from vSkip', () => {
-            const form = vForm((current: Box) => vGroup({
-                name: vControl(),
-                weight: current.weight! < 50 ? vSkip() : vControl(),
-                volume: vControl(),
+            const form = wForm((current: Box) => wGroup({
+                name: wControl(),
+                weight: current.weight! < 50 ? wSkip() : wControl(),
+                volume: wControl(),
             })).build(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
@@ -775,10 +775,10 @@ describe('VFormGroup', () => {
         });
 
         it('should remove control if it is switched to vSkip', () => {
-            const form = vForm((current: Box) => vGroup({
-                name: vControl(),
-                weight: current.weight! < 50 ? vSkip() : vControl(),
-                volume: vControl(),
+            const form = wForm((current: Box) => wGroup({
+                name: wControl(),
+                weight: current.weight! < 50 ? wSkip() : wControl(),
+                volume: wControl(),
             })).build(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
@@ -790,10 +790,10 @@ describe('VFormGroup', () => {
 
         it('should add native control, if it is switched to bind', () => {
             const control = new FormControl(999);
-            const form = vForm((current: Box) => vGroup({
-                name: vControl(),
-                weight: vNative(current.weight! < 50 ? undefined : control),
-                volume: vControl(),
+            const form = wForm((current: Box) => wGroup({
+                name: wControl(),
+                weight: wNative(current.weight! < 50 ? undefined : control),
+                volume: wControl(),
             })).build(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
@@ -807,10 +807,10 @@ describe('VFormGroup', () => {
 
         it('should remove native control, if it is switched to unbind', () => {
             const control = new FormControl(999);
-            const form = vForm((current: Box) => vGroup({
-                name: vControl(),
-                weight: vNative(current.weight! < 50 ? undefined : control),
-                volume: vControl(),
+            const form = wForm((current: Box) => wGroup({
+                name: wControl(),
+                weight: wNative(current.weight! < 50 ? undefined : control),
+                volume: wControl(),
             })).build(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
@@ -823,11 +823,11 @@ describe('VFormGroup', () => {
         });
 
         it('should add portal control, if it was connected', () => {
-            const weightForm = vForm(() => vControl()).build(elephant.weight);
-            const form = vForm((current: Box) => vGroup({
-                name: vControl(),
-                weight: vPortal('weight'),
-                volume: vControl(),
+            const weightForm = wForm(() => wControl()).build(elephant.weight);
+            const form = wForm((current: Box) => wGroup({
+                name: wControl(),
+                weight: wPortal('weight'),
+                volume: wControl(),
             })).build(elephant);
 
             form.connect('weight', weightForm);
@@ -837,11 +837,11 @@ describe('VFormGroup', () => {
         });
 
         it('should remove portal control, if it was disconnected', () => {
-            const weightForm = vForm(() => vControl()).build(elephant.weight);
-            const form = vForm((current: Box) => vGroup({
-                name: vControl(),
-                weight: vPortal('weight'),
-                volume: vControl(),
+            const weightForm = wForm(() => wControl()).build(elephant.weight);
+            const form = wForm((current: Box) => wGroup({
+                name: wControl(),
+                weight: wPortal('weight'),
+                volume: wControl(),
             })).build(elephant);
 
             form.connect('weight', weightForm);
@@ -854,7 +854,7 @@ describe('VFormGroup', () => {
             expect(form.control.get('weight')).toBeFalsy();
         });
 
-        it('should rerender nested vform containers', () => {
+        it('should rerender nested wform containers', () => {
             const form = flightFormBuilder().build(belarusToAustralia);
 
             form.setValue(belarusToRussia);
@@ -866,23 +866,23 @@ describe('VFormGroup', () => {
             const form = renderConditionalGroup(
                 parcel,
                 50,
-                [{ updateOn: VFormHooks.Change }],
-                [{ updateOn: VFormHooks.Blur }]);
+                [{ updateOn: WFormHooks.Change }],
+                [{ updateOn: WFormHooks.Blur }]);
 
             form.setValue(largeParcel);
             
-            expect(form.control.updateOn).toBe(VFormHooks.Change);
+            expect(form.control.updateOn).toBe(WFormHooks.Change);
         });
     });
 
     describe('getLastFormNode', () => {
         it('should return node from the latest render operation', () => {
-            const node1 = vGroup(withVolume(parcel));
-            const node2 = vGroup(withVolume(parcel, { validator: moreThan10 }));
-            const node3 = vGroup(withVolume(parcel, { validator: even }));
+            const node1 = wGroup(withVolume(parcel));
+            const node2 = wGroup(withVolume(parcel, { validator: moreThan10 }));
+            const node3 = wGroup(withVolume(parcel, { validator: even }));
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = vForm(fn).build(parcel);
+            const form = wForm(fn).build(parcel);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

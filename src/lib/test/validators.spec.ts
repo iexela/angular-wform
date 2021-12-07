@@ -1,6 +1,6 @@
 import { AbstractControl, FormControl, ValidatorFn, Validators } from '@angular/forms';
-import { vCompoundValidator, vControl, vForm, vValidator, vValidatorFactory, VValidatorNode, VValidators } from '..';
-import { VValidationStrategy } from '../reconcilation';
+import { wCompoundValidator, wControl, wForm, wValidator, wValidatorFactory, WValidatorNode, WValidators } from '..';
+import { WValidationStrategy } from '../reconcilation';
 import { even, moreThan10 } from './test-mocks';
 
 const TEST_VALUE = Object.freeze({});
@@ -50,8 +50,8 @@ function hasControlValidator(control: AbstractControl, validator: ValidatorFn): 
     return errorsToFindKeys.every(key => foundErrorsKeys.includes(key));
 }
 
-function controlWithValidator(node: VValidatorNode): AbstractControl {
-    const form = vForm(() => vControl({ validator: node })).build(null);
+function controlWithValidator(node: WValidatorNode): AbstractControl {
+    const form = wForm(() => wControl({ validator: node })).build(null);
     return form.control;
 }
 
@@ -61,8 +61,8 @@ describe('validators', () => {
     describe('simple', () => {
         describe('first render', () => {
             it('should assign validator', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: vValidator(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    validator: wValidator(testValidator1),
                 })).build(5);
 
                 expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
@@ -71,8 +71,8 @@ describe('validators', () => {
 
         describe('reconcilation', () => {
             it('should assign validator', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? undefined : vValidator(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? undefined : wValidator(testValidator1),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -81,8 +81,8 @@ describe('validators', () => {
             });
 
             it('should remove validator', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidator(testValidator1) : undefined,
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidator(testValidator1) : undefined,
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -91,8 +91,8 @@ describe('validators', () => {
             });
 
             it('should not change validator if validator function was not modified', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: vValidator(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    validator: wValidator(testValidator1),
                 })).build<number>(5);
 
                 const tracker = trackValidators(form.control);
@@ -104,8 +104,8 @@ describe('validators', () => {
             });
 
             it('should change validator if validator function was modified', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidator(testValidator1) : vValidator(testValidator2),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -115,8 +115,8 @@ describe('validators', () => {
             });
 
             it('should not change validator if locals are empty', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidator(testValidator1, []) : vValidator(testValidator2, []),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidator(testValidator1, []) : wValidator(testValidator2, []),
                 })).build<number>(5);
 
                 const tracker = trackValidators(form.control);
@@ -128,8 +128,8 @@ describe('validators', () => {
             });
 
             it('should not change validator if locals are the same', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidator(testValidator1, [1, 'abc']) : vValidator(testValidator2, [1, 'abc']),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidator(testValidator1, [1, 'abc']) : wValidator(testValidator2, [1, 'abc']),
                 })).build<number>(5);
 
                 const tracker = trackValidators(form.control);
@@ -141,8 +141,8 @@ describe('validators', () => {
             });
 
             it('should change validator if locals are different', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidator(testValidator1, [1, 'abc']) : vValidator(testValidator2, [2, 'abc']),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidator(testValidator1, [1, 'abc']) : wValidator(testValidator2, [2, 'abc']),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -152,10 +152,10 @@ describe('validators', () => {
             });
 
             it('should assign another validator if node type of validator was changed', () => {
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: n < 10
-                        ? vValidator(testValidator1, [1, 'abc'])
-                        : vValidatorFactory(() => testValidator2)(),
+                        ? wValidator(testValidator1, [1, 'abc'])
+                        : wValidatorFactory(() => testValidator2)(),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -169,8 +169,8 @@ describe('validators', () => {
     describe('factory', () => {
         describe('first render', () => {
             it('should assign created validator', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: vValidatorFactory(() => testValidator1)(),
+                const form = wForm((n: number) => wControl({
+                    validator: wValidatorFactory(() => testValidator1)(),
                 })).build(5);
 
                 expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
@@ -179,8 +179,8 @@ describe('validators', () => {
             it('should create validator with specified arguments and assign it to control', () => {
                 const factory = jasmine.createSpy<V3>().and.returnValue(testValidator1);
 
-                const form = vForm((n: number) => vControl({
-                    validator: vValidatorFactory(factory)(1, 'abc', true),
+                const form = wForm((n: number) => wControl({
+                    validator: wValidatorFactory(factory)(1, 'abc', true),
                 })).build(5);
 
                 expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
@@ -192,8 +192,8 @@ describe('validators', () => {
             it('should assign new validator by creating it with specified arguments', () => {
                 const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
 
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? undefined : vValidatorFactory(factory)(1, 'abc', true),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? undefined : wValidatorFactory(factory)(1, 'abc', true),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -205,8 +205,8 @@ describe('validators', () => {
             it('should remove validator', () => {
                 const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
 
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidatorFactory(factory)(1, 'abc', true) : undefined,
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidatorFactory(factory)(1, 'abc', true) : undefined,
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -217,8 +217,8 @@ describe('validators', () => {
             it('should not recreate validator if arguments are the same', () => {
                 const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
 
-                const form = vForm((n: number) => vControl({
-                    validator: vValidatorFactory(factory)(1, 'abc', true),
+                const form = wForm((n: number) => wControl({
+                    validator: wValidatorFactory(factory)(1, 'abc', true),
                 })).build<number>(5);
 
                 const tracker = trackValidators(form.control);
@@ -233,8 +233,8 @@ describe('validators', () => {
             it('should recreate validator if arguments are different', () => {
                 const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1, testValidator2);
 
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidatorFactory(factory)(1, 'abc', true) : vValidatorFactory(factory)(1, 'abc', false),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidatorFactory(factory)(1, 'abc', true) : wValidatorFactory(factory)(1, 'abc', false),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -248,8 +248,8 @@ describe('validators', () => {
                 const factory1 = jasmine.createSpy<V3>().and.returnValues(testValidator1);
                 const factory2 = jasmine.createSpy<V3>().and.returnValues(testValidator2);
 
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidatorFactory(factory1)(1, 'abc', false) : vValidatorFactory(factory2)(1, 'abc', false),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidatorFactory(factory1)(1, 'abc', false) : wValidatorFactory(factory2)(1, 'abc', false),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -262,10 +262,10 @@ describe('validators', () => {
             });
 
             it('should assign another validator if node type of validator was changed', () => {
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: n < 10
-                        ? vValidatorFactory(() => testValidator1)()
-                        : vValidator(testValidator2, [1, 'abc']),
+                        ? wValidatorFactory(() => testValidator1)()
+                        : wValidator(testValidator2, [1, 'abc']),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -280,12 +280,12 @@ describe('validators', () => {
         describe('first render', () => {
             it('should call mixer function with validators created by child validation nodes', () => {
                 const factory = jasmine.createSpy();
-                const compoundValidator = vCompoundValidator(factory);
+                const compoundValidator = wCompoundValidator(factory);
                 
-                vForm((n: number) => vControl({
+                wForm((n: number) => wControl({
                     validator: compoundValidator(
-                        vValidatorFactory(() => testValidator1)(),
-                        vValidator(testValidator2),
+                        wValidatorFactory(() => testValidator1)(),
+                        wValidator(testValidator2),
                         testValidator3,
                     ),
                 })).build(5);
@@ -295,9 +295,9 @@ describe('validators', () => {
 
             it('should assign to control all retrieved validators', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
-                const compoundValidator = vCompoundValidator(factory);
+                const compoundValidator = wCompoundValidator(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: compoundValidator(testValidator1),
                 })).build(5);
 
@@ -310,12 +310,12 @@ describe('validators', () => {
         describe('reconcilation', () => {
             it('should assign new validators by creating them from child validators', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
-                const compoundValidator = vCompoundValidator(factory);
+                const compoundValidator = wCompoundValidator(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: n < 10 ? undefined : compoundValidator(
-                        vValidatorFactory(() => testValidator1)(),
-                        vValidator(testValidator2),
+                        wValidatorFactory(() => testValidator1)(),
+                        wValidator(testValidator2),
                         testValidator3,
                     ),
                 })).build<number>(5);
@@ -332,9 +332,9 @@ describe('validators', () => {
 
             it('should remove validators', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
-                const compoundValidator = vCompoundValidator(factory);
+                const compoundValidator = wCompoundValidator(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: n < 10 ? compoundValidator(testValidator1) : undefined,
                 })).build<number>(5);
 
@@ -348,18 +348,18 @@ describe('validators', () => {
             it('should do not recreate validators if child validation nodes were not modified', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
                 const factory1 = () => testValidator1;
-                const compoundValidator = vCompoundValidator(factory);
+                const compoundValidator = wCompoundValidator(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: n < 10
                         ? compoundValidator(
-                            vValidatorFactory(factory1)(),
-                            vValidator(testValidator2),
+                            wValidatorFactory(factory1)(),
+                            wValidator(testValidator2),
                             testValidator3,
                         )
                         : compoundValidator(
-                            vValidatorFactory(factory1)(),
-                            vValidator(testValidator2),
+                            wValidatorFactory(factory1)(),
+                            wValidator(testValidator2),
                             testValidator3,
                         ),
                 })).build<number>(5);
@@ -374,17 +374,17 @@ describe('validators', () => {
             it('should do not recreate validators if child validation nodes were not modified (local args)', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
                 const factory1 = () => testValidator1;
-                const compoundValidator = vCompoundValidator(factory);
+                const compoundValidator = wCompoundValidator(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: n < 10
                         ? compoundValidator(
-                            vValidatorFactory<V3>(factory1)(),
-                            vValidator(testValidator2, ['abc']),
+                            wValidatorFactory<V3>(factory1)(),
+                            wValidator(testValidator2, ['abc']),
                         )
                         : compoundValidator(
-                            vValidatorFactory<V3>(factory1)(),
-                            vValidator(testValidator3, ['abc']),
+                            wValidatorFactory<V3>(factory1)(),
+                            wValidator(testValidator3, ['abc']),
                         ),
                 })).build<number>(5);
 
@@ -402,12 +402,12 @@ describe('validators', () => {
                     .and
                     .returnValue(testValidator5);
                 const factory1 = () => testValidator1;
-                const compoundValidator = vCompoundValidator(factory);
+                const compoundValidator = wCompoundValidator(factory);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: compoundValidator(
-                        vValidatorFactory<V3>(factory1)(),
-                        n < 10 ? vValidator(testValidator2, ['abc']) : vValidator(testValidator3, ['def']),
+                        wValidatorFactory<V3>(factory1)(),
+                        n < 10 ? wValidator(testValidator2, ['abc']) : wValidator(testValidator3, ['def']),
                     ),
                 })).build<number>(5);
 
@@ -421,10 +421,10 @@ describe('validators', () => {
             it('should recreate validators if mixer function is different', () => {
                 const factory1 = jasmine.createSpy().and.returnValue([testValidator1, testValidator2]);
                 const factory2 = jasmine.createSpy().and.returnValue([testValidator3, testValidator4]);
-                const compoundValidator1 = vCompoundValidator(factory1);
-                const compoundValidator2 = vCompoundValidator(factory2);
+                const compoundValidator1 = wCompoundValidator(factory1);
+                const compoundValidator2 = wCompoundValidator(factory2);
                 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: n < 10
                         ? compoundValidator1(testValidator5)
                         : compoundValidator2(testValidator5),
@@ -442,12 +442,12 @@ describe('validators', () => {
 
             it('should assign another validator if node type of validator was changed', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator1, testValidator2]);
-                const compoundValidator = vCompoundValidator(factory);
+                const compoundValidator = wCompoundValidator(factory);
 
-                const form = vForm((n: number) => vControl({
+                const form = wForm((n: number) => wControl({
                     validator: n < 10
                         ? compoundValidator(testValidator1)
-                        : vValidator(testValidator3, [1, 'abc']),
+                        : wValidator(testValidator3, [1, 'abc']),
                 })).build<number>(5);
 
                 form.setValue(20);
@@ -460,10 +460,10 @@ describe('validators', () => {
     });
 
     describe('side effects', () => {
-        describe(`${VValidationStrategy[VValidationStrategy.Append]} strategy`, () => {
+        describe(`${WValidationStrategy[WValidationStrategy.Append]} strategy`, () => {
             it('should restore removed validator', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: vValidator(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    validator: wValidator(testValidator1),
                 })).build(5);
     
                 form.control.setValidators(null);
@@ -476,8 +476,8 @@ describe('validators', () => {
             });
     
             it('should not remove other validators', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: vValidator(testValidator1),
+                const form = wForm((n: number) => wControl({
+                    validator: wValidator(testValidator1),
                 })).build(5);
     
                 form.control.setValidators([form.control.validator!, testValidator2]);
@@ -492,8 +492,8 @@ describe('validators', () => {
             });
     
             it('should not remove other validators, if set of validators was modified', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidator(testValidator1) : vValidator(testValidator2),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
                 })).build<number>(5);
                 
                 form.control.setValidators([form.control.validator!, testValidator3]);
@@ -510,8 +510,8 @@ describe('validators', () => {
             });
     
             it('should update set of validators, even if initial validator was composed', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidator(testValidator1) : vValidator(testValidator2),
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
                 })).build<number>(5);
                 
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
@@ -528,11 +528,11 @@ describe('validators', () => {
             });
         });
 
-        describe(`${VValidationStrategy[VValidationStrategy.Replace]} strategy`, () => {
+        describe(`${WValidationStrategy[WValidationStrategy.Replace]} strategy`, () => {
             it('should restore removed validator', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: vValidator(testValidator1),
-                })).validationStrategy(VValidationStrategy.Replace).build(5);
+                const form = wForm((n: number) => wControl({
+                    validator: wValidator(testValidator1),
+                })).validationStrategy(WValidationStrategy.Replace).build(5);
     
                 form.control.setValidators(null);
     
@@ -544,9 +544,9 @@ describe('validators', () => {
             });
     
             it('should remove other validators', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: vValidator(testValidator1),
-                })).validationStrategy(VValidationStrategy.Replace).build(5);
+                const form = wForm((n: number) => wControl({
+                    validator: wValidator(testValidator1),
+                })).validationStrategy(WValidationStrategy.Replace).build(5);
     
                 form.control.setValidators([form.control.validator!, testValidator2]);
     
@@ -560,9 +560,9 @@ describe('validators', () => {
             });
     
             it('should remove other validators, if set of validators was modified', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidator(testValidator1) : vValidator(testValidator2),
-                })).validationStrategy(VValidationStrategy.Replace).build<number>(5);
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
+                })).validationStrategy(WValidationStrategy.Replace).build<number>(5);
     
                 form.control.setValidators([form.control.validator!, testValidator3]);
     
@@ -578,9 +578,9 @@ describe('validators', () => {
             });
     
             it('should replace set of validators, even if initial validator was composed', () => {
-                const form = vForm((n: number) => vControl({
-                    validator: n < 10 ? vValidator(testValidator1) : vValidator(testValidator2),
-                })).validationStrategy(VValidationStrategy.Replace).build<number>(5);
+                const form = wForm((n: number) => wControl({
+                    validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
+                })).validationStrategy(WValidationStrategy.Replace).build<number>(5);
     
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
     
@@ -600,12 +600,12 @@ describe('validators', () => {
     describe('instances', () => {
         describe('compose', () => {
             it('should not assign validator when there is no child validator', () => {
-                const no = controlWithValidator(VValidators.compose());
+                const no = controlWithValidator(WValidators.compose());
                 expect(no.validator).toBeFalsy();
             });
 
             it('should return results of the single assigned validator', () => {
-                const single = controlWithValidator(VValidators.compose(even));
+                const single = controlWithValidator(WValidators.compose(even));
 
                 single.setValue(1);
                 expect(single.errors).toEqual({ even: true });
@@ -615,14 +615,14 @@ describe('validators', () => {
             });
 
             it('should successed if all validators are successed', () => {
-                const many = controlWithValidator(VValidators.compose(even, moreThan10));
+                const many = controlWithValidator(WValidators.compose(even, moreThan10));
 
                 many.setValue(100);
                 expect(many.errors).toBeFalsy();
             });
 
             it('should fail and return merged results of all assigned validators, if at least one validator is failed', () => {
-                const many = controlWithValidator(VValidators.compose(even, moreThan10));
+                const many = controlWithValidator(WValidators.compose(even, moreThan10));
 
                 many.setValue(5);
                 expect(many.errors).toEqual({ even: true, min: true });
@@ -637,12 +637,12 @@ describe('validators', () => {
 
         describe('and', () => {
             it('should not assign validator when there is no child validator', () => {
-                const no = controlWithValidator(VValidators.and());
+                const no = controlWithValidator(WValidators.and());
                 expect(no.validator).toBeFalsy();
             });
 
             it('should return results of the single assigned validator', () => {
-                const single = controlWithValidator(VValidators.and(even));
+                const single = controlWithValidator(WValidators.and(even));
 
                 single.setValue(1);
                 expect(single.errors).toEqual({ even: true });
@@ -652,7 +652,7 @@ describe('validators', () => {
             });
 
             it('should return results of the first failed validator', () => {
-                const many = controlWithValidator(VValidators.and(even, moreThan10));
+                const many = controlWithValidator(WValidators.and(even, moreThan10));
 
                 many.setValue(5);
                 expect(many.errors).toEqual({ even: true });
@@ -666,7 +666,7 @@ describe('validators', () => {
             });
 
             it('should successed if no any and validator is failed', () => {
-                const many = controlWithValidator(VValidators.and(even, moreThan10));
+                const many = controlWithValidator(WValidators.and(even, moreThan10));
 
                 many.setValue(100);
                 expect(many.errors).toBeFalsy();
@@ -675,12 +675,12 @@ describe('validators', () => {
 
         describe('or', () => {
             it('should not assign validator when there is no child validator', () => {
-                const no = controlWithValidator(VValidators.or());
+                const no = controlWithValidator(WValidators.or());
                 expect(no.validator).toBeFalsy();
             });
 
             it('should return results of the single assigned validator', () => {
-                const single = controlWithValidator(VValidators.or(even));
+                const single = controlWithValidator(WValidators.or(even));
 
                 single.setValue(1);
                 expect(single.errors).toEqual({ even: true });
@@ -690,7 +690,7 @@ describe('validators', () => {
             });
 
             it('should successed if at least one validator is successed', () => {
-                const many = controlWithValidator(VValidators.or(even, moreThan10));
+                const many = controlWithValidator(WValidators.or(even, moreThan10));
 
                 many.setValue(4);
                 expect(many.errors).toBeFalsy();
@@ -703,7 +703,7 @@ describe('validators', () => {
             });
 
             it('should fail and return merged results if all validators are failed', () => {
-                const many = controlWithValidator(VValidators.or(even, moreThan10));
+                const many = controlWithValidator(WValidators.or(even, moreThan10));
 
                 many.setValue(5);
                 expect(many.errors).toEqual({ even: true, min: true });

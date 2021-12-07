@@ -1,34 +1,34 @@
-import { VFormNode, VFormNodeType, VFormPlaceholder, VPathElement } from '../model';
+import { WFormNode, WFormNodeType, WFormPlaceholder, WPathElement } from '../model';
 import { Maybe } from '../common';
-import { VFormArray, VFormGroup } from '../model';
-import { VFormOptions } from '../reconcilation';
-import { VPortalHost } from '../portal-host';
+import { WFormArray, WFormGroup } from '../model';
+import { WFormOptions } from '../reconcilation';
+import { WPortalHost } from '../portal-host';
 
-export class VRenderContext {
+export class WRenderContext {
     validatorsChanged = false;
 
-    isUsedNode = (node: VFormNode | VFormPlaceholder): node is VFormNode => {
+    isUsedNode = (node: WFormNode | WFormPlaceholder): node is WFormNode => {
         if (node == null) {
             // It is intentional, null error is catched later in processNode
             return true;
         }
 
         switch (node.type) {
-            case VFormNodeType.Placeholder:
+            case WFormNodeType.Placeholder:
                 return false;
-            case VFormNodeType.Native:
+            case WFormNodeType.Native:
                 return node.control != null;
-            case VFormNodeType.Portal:
+            case WFormNodeType.Portal:
                 return this.portalHost.getForm(node.name) != null;
             default:
                 return true;
         }
     };
     
-    private _currentPath: VPathElement[] = [];
+    private _currentPath: WPathElement[] = [];
     private _disabled: boolean[] = [];
 
-    constructor(readonly options: VFormOptions, readonly portalHost: VPortalHost) {}
+    constructor(readonly options: WFormOptions, readonly portalHost: WPortalHost) {}
 
     tryDisabled(disabled: boolean): boolean {
         const disabledTop = this._disabled.length === 0 ? false : this._disabled[this._disabled.length - 1];
@@ -44,7 +44,7 @@ export class VRenderContext {
         this.validatorsChanged = false;
     }
 
-    push(name: Maybe<VPathElement>, node: VFormGroup | VFormArray): void {
+    push(name: Maybe<WPathElement>, node: WFormGroup | WFormArray): void {
         if (name != null) {
             this._currentPath.push(name);
         }
@@ -56,7 +56,7 @@ export class VRenderContext {
         this._disabled.pop();
     }
 
-    pathTo(name?: VPathElement): VPathElement[] {
+    pathTo(name?: WPathElement): WPathElement[] {
         if (name == null) {
             return this._currentPath.concat();
         }

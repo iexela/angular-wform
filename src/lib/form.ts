@@ -3,17 +3,17 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 import { ProcedureFn } from './common';
-import { VFormNode, VFormNodeFactory, VFormNodePatcher } from './model';
-import { VPortalHost } from './portal-host';
-import { reconcile, VFormOptions, VReconcilationRequest } from './reconcilation';
+import { WFormNode, WFormNodeFactory, WFormNodePatcher } from './model';
+import { WPortalHost } from './portal-host';
+import { reconcile, WFormOptions, WReconcilationRequest } from './reconcilation';
 import { calculateValue } from './utils';
 
-export class VForm<T> {
+export class WForm<T> {
     private _control$$: BehaviorSubject<AbstractControl>;
-    private _factory: VFormNodeFactory<T, VFormNode>;
-    private _options: VFormOptions;
+    private _factory: WFormNodeFactory<T, WFormNode>;
+    private _options: WFormOptions;
     private _reconcilationInProgress$$ = new BehaviorSubject(false);
-    private _portalHost = new VPortalHost();
+    private _portalHost = new WPortalHost();
 
     readonly valueChanges: Observable<T>;
     readonly rawValueChanges: Observable<T>;
@@ -38,7 +38,7 @@ export class VForm<T> {
         return this.control.invalid;
     }
 
-    constructor(factory: VFormNodeFactory<T, VFormNode>, options: VFormOptions, value: T, base?: AbstractControl) {
+    constructor(factory: WFormNodeFactory<T, WFormNode>, options: WFormOptions, value: T, base?: AbstractControl) {
         this._options = options;
 
         this._control$$ = new BehaviorSubject(reconcile({
@@ -85,7 +85,7 @@ export class VForm<T> {
         this.setValue(value);
     }
 
-    connect(name: string, form: VForm<any>): void {
+    connect(name: string, form: WForm<any>): void {
         this._portalHost.setForm(name, form);
         this.update();
     }
@@ -154,7 +154,7 @@ export class VForm<T> {
         });
     }
 
-    patch(patcher: VFormNodePatcher): void {
+    patch(patcher: WFormNodePatcher): void {
         this._reconcile({
             options: this._options,
             portalHost: this._portalHost,
@@ -164,7 +164,7 @@ export class VForm<T> {
         });
     }
 
-    private _reconcile(request: VReconcilationRequest): void {
+    private _reconcile(request: WReconcilationRequest): void {
         this._reconcilationInProgress$$.next(true);
         try {
             this._control$$.next(reconcile(request));

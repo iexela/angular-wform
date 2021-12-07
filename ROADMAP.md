@@ -1,4 +1,4 @@
-3. Implement tests for controls to test changing of vnode types
+3. Implement tests for controls to test changing of wnode types
 7. Think how to simplify patch implementation
 9. Write real-world sample
 12. Support CI
