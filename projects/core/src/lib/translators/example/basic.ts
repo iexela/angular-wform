@@ -1,6 +1,6 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
-import { WAsyncValidatorNode, WValidatorNode } from 'src/lib';
-import { Maybe } from 'src/lib/common';
+import { WAsyncValidatorNode, WValidatorNode } from '../../model';
+import { Maybe } from '../../common';
 import { arrayify } from '../../utils';
 import { composeAsyncValidators, composeValidators } from '../../validators';
 import { toCondition, whenAll } from './conditions';

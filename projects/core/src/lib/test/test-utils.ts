@@ -1,6 +1,6 @@
 import { tick } from '@angular/core/testing';
-import { AbstractControl } from "@angular/forms";
-import { isObservable, Observable } from 'rxjs';
+import { AbstractControl } from '@angular/forms';
+import { firstValueFrom, isObservable, Observable } from 'rxjs';
 
 export function trackControl(control: AbstractControl): { changed: boolean, statusChanged: boolean, valueChanged: boolean } {
     const tracker = { statusChanged: false, valueChanged: false, changed: false };
@@ -22,7 +22,7 @@ export function andTick<T>(value: T): T {
 
 export function toPromise<T>(value: Observable<T> | Promise<T>): Promise<T> {
     if (isObservable(value)) {
-        return value.toPromise();
+        return firstValueFrom(value);
     }
     return value;
 }

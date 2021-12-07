@@ -24,6 +24,6 @@ describe('staged example', () => {
 
         expect(form.get('firstName').errors).toEqual({ required: true });
         expect(form.get('lastName').disabled).toBe(true);
-        expect(getLastFormNode(form.get('lastName')).data.visible).toBe(false);
+        expect(getLastFormNode(form.get('lastName')).data['visible']).toBe(false);
     });
 });
