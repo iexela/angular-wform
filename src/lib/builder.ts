@@ -68,6 +68,6 @@ export class VFormBuilder<T> {
     }
 }
 
-export function vForm<TValue = any, TFormNode extends VFormNode = VFormNode>(factory: VFormNodeFactory<ExtractFormValue<TValue, TFormNode>, TFormNode>): VFormBuilder<ExtractFormValue<TValue, TFormNode>> {
+export function vForm<TValue = {}, TFormNode extends VFormNode = VFormNode>(factory: VFormNodeFactory<ExtractFormValue<TValue, TFormNode>, TFormNode>): VFormBuilder<ExtractFormValue<TValue, TFormNode>> {
     return new VFormBuilder(factory);
 }

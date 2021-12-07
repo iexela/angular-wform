@@ -1,5 +1,5 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
-import { ArrayItemOf, OptionalKeys, RequiredKeys, RestoreKeys } from './common';
+import { ArrayItemOf } from './common';
 
 export type VPathElement = string | number;
 
@@ -151,23 +151,32 @@ export function isAsyncValidatorNode(value: any): value is VAsyncValidatorNode {
     return !!VAsyncValidatorNodeType[value['type']];
 }
 
-type FormGroupValueOf<TValue extends object, TFormGroupChildren extends VFormGroupChildren> = RestoreKeys<TValue, {
-    [P in (keyof TFormGroupChildren & keyof TValue)]: ExtractFormValue<Exclude<TValue[P], undefined>, TFormGroupChildren[P]>;
-}> & {
-    [P in Exclude<keyof TFormGroupChildren, keyof TValue>]?: GetFormValue<TFormGroupChildren[P]>;
-};
+const FIELD_TO_REMOVE = Symbol('field-to-remove');
+type FieldToRemove = typeof FIELD_TO_REMOVE;
+
+type CleanRemovedFields<T> = Omit<T, { [P in keyof T]: FieldToRemove extends T[P] ? P : never }[keyof T]>;
+
+type FormGroupValueOf<TValue extends object, TFormGroupChildren extends VFormGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormValue<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
 
 type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends VFormArrayChildren> =
     ExtractFormValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
 
 export type ExtractFormValue<TValue, TFormNode> =
-    TFormNode extends VFormGroup<infer RGroupChildren>
-        ? (TValue extends object ? FormGroupValueOf<TValue, RGroupChildren> : never)
-        : (TFormNode extends VFormArray<infer RArrayChildren>
-            ? (TValue extends any[] ? FormArrayValueOf<TValue, RArrayChildren> : never)
-            : (TFormNode extends (VFormControl<any> | VFormNative<any> | VFormPortal | VFormPlaceholder)
-                ? TValue
-                : never));
+    {} extends TValue
+        ? GetFormValue<TFormNode>
+        : (TFormNode extends VFormGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormGroupValueOf<TValue, RGroupChildren> : never)
+            : (TFormNode extends VFormArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf<TValue, RArrayChildren> : never)
+                : (TFormNode extends (VFormControl<infer R> | VFormNative<infer R>)
+                    ? TValue | (any extends R ? never : R)
+                    : (TFormNode extends (VFormPortal | VFormPlaceholder)
+                        ? any
+                        : never))));
 
 export type GetFormValue<TFormNode> =
     TFormNode extends VFormGroup<infer RGroupChildren>

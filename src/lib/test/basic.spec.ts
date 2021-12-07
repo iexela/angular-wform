@@ -140,7 +140,7 @@ describe('basic', () => {
             const keyGenerator = jasmine.createSpy();
             vForm(() =>
                 vGroup({ abc: vTaxModel }),
-            ).keyGenerator(keyGenerator).build(false);
+            ).keyGenerator(keyGenerator).build({ abc: { tax1: 1, tax2: [3, 4] } });
 
             expect(keyGenerator).not.toHaveBeenCalled();
         });
@@ -352,7 +352,7 @@ describe('basic', () => {
                 group: vGroup({
                     nested: null as any,
                 }),
-            })).build(false)).toThrowError(errorHasMessage('group.nested'));
+            })).build({})).toThrowError(errorHasMessage('group.nested'));
         });
 
         it('"reconcilation operation" should throw error if child of group is nil', () => {
@@ -374,7 +374,7 @@ describe('basic', () => {
                         vControl({ key: 3 }),
                     ]),
                 }),
-            })).build(false)).toThrowError(errorHasMessage('group.nested.1'));
+            })).build({})).toThrowError(errorHasMessage('group.nested.1'));
         });
 
         it('"reconcilation operation" should throw error if child of array is nil', () => {

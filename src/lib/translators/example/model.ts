@@ -1,5 +1,5 @@
 import { AbstractControl } from '@angular/forms';
-import { ArrayItemOf, PredicateFn, RestoreKeys } from '../../common';
+import { ArrayItemOf, PredicateFn } from '../../common';
 import { VAsyncValidatorNode, VFormHooks, VValidatorNode } from '../../model';
 
 export enum FormSampleNodeType {
@@ -85,11 +85,16 @@ export interface FormSampleNodeFactory<TValue, TNode extends FormSampleNode> {
     (value: TValue): TNode;
 }
 
-type FormSampleGroupValueOf<TValue extends object, TChildren extends FormSampleGroupChildren> = RestoreKeys<TValue, {
-    [P in (keyof TChildren & keyof TValue)]: ExtractFormSampleValue<Exclude<TValue[P], undefined>, TChildren[P]>;
-}> & {
-    [P in Exclude<keyof TChildren, keyof TValue>]?: GetFormSampleValue<TChildren[P]>;
-};
+const FIELD_TO_REMOVE = Symbol('field-to-remove');
+type FieldToRemove = typeof FIELD_TO_REMOVE;
+
+type CleanRemovedFields<T> = Omit<T, { [P in keyof T]: FieldToRemove extends T[P] ? P : never }[keyof T]>;
+
+type FormSampleGroupValueOf<TValue extends object, TFormGroupChildren extends FormSampleGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormSampleValue<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
 
 type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends FormSampleArrayChildren> =
     ExtractFormSampleValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
