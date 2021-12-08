@@ -1,6 +1,9 @@
 import { AbstractControl, FormControl, ValidatorFn, Validators } from '@angular/forms';
-import { wCompoundValidator, wControl, wForm, wValidator, wValidatorFactory, WValidatorNode, WValidators } from '..';
+import { wControl } from '../basic';
+import { wForm } from '../builder';
+import { WValidatorNode } from '../model';
 import { WValidationStrategy } from '../reconcilation';
+import { wCompoundValidator, wValidator, wValidatorFactory, WValidators } from '../validators';
 import { even, moreThan10 } from './test-mocks';
 
 const TEST_VALUE = Object.freeze({});

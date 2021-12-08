@@ -1,8 +1,11 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormArray, FormControl } from '@angular/forms';
-import { getLastFormNode, wArray, wControl, WForm, wForm, WFormArrayChildren, WFormArrayOptions, WFormBuilder, WFormControlOptions, WFormHooks, wGroup, wValidator } from '..';
-import { wNative, wPortal, wSkip } from '../basic';
-import { wValidatorAsync } from '../validators';
+import { wArray, wControl, WFormArrayOptions, WFormControlOptions, wGroup, wNative, wPortal, wSkip } from '../basic';
+import { wForm, WFormBuilder } from '../builder';
+import { WForm } from '../form';
+import { WFormArrayChildren, WFormHooks } from '../model';
+import { getLastFormNode } from '../reconcilation';
+import { wValidator, wValidatorAsync } from '../validators';
 import { Box, createTaxControl, elephant, even, krokodile, moreThan10, mouse, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 

@@ -1,9 +1,9 @@
 import { Validators } from '@angular/forms';
-import { composeValidators, WFormArray, WFormControl, WFormGroup, WFormNative, WFormNodeType, WFormPortal, wValidator, WValidatorNode } from '../..';
+import { WFormArray, WFormControl, WFormGroup, WFormNative, WFormNodeType, WFormPortal, WValidatorNode } from '../../model';
 import { Maybe } from '../../common';
 import { WFormNode } from '../../model';
 import { arrayify } from '../../utils';
-import { andValidators } from '../../validators';
+import { andValidators, composeValidators, wValidator } from '../../validators';
 import { WFormTreeVisitor, WFormTreeNodeType } from '../tree-translator';
 import { Location, FormSampleArray, FormSampleControl, FormSampleGroup, FormSampleMode, FormSampleNative, FormSampleNode, FormSampleNodeType, FormSampleOptions, FormSamplePlaceholder, FormSamplePortal, SampleEnvironmentPredicate } from './model';
 

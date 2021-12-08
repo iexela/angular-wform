@@ -1,5 +1,5 @@
 import { AbstractControl } from '@angular/forms';
-import { WThisFormNode } from '..';
+import { WThisFormNode } from '../model';
 import { Maybe } from '../common';
 import { AsyncValidatorBundle, createAsyncValidatorBundle, createValidatorBundle, ValidatorBundle } from './internal-model';
 

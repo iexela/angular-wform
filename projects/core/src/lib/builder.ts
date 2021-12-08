@@ -1,5 +1,5 @@
 import { AbstractControl } from '@angular/forms';
-import { ExtractFormValue, WFormNode } from '.';
+import { ExtractFormValue, WFormNode } from './model';
 import { WForm } from './form';
 import { WFormNodeFactory } from './model';
 import { WFormOptions, WValidationStrategy } from './reconcilation';

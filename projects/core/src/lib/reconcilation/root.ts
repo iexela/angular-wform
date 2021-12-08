@@ -1,6 +1,5 @@
 import { AbstractControl } from '@angular/forms';
-import { WFormNode, WThisFormNode } from '..';
-import { WFormNodeType } from '../model';
+import { WFormNodeType, WThisFormNode } from '../model';
 import { processNode } from './controls';
 import { WReconcilationRequest } from './model';
 import { getRoot } from './registry';

@@ -1,7 +1,7 @@
 import { AsyncValidatorFn, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { concat, defer, forkJoin } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { isAsyncValidatorNode, WAsyncCompoundValidatorNode, WAsyncFactoryValidatorNode, WAsyncSimpleValidatorNode, WAsyncValidatorFactory, WAsyncValidatorMixer, WAsyncValidatorNode, WAsyncValidatorNodeType } from '.';
+import { isAsyncValidatorNode, WAsyncCompoundValidatorNode, WAsyncFactoryValidatorNode, WAsyncSimpleValidatorNode, WAsyncValidatorFactory, WAsyncValidatorMixer, WAsyncValidatorNode, WAsyncValidatorNodeType } from './model';
 import { Nullable } from './common';
 import { isValidatorNode, WCompoundValidatorNode, WFactoryValidatorNode, WSimpleValidatorNode, WValidatorFactory, WValidatorMixer, WValidatorNode, WValidatorNodeType } from './model';
 

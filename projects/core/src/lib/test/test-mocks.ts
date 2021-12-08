@@ -1,6 +1,6 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
-import { wGroup, wValidator, wArray, wControl } from '..';
-import { wValidatorAsync } from '../validators';
+import { wGroup, wArray, wControl } from '../basic';
+import { wValidator, wValidatorAsync } from '../validators';
 
 export const moreThan10 = wValidator(control => control.value <= 10 ? { min: true } : null);
 export const even = wValidator(control => (control.value % 2) === 1 ? { even: true } : null);

@@ -1,7 +1,11 @@
-import { getLastFormNode, wControl, WForm, wForm, WFormControlOptions, WFormHooks } from '..';
-import { andTick, trackControl } from './test-utils';
-import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
 import { fakeAsync, tick } from '@angular/core/testing';
+import { wControl, WFormControlOptions } from '../basic';
+import { wForm } from '../builder';
+import { WForm } from '../form';
+import { WFormHooks } from '../model';
+import { getLastFormNode } from '../reconcilation';
+import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
+import { andTick, trackControl } from './test-utils';
 
 function renderNumber(n: number, options?: WFormControlOptions<number>): WForm<number> {
     return wForm(() => wControl(options)).build(n);

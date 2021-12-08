@@ -1,7 +1,9 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { AbstractControl, FormControl } from '@angular/forms';
-import { getLastFormNode, wForm, WForm } from '..';
 import { WFormNativeOptions, wNative } from '../basic';
+import { wForm } from '../builder';
+import { WForm } from '../form';
+import { getLastFormNode } from '../reconcilation';
 import { belarusToRussia, createFlightForm, even, evenAsync, moreThan10, moreThan10Async, russiaToBelarus } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 

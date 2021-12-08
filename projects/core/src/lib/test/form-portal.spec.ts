@@ -1,6 +1,5 @@
+import { wControl, wGroup, wPortal } from '../basic';
 import { wForm } from '../builder';
-import { wGroup, wPortal } from '../basic';
-import { wControl } from '..';
 
 describe('WFormPortal', () => {
     it('should not render control when portal is not connected', () => {

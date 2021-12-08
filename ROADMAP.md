@@ -6,3 +6,5 @@
 14. Check that library works for different TS versions
 16. Write documentation
 18. Log console.debug/console.warn only in dev mode?
+19. Support dataChanges
+20. Provide basic pipe classes

@@ -1,4 +1,5 @@
-import { wControl, wForm, wGroup } from '..';
+import { wControl, wGroup } from '../basic';
+import { wForm } from '../builder';
 import { GetField, HasField, Is, must } from './test-types';
 
 interface Spaceship {

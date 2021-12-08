@@ -1,4 +1,4 @@
-import { getLastFormNode } from '../..';
+import { getLastFormNode } from '../../reconcilation';
 import { buildTreeTranslator } from '../tree-translator';
 import { sControl, sRoot } from './basic';
 import { sampleFormFactory } from './builder';

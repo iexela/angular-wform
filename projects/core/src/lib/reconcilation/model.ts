@@ -1,5 +1,5 @@
 import { AbstractControl } from '@angular/forms';
-import { WPathElement } from '..';
+import { WPathElement } from '../model';
 import { WFormNode } from '../model';
 import { WPortalHost } from '../portal-host';
 
