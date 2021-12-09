@@ -1,0 +1,28 @@
+<wform-page-content>
+    <mat-card class="fixed-width-center w-400">
+        <form [formGroup]="form.group" (submit)="onSubmit()">
+            <mat-card-title>Welcome</mat-card-title>
+            <mat-card-content>
+                <mat-radio-group formControlName="type" (change)="onTypeChange()" class="form-field radio-group-inline">
+                    <mat-radio-button value="register">Register as New User</mat-radio-button>
+                    <mat-radio-button value="login">Login As Existing User</mat-radio-button>
+                </mat-radio-group>
+                <mat-form-field class="form-field">
+                    <input formControlName="login" type="text" matInput placeholder="User name or email">
+                </mat-form-field>
+                <mat-form-field *ngIf="isRegister" class="form-field">
+                    <input formControlName="phone" type="text" matInput placeholder="Phone">
+                </mat-form-field>
+                <mat-form-field  *ngIf="isLogin" class="form-field">
+                    <input formControlName="password" type="password" matInput placeholder="Password">
+                </mat-form-field>
+                <mat-form-field *ngIf="isRegister" class="form-field">
+                    <input formControlName="code" type="password" matInput placeholder="Code">
+                </mat-form-field>
+            </mat-card-content>
+            <mat-card-actions align="end">
+                <button type="submit" mat-raised-button color="primary">Login</button>
+            </mat-card-actions>
+        </form>
+    </mat-card>
+</wform-page-content>

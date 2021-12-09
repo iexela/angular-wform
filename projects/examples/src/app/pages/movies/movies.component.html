@@ -1,0 +1,33 @@
+<wform-page-content>
+    <mat-card class="fixed-width-center w-400">
+        <form [formGroup]="form.group" (submit)="onSubmit()">
+            <mat-card-title>Search for movies</mat-card-title>
+            <mat-card-content>
+                <mat-form-field class="form-field">
+                    <input name="search" formControlName="search" type="text" matInput>
+                </mat-form-field>
+                <div class="checkbox-group-inline">
+                    <mat-checkbox
+                        *ngFor="let restriction of form.getArray('restrictions').controls"
+                        [formControl]="$any(restriction.get('on'))">{{restriction.get('code')!.value}}</mat-checkbox>
+                </div>
+            </mat-card-content>
+            <mat-card-actions align="end">
+                <mat-form-field>
+                    <input
+                        type="number"
+                        matInput
+                        min="0"
+                        max="99"
+                        placeholder="Age of user"
+                        [value]="age"
+                        (change)="onAgeChanged($any($event.target).value || 0)">
+                </mat-form-field>
+                <div class="flex-1"></div>
+                <div>
+                    <button type="submit" mat-raised-button color="primary">Search</button>
+                </div>
+            </mat-card-actions>
+        </form>
+    </mat-card>
+</wform-page-content>

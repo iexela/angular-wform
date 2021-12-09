@@ -1,0 +1,66 @@
+<wform-page-content>
+    <mat-card class="fixed-width-center w-400">
+        <form [formGroup]="form.group" (submit)="onSubmit()">
+            <mat-card-title>Pizza</mat-card-title>
+            <mat-card-content>
+                <mat-form-field class="form-field">
+                    <mat-select formControlName="size">
+                        <mat-option *ngFor="let size of sizes" [value]="size">{{size}} cm</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-radio-group formControlName="base" class="form-field radio-group-inline">
+                    <mat-radio-button value="classic">Classic</mat-radio-button>
+                    <mat-radio-button value="thin">Thin</mat-radio-button>
+                </mat-radio-group>
+                <div class="flex-row flex-space-between flex-cross-center">
+                    <button
+                            type="button"
+                            mat-button
+                            [matMenuTriggerFor]="ingredientMenu"
+                            color="primary">
+                        <mat-icon class="s20">add</mat-icon>
+                        Add Ingredient
+                    </button>
+                    <span *ngIf="form.get('ingredients').hasError('noIngredients')" class="mat-error">
+                        No ingredients added
+                    </span>
+                    <span *ngIf="form.get('ingredients').hasError('tooManyIngredients')" class="mat-error">
+                        Limit of 10 ingredients reached
+                    </span>
+                    <span *ngIf="form.get('ingredients').valid">
+                        Max 10 ingredients possible
+                    </span>
+                </div>
+                <mat-menu #ingredientMenu="matMenu">
+                    <button
+                        *ngFor="let ingredient of ingredientTypes"
+                        mat-menu-item
+                        (click)="onIngredientAdd(ingredient.id)">{{ingredient.name}}</button>
+                </mat-menu>
+                <mat-list>
+                    <mat-list-item
+                            *ngFor="let ingredient of form.getArray('ingredients').controls"
+                            [formGroup]="$any(ingredient)">
+                        <span class="flex-1">{{getIngredientName(ingredient.value.typeId)}}</span>
+                        <mat-form-field class="w-100">
+                            <input formControlName="count" type="number" matInput>
+                        </mat-form-field>
+                        <button
+                                type="button"
+                                mat-flat-button
+                                title="Remove"
+                                (click)="onIngredientRemove(ingredient.value.typeId)">
+                            <mat-icon>remove_circle_outline</mat-icon>
+                        </button>
+                    </mat-list-item>
+                </mat-list>
+            </mat-card-content>
+            <mat-card-actions align="end">
+                <button type="submit" mat-raised-button color="primary">Order</button>
+                <button type="button" mat-icon-button>
+                    <mat-icon></mat-icon>
+                </button>
+            </mat-card-actions>
+        </form>
+    </mat-card>
+</wform-page-content>

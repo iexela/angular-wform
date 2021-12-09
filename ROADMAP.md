@@ -8,3 +8,4 @@
 18. Log console.debug/console.warn only in dev mode?
 19. Support dataChanges
 20. Provide basic pipe classes
+24. Verify types when () => { ... return wForm(...); };

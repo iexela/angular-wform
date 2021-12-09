@@ -78,6 +78,10 @@ export function isNil(value: any): value is null | undefined {
     return value == null;
 }
 
+export function isFunction<T>(value: T): value is T & Function {
+    return typeof value === 'function';
+}
+
 export function arrayify<T>(value: T | T[] | null | undefined): T[] {
     if (isNil(value)) {
         return [];

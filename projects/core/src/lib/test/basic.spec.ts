@@ -24,7 +24,7 @@ describe('basic', () => {
     describe('virtual function', () => {
         it('should accept initial value', () => {
             const fn = jasmine.createSpy('virtual-fn').and.returnValue(wControl());
-            wForm(fn).build(1 as number);
+            wForm(fn).build(1);
     
             expect(fn.calls.count()).toBe(1);
             expect(fn.calls.mostRecent().args[0]).toBe(1);
@@ -32,7 +32,7 @@ describe('basic', () => {
     
         it('should accept value passed into "setValue" method', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).build(1 as number);
+            const form = wForm(fn).build(1);
     
             form.setValue(5);
     
@@ -42,7 +42,7 @@ describe('basic', () => {
     
         it('should accept current value if "update" is called', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).build(1 as number);
+            const form = wForm(fn).build(1);
     
             form.update();
     
@@ -52,12 +52,31 @@ describe('basic', () => {
     
         it('should not be called if value was changed using "control.setValue"', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).build(1 as number);
+            const form = wForm(fn).build(1);
     
             form.control.setValue(5);
     
             expect(fn.calls.count()).toBe(1);
             expect(fn.calls.mostRecent().args[0]).toBe(1);
+        });
+    });
+
+    describe('setValue', () => {
+        it('should pass value into virtual function', () => {
+            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
+            const form = wForm(fn).build(1);
+    
+            form.setValue(5);
+    
+            expect(fn.calls.mostRecent().args[0]).toBe(5);
+        });
+        it('should pass value transformed by value function into virtual function', () => {
+            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
+            const form = wForm(fn).build(2);
+    
+            form.setValue(value => value + 1);
+    
+            expect(fn.calls.mostRecent().args[0]).toBe(3);
         });
     });
 
@@ -205,7 +224,19 @@ describe('basic', () => {
     });
 
     describe('errors', () => {
-        it('"getControl" should throw error if control does not exist', () => {
+        it('"group" should throw error if control is not FormGroup', () => {
+            const form = wForm(() => wControl()).build(1);
+
+            expect(() => form.group).toThrowError(errorHasMessage('Root', 'FormGroup'));
+        });
+
+        it('"array" should throw error if control is not FormArray', () => {
+            const form = wForm(() => wControl()).build(1);
+
+            expect(() => form.array).toThrowError(errorHasMessage('Root', 'FormArray'));
+        });
+
+        it('"get" should throw error if control does not exist', () => {
             const form = wForm(() => wGroup({
                 nested: wGroup({
                     arr: wArray([
@@ -222,6 +253,40 @@ describe('basic', () => {
             expect(() => form.get('unexisting')).toThrowError(errorHasMessage('unexisting'));
             expect(() => form.get('0')).toThrowError(errorHasMessage('0'));
             expect(() => form.get('nested.arr.1.field2')).toThrowError(errorHasMessage('nested.arr.1.field2'));
+        });
+
+        it('"getGroup" should throw error if control is not FormGroup', () => {
+            const form = wForm(() => wGroup({
+                nested: wGroup({
+                    arr: wArray([
+                        wControl(),
+                        wGroup({
+                            field: wControl({ value: 'abc' }),
+                        }),
+                    ]),
+                }),
+            })).build({});
+
+            expect(form.getGroup('nested').value).toBeTruthy();
+            expect(() => form.getGroup('nested.arr')).toThrowError(errorHasMessage('FormGroup', 'nested.arr'));
+            expect(() => form.getGroup('nested.arr.0')).toThrowError(errorHasMessage('FormGroup', 'nested.arr.0'));
+        });
+
+        it('"getArray" should throw error if control is not FormArray', () => {
+            const form = wForm(() => wGroup({
+                nested: wGroup({
+                    arr: wArray([
+                        wControl(),
+                        wGroup({
+                            field: wControl({ value: 'abc' }),
+                        }),
+                    ]),
+                }),
+            })).build({});
+
+            expect(form.getArray('nested.arr').value).toBeTruthy();
+            expect(() => form.getArray('nested')).toThrowError(errorHasMessage('FormArray', 'nested'));
+            expect(() => form.getArray('nested.arr.0')).toThrowError(errorHasMessage('FormArray', 'nested.arr.0'));
         });
 
         it('"array reconcilation" should throw error if several items have the same key', () => {

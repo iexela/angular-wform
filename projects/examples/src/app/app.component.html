@@ -1,0 +1,21 @@
+<mat-toolbar class="mat-elevation-z6">
+    <span>wform Examples</span>
+    <span class="flex-1"></span>
+    <button mat-icon-button class="example-icon">
+      <img src="../assets/github.svg">
+    </button>
+</mat-toolbar>
+<mat-sidenav-container class="full-height">
+    <mat-sidenav class="menu" mode="side" opened>
+        <mat-nav-list>
+            <a mat-list-item routerLink="login" routerLinkActive="nav-item-active">Login</a>
+            <a mat-list-item routerLink="pizza" routerLinkActive="nav-item-active">Pizza</a>
+            <a mat-list-item routerLink="movies" routerLinkActive="nav-item-active">Movies</a>
+            <a mat-list-item routerLink="snickers" routerLinkActive="nav-item-active">Snickers</a>
+            <a mat-list-item routerLink="super" routerLinkActive="nav-item-active">Super</a>
+        </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <router-outlet></router-outlet>
+    </mat-sidenav-content>
+</mat-sidenav-container>

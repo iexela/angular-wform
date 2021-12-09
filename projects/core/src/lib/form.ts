@@ -2,11 +2,11 @@ import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
-import { ProcedureFn } from './common';
+import { ProcedureFn, TransformFn } from './common';
 import { WFormNode, WFormNodeFactory, WFormNodePatcher } from './model';
 import { WPortalHost } from './portal-host';
 import { reconcile, WFormOptions, WReconcilationRequest } from './reconcilation';
-import { calculateValue } from './utils';
+import { calculateValue, isFunction } from './utils';
 
 export class WForm<T> {
     private _control$$: BehaviorSubject<AbstractControl>;
@@ -20,6 +20,26 @@ export class WForm<T> {
 
     get control(): AbstractControl {
         return this._control$$.value;
+    }
+
+    get group(): FormGroup {
+        const control = this.control;
+
+        if (!(control instanceof FormGroup)) {
+            throw new Error('Root element is not FormGroup');
+        }
+
+        return control;
+    }
+
+    get array(): FormArray {
+        const control = this.control;
+
+        if (!(control instanceof FormArray)) {
+            throw new Error('Root element is not FormArray');
+        }
+
+        return control;
     }
 
     get value(): T {
@@ -71,7 +91,11 @@ export class WForm<T> {
         }
     }
 
-    setValue<U extends T>(value: U): void {
+    setValue<U extends T>(valueFn: TransformFn<T, U>): void;
+    setValue<U extends T>(value: U): void;
+    setValue<U extends T>(valueOrFn: TransformFn<T, U>): void {
+        const value = isFunction(valueOrFn) ? valueOrFn(this.rawValue) : valueOrFn;
+
         this._reconcile({
             options: this._options,
             portalHost: this._portalHost,
@@ -128,7 +152,7 @@ export class WForm<T> {
         onEach(this.control);
     }
 
-    get(path: string): AbstractControl {
+    get(path: (string | number)[] | string): AbstractControl {
         const found = this.control.get(path);
 
         if (found == null) {
@@ -138,7 +162,27 @@ export class WForm<T> {
         return found;
     }
 
-    has(path: string): boolean {
+    getGroup(path: (string | number)[] | string): FormGroup {
+        const control = this.get(path);
+
+        if (!(control instanceof FormGroup)) {
+            throw new Error(`Control is not FormGroup: ${path}`);
+        }
+
+        return control;
+    }
+
+    getArray(path: (string | number)[] | string): FormArray {
+        const control = this.get(path);
+
+        if (!(control instanceof FormArray)) {
+            throw new Error(`Control is not FormArray: ${path}`);
+        }
+
+        return control;
+    }
+
+    has(path: (string | number)[] | string): boolean {
         return this.control.get(path) != null;
     }
 

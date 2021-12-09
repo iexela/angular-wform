@@ -4,7 +4,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "core": [
+      "angular-wform": [
         "dist/core/core",
         "dist/core"
       ]
