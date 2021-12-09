@@ -1,6 +1,7 @@
-import { wControl, wGroup } from '../basic';
+import { wControl, wGroup, wValue } from '../basic';
 import { wForm } from '../builder';
-import { GetField, HasField, Is, must } from './test-types';
+import { Is } from '../common';
+import { GetField, HasField, must } from './test-types';
 
 interface Spaceship {
     name: string;
@@ -130,6 +131,21 @@ describe('type', () => {
             must<Is<GetField<typeof form.value, 'speed'>, number>>(true);
         });
 
+        it('should declare field types as is (when all fields are optional)', () => {
+            type TestSpaceship = {
+                name?: string;
+                speed?: number;
+            };
+
+            const form = wForm((s: TestSpaceship) => wGroup({
+                name: wControl(),
+                speed: wControl(),
+            })).build(first);
+
+            must<Is<GetField<typeof form.value, 'name'>, string | undefined>>(true);
+            must<Is<GetField<typeof form.value, 'speed'>, number | undefined>>(true);
+        });
+
         it('should declare only fields existing in the form', () => {
             type TestSpaceship = {
                 name: string;
@@ -147,7 +163,7 @@ describe('type', () => {
             must<HasField<typeof form.value, 'volume'>>(false);
         });
 
-        it('should not declare additional fields if they do not exist on entity', () => {
+        it('should declare additional fields as "any | undefined" if they do not exist on entity', () => {
             type TestSpaceship = {
                 name: string;
                 speed: number;
@@ -157,11 +173,26 @@ describe('type', () => {
                 name: wControl(),
                 speed: wControl(),
                 price: wControl(),
-            })).build(first);
+            })).build({ ...first, price: 111 });
 
-            must<Is<GetField<typeof form.value, 'name'>, string>>(true);
-            must<Is<GetField<typeof form.value, 'speed'>, number>>(true);
-            must<HasField<typeof form.value, 'price'>>(false);
+            must<Is<GetField<typeof form.value, 'price'>, any | undefined>>(true);
+            must<HasField<typeof form.value, 'price'>>(true);
+        });
+
+        it('should take into account type of additional fields not existing on entity', () => {
+            type TestSpaceship = {
+                name: string;
+                speed: number;
+                volume?: number;
+            };
+            const form = wForm((s: TestSpaceship) => wGroup({
+                name: wControl(),
+                speed: wControl(),
+                price: wValue(1),
+            })).build({ ...first, price: 111 });
+
+            must<Is<GetField<typeof form.value, 'price'>, number | undefined>>(true);
+            must<HasField<typeof form.value, 'price'>>(true);
         });
     });
 

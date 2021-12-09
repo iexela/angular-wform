@@ -1,10 +1,9 @@
-import { OptionalKeys, RequiredKeys } from '../common';
+import { Is, OptionalKeys, RequiredKeys } from '../common';
 
 export type HasField<T, K extends string> = K extends keyof T ? true : false;
 export type IsFieldOptional<T, K extends string> = K extends OptionalKeys<T> ? true : false;
 export type IsFieldRequired<T, K extends string> = K extends RequiredKeys<T> ? true : false;
 // https://stackoverflow.com/a/53808212
-export type Is<A, B> = (<G>() => G extends A ? 1 : 2) extends (<G>() => G extends B ? 1 : 2) ? true : false;
 export type IsTrue<T> = Is<T, true>;
 export type IsFalse<T> = Is<T, false>;
 export type IsNil<T> = true extends (IsNull<T> | IsUndefined<T> | Is<T, null | undefined>) ? true : false;

@@ -15,3 +15,5 @@ export type ArrayItemOf<T> = T extends (infer R)[] ? R : never;
 
 export type OptionalKeys<T> = { [P in keyof T]-?: undefined extends T[P] ? P : never }[keyof T];
 export type RequiredKeys<T> = Exclude<keyof T, OptionalKeys<T>>;
+
+export type Is<A, B> = (<G>() => G extends A ? 1 : 2) extends (<G>() => G extends B ? 1 : 2) ? true : false;

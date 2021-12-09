@@ -15,7 +15,7 @@ interface SnickersSize {
 }
 
 interface Snickers {
-    brand?: string;
+    brand: string;
     size?: number;
     count?: number;
 }

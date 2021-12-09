@@ -1,5 +1,5 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
-import { ArrayItemOf } from './common';
+import { ArrayItemOf, Is } from './common';
 
 export type WPathElement = string | number;
 
@@ -160,13 +160,15 @@ type FormGroupValueOf<TValue extends object, TFormGroupChildren extends WFormGro
     [P in keyof TValue]: P extends keyof TFormGroupChildren
         ? ExtractFormValue<TValue[P], TFormGroupChildren[P]>
         : FieldToRemove;
-}>;
+}> & {
+    [P in Exclude<keyof TFormGroupChildren, keyof TValue>]?: GetFormValue<TFormGroupChildren[P]>;
+};
 
 type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends WFormArrayChildren> =
     ExtractFormValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
 
 export type ExtractFormValue<TValue, TFormNode> =
-    {} extends TValue
+    Is<{}, TValue> extends true
         ? GetFormValue<TFormNode>
         : (TFormNode extends WFormGroup<infer RGroupChildren>
             ? (TValue extends object ? FormGroupValueOf<TValue, RGroupChildren> : never)
