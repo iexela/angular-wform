@@ -62,4 +62,6 @@ export {
     WKeyGenerator,
     WValidationStrategy,
     getLastFormNode,
+    getData,
+    dataChanges,
 } from './lib/reconcilation';

@@ -2,7 +2,7 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { wArray, wControl, wGroup, wNative, wPortal, wSkip } from '../basic';
 import { wForm } from '../builder';
 import { WFormNodeType } from '../model';
-import { getLastFormNode } from '../reconcilation';
+import { dataChanges, getData, getLastFormNode } from '../reconcilation';
 import { WValidators } from '../validators';
 import { belarusToAustralia, belarusToRussia, Box, createFlightForm, createFlightWNode, createTaxControl, elephant, Flight, mouse, russiaToBelarus, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
@@ -468,6 +468,41 @@ describe('basic', () => {
             const form = wForm((flag: boolean) => wNative(flag ? undefined : control)).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError()
+        });
+    });
+
+    describe('data', () => {
+        it('"getData" should return rendered data', () => {
+            const form = wForm((value: number) => wControl({ data: { value12: value + 12 } })).build(3);
+
+            expect(getData(form.control)).toEqual({ value12: 15 });
+        });
+
+        it('"getData" should return last rendered data', () => {
+            const form = wForm((value: number) => wControl({ data: { value12: value + 12 } })).build(3);
+
+            form.setValue(7);
+
+            expect(getData(form.control)).toEqual({ value12: 19 });
+
+            form.setValue(17);
+
+            expect(getData(form.control)).toEqual({ value12: 29 });
+        });
+
+        it('"dataChanges" should stream data changes', () => {
+            const form = wForm((value: number) => wControl({ data: { value12: value + 12 } })).build(3);
+
+            const subscription = jasmine.createSpy();
+            dataChanges(form.control).subscribe(subscription);
+
+            form.setValue(7);
+
+            expect(subscription.calls.mostRecent().args[0]).toEqual({ value12: 19 });
+
+            form.setValue(17);
+
+            expect(subscription.calls.mostRecent().args[0]).toEqual({ value12: 29 });
         });
     });
 
