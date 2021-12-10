@@ -160,9 +160,7 @@ type FormGroupValueOf<TValue extends object, TFormGroupChildren extends WFormGro
     [P in keyof TValue]: P extends keyof TFormGroupChildren
         ? ExtractFormValue<TValue[P], TFormGroupChildren[P]>
         : FieldToRemove;
-}> & {
-    [P in Exclude<keyof TFormGroupChildren, keyof TValue>]?: GetFormValue<TFormGroupChildren[P]>;
-};
+}>;
 
 type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends WFormArrayChildren> =
     ExtractFormValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];

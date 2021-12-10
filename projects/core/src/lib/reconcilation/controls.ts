@@ -1,5 +1,5 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
-import { getLastFormNode } from '.';
+import { getLastFormNode } from './registry';
 import { WFormNative, WFormPlaceholder, WFormPortal, WPathElement, WThisFormNode } from '../model';
 import { Maybe } from '../common';
 import { WFormArray, WFormControl, WFormGroup, WFormNode, WFormNodeType } from '../model';

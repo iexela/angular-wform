@@ -198,7 +198,7 @@ export class WForm<T> {
         });
     }
 
-    patch(patcher: WFormNodePatcher): void {
+    private patch(patcher: WFormNodePatcher): void {
         this._reconcile({
             options: this._options,
             portalHost: this._portalHost,

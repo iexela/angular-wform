@@ -6,7 +6,4 @@
 14. Check that library works for different TS versions
 16. Write documentation
 18. Log console.debug/console.warn only in dev mode?
-20. Provide basic pipe classes
-24. Implement type tests for array
-25. Is it a goo idea to schedule dataChanges immediately
-27. Should we optimize operator import?
+25. Is it a good idea to schedule dataChanges immediately

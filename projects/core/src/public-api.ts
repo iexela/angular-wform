@@ -65,3 +65,11 @@ export {
     getData,
     dataChanges,
 } from './lib/reconcilation';
+
+export {
+    AsFormArrayPipe,
+    AsFormControlPipe,
+    AsFormGroupPipe,
+    FormDataAsyncPipe,
+    WFormModule,
+} from './lib/module';

@@ -13,6 +13,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { WFormModule } from 'angular-wform';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -54,6 +55,8 @@ import { MoviesComponent } from './pages/movies/movies.component';
     MatSnackBarModule,
     MatSelectModule,
     MatMenuModule,
+
+    WFormModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

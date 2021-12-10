@@ -9,7 +9,7 @@
                 <div class="checkbox-group-inline">
                     <mat-checkbox
                         *ngFor="let restriction of form.getArray('restrictions').controls"
-                        [formControl]="$any(restriction.get('on'))">{{restriction.get('code')!.value}}</mat-checkbox>
+                        [formControl]="restriction.get('on') | asFormControl">{{restriction.get('code')!.value}}</mat-checkbox>
                 </div>
             </mat-card-content>
             <mat-card-actions align="end">

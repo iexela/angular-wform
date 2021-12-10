@@ -1,3 +1,4 @@
+import { wArray } from 'angular-wform';
 import { wControl, wGroup, wValue } from '../basic';
 import { wForm } from '../builder';
 import { Is } from '../common';
@@ -70,8 +71,6 @@ describe('type', () => {
                 a: wControl(),
                 b: wControl(),
             })).build({});
-
-            form.value
 
             must<Is<GetField<typeof form.value, 'a'>, any | undefined>>(true);
             must<Is<GetField<typeof form.value, 'b'>, any | undefined>>(true);
@@ -163,7 +162,7 @@ describe('type', () => {
             must<HasField<typeof form.value, 'volume'>>(false);
         });
 
-        it('should declare additional fields as "any | undefined" if they do not exist on entity', () => {
+        it('should not declare additional field', () => {
             type TestSpaceship = {
                 name: string;
                 speed: number;
@@ -173,13 +172,12 @@ describe('type', () => {
                 name: wControl(),
                 speed: wControl(),
                 price: wControl(),
-            })).build({ ...first, price: 111 });
+            })).build({ ...first });
 
-            must<Is<GetField<typeof form.value, 'price'>, any | undefined>>(true);
-            must<HasField<typeof form.value, 'price'>>(true);
+            must<HasField<typeof form.value, 'price'>>(false);
         });
-
-        it('should take into account type of additional fields not existing on entity', () => {
+        
+        it('should not declare additional field if value is passed into control', () => {
             type TestSpaceship = {
                 name: string;
                 speed: number;
@@ -189,13 +187,35 @@ describe('type', () => {
                 name: wControl(),
                 speed: wControl(),
                 price: wValue(1),
-            })).build({ ...first, price: 111 });
+            })).build({ ...first });
 
-            must<Is<GetField<typeof form.value, 'price'>, number | undefined>>(true);
-            must<HasField<typeof form.value, 'price'>>(true);
+            must<HasField<typeof form.value, 'price'>>(false);
         });
     });
 
     describe('array', () => {
+        it('should declare all items as "any" if value is undefined', () => {
+            const form = wForm(() => wArray([wControl(), wControl()])).build([]);
+
+            must<Is<typeof form.value, any[]>>(true);
+        });
+
+        it('should declare all items as "any" if any value is undefined', () => {
+            const form = wForm(() => wArray([wControl({ value: 1 }), wControl()])).build([]);
+
+            must<Is<typeof form.value, any[]>>(true);
+        });
+
+        it('should declare all items as "<type>" if values of the same type are passed into all controls', () => {
+            const form = wForm(() => wArray([wControl({ value: 1 }), wControl({ value: 1 })])).build([]);
+
+            must<Is<typeof form.value, number[]>>(true);
+        });
+
+        it('should declare all items as "<union of all types>" if values of different types are passed into all controls', () => {
+            const form = wForm(() => wArray([wControl({ value: 1 }), wControl({ value: '1' })])).build([]);
+
+            must<Is<typeof form.value, (number | string)[]>>(true);
+        });
     });
 });

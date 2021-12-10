@@ -496,13 +496,15 @@ describe('basic', () => {
             const subscription = jasmine.createSpy();
             dataChanges(form.control).subscribe(subscription);
 
+            expect(subscription).not.toHaveBeenCalled();
+
             form.setValue(7);
 
-            expect(subscription.calls.mostRecent().args[0]).toEqual({ value12: 19 });
+            expect(subscription).toHaveBeenCalledWith({ value12: 19 });
 
             form.setValue(17);
 
-            expect(subscription.calls.mostRecent().args[0]).toEqual({ value12: 29 });
+            expect(subscription).toHaveBeenCalledWith({ value12: 29 });
         });
     });
 
