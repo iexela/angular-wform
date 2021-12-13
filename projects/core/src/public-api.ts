@@ -32,6 +32,7 @@ export {
 
 export {
     WForm,
+    WFormOptions,
 } from './lib/form';
 
 export {
@@ -61,10 +62,16 @@ export {
 export {
     WKeyGenerator,
     WValidationStrategy,
+    WFormReconcilationOptions,
     getLastFormNode,
     getData,
     dataChanges,
+    DEFAULT_RECONCILATION_OPTIONS,
 } from './lib/reconcilation';
+
+export {
+    WFormRenderer,
+} from './lib/renderer';
 
 export {
     AsFormArrayPipe,

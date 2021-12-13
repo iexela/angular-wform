@@ -1,25 +1,30 @@
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 import { ProcedureFn, TransformFn } from './common';
-import { WFormNode, WFormNodeFactory, WFormNodePatcher } from './model';
-import { WPortalHost } from './portal-host';
-import { reconcile, WFormOptions, WReconcilationRequest } from './reconcilation';
+import { WFormNode, WFormNodeFactory } from './model';
+import { WPortal } from './portal-host';
+import { WFormReconcilationOptions } from './reconcilation';
+import { WFormRenderer } from './renderer';
 import { calculateValue, isFunction } from './utils';
 
-export class WForm<T> {
-    private _control$$: BehaviorSubject<AbstractControl>;
+export interface WFormOptions extends WFormReconcilationOptions {
+    updateOnChange: boolean;
+}
+
+export class WForm<T> implements WPortal<T> {
+    private _renderer: WFormRenderer<T>;
     private _factory: WFormNodeFactory<T, WFormNode>;
-    private _options: WFormOptions;
-    private _reconcilationInProgress$$ = new BehaviorSubject(false);
-    private _portalHost = new WPortalHost();
 
     readonly valueChanges: Observable<T>;
     readonly rawValueChanges: Observable<T>;
 
     get control(): AbstractControl {
-        return this._control$$.value;
+        const { control } = this._renderer;
+        if (!control) {
+            throw new Error('Root control is not rendered yet');
+        }
+        return control;
     }
 
     get group(): FormGroup {
@@ -59,32 +64,32 @@ export class WForm<T> {
     }
 
     constructor(factory: WFormNodeFactory<T, WFormNode>, options: WFormOptions, value: T, base?: AbstractControl) {
-        this._options = options;
+        const renderer = new WFormRenderer(options);
 
-        this._control$$ = new BehaviorSubject(reconcile({
-            options: { ...options, strict: false },
-            portalHost: this._portalHost,
-            node: factory(value),
-            value,
-            control: base,
-        }));
+        this._renderer = renderer;
 
-        const nativeValueChanges = this._control$$.pipe(switchMap(control => control.valueChanges));
+        if (base) {
+            renderer.attach(base, factory(value), value);
+        } else {
+            renderer.render(factory(value), value);
+        }
+
+        const nativeValueChanges = renderer.controlObservable
+            .pipe(switchMap(control => control.valueChanges));
 
         this.valueChanges = combineLatest([
             nativeValueChanges,
-            this._reconcilationInProgress$$,
+            renderer.reconcilationInProgressOnbservable,
         ]).pipe(
             filter(([_, reconcilationInProgress]: [T, boolean]) => !reconcilationInProgress),
             map(([value]) => value));
-
         this.rawValueChanges = this.valueChanges.pipe(map(() => this.rawValue));
 
         this._factory = factory;
 
         if (options.updateOnChange) {
             nativeValueChanges.subscribe(() => {
-                if (!this._reconcilationInProgress$$.value) {
+                if (!renderer.reconcilationInProgress) {
                     this.update();
                 }
             });
@@ -96,13 +101,7 @@ export class WForm<T> {
     setValue<U extends T>(valueOrFn: TransformFn<T, U>): void {
         const value = isFunction(valueOrFn) ? valueOrFn(this.rawValue) : valueOrFn;
 
-        this._reconcile({
-            options: this._options,
-            portalHost: this._portalHost,
-            node: this._factory(value),
-            control: this.control,
-            value,
-        });
+        this._renderer.render(this._factory(value), value);
     }
 
     resetValue(value: T): void {
@@ -110,12 +109,12 @@ export class WForm<T> {
     }
 
     connect(name: string, form: WForm<any>): void {
-        this._portalHost.setForm(name, form);
+        this._renderer.connect(name, form);
         this.update();
     }
 
     disconnect(name: string): void {
-        this._portalHost.resetForm(name);
+        this._renderer.disconnect(name);
         this.update();
     }
 
@@ -189,31 +188,6 @@ export class WForm<T> {
     update(): void {
         const value = this.rawValue;
 
-        this._reconcile({
-            options: this._options,
-            portalHost: this._portalHost,
-            node: this._factory(value),
-            control: this.control,
-            value,
-        });
-    }
-
-    private patch(patcher: WFormNodePatcher): void {
-        this._reconcile({
-            options: this._options,
-            portalHost: this._portalHost,
-            node: patcher(this.control),
-            control: this.control,
-            value: this.rawValue,
-        });
-    }
-
-    private _reconcile(request: WReconcilationRequest): void {
-        this._reconcilationInProgress$$.next(true);
-        try {
-            this._control$$.next(reconcile(request));
-        } finally {
-            this._reconcilationInProgress$$.next(false);
-        }
+        this._renderer.render(this._factory(value), value);
     }
 }

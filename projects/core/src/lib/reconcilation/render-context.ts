@@ -1,7 +1,7 @@
 import { WFormNode, WFormNodeType, WFormPlaceholder, WPathElement } from '../model';
 import { Maybe } from '../common';
 import { WFormArray, WFormGroup } from '../model';
-import { WFormOptions } from '../reconcilation';
+import { WFormReconcilationOptions } from '../reconcilation';
 import { WPortalHost } from '../portal-host';
 
 export class WRenderContext {
@@ -19,7 +19,7 @@ export class WRenderContext {
             case WFormNodeType.Native:
                 return node.control != null;
             case WFormNodeType.Portal:
-                return this.portalHost.getForm(node.name) != null;
+                return this.portalHost.get(node.name) != null;
             default:
                 return true;
         }
@@ -28,7 +28,7 @@ export class WRenderContext {
     private _currentPath: WPathElement[] = [];
     private _disabled: boolean[] = [];
 
-    constructor(readonly options: WFormOptions, readonly portalHost: WPortalHost) {}
+    constructor(readonly options: WFormReconcilationOptions, readonly portalHost: WPortalHost) {}
 
     tryDisabled(disabled: boolean): boolean {
         const disabledTop = this._disabled.length === 0 ? false : this._disabled[this._disabled.length - 1];

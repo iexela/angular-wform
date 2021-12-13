@@ -2,7 +2,7 @@ import { AsyncValidatorFn, ValidationErrors, ValidatorFn, Validators } from '@an
 import { concat, defer, forkJoin } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { isAsyncValidatorNode, WAsyncCompoundValidatorNode, WAsyncFactoryValidatorNode, WAsyncSimpleValidatorNode, WAsyncValidatorFactory, WAsyncValidatorMixer, WAsyncValidatorNode, WAsyncValidatorNodeType } from './model';
-import { Nullable } from './common';
+import { Nilable, Nullable } from './common';
 import { isValidatorNode, WCompoundValidatorNode, WFactoryValidatorNode, WSimpleValidatorNode, WValidatorFactory, WValidatorMixer, WValidatorNode, WValidatorNodeType } from './model';
 
 // Validators
@@ -32,9 +32,11 @@ export function wValidatorFactory<T>(factory: WValidatorFactory): (args: any[]) 
     });
 }
 
-export function wCompoundValidator<T>(mixer: WValidatorMixer<T>): (...validatorsAndNodes: (ValidatorFn | WValidatorNode)[]) => WCompoundValidatorNode {
+export function wCompoundValidator<T>(mixer: WValidatorMixer<T>): (...validatorsAndNodes: Nilable<ValidatorFn | WValidatorNode>[]) => WCompoundValidatorNode {
     return function() {
-        const nodes = Array.from(arguments).map(item => isValidatorNode(item) ? item : wValidator(item));
+        const nodes = Array.from(arguments)
+            .filter(Boolean)
+            .map(item => isValidatorNode(item) ? item : wValidator(item));
         return {
             type: WValidatorNodeType.Compound,
             mixer,
@@ -89,9 +91,11 @@ export function wValidatorFactoryAsync<T>(factory: WAsyncValidatorFactory): (arg
     });
 }
 
-export function wCompoundValidatorAsync<T>(mixer: WAsyncValidatorMixer<T>): (...validatorsAndNodes: (AsyncValidatorFn | WAsyncValidatorNode)[]) => WAsyncCompoundValidatorNode {
+export function wCompoundValidatorAsync<T>(mixer: WAsyncValidatorMixer<T>): (...validatorsAndNodes: Nilable<AsyncValidatorFn | WAsyncValidatorNode>[]) => WAsyncCompoundValidatorNode {
     return function() {
-        const nodes = Array.from(arguments).map(item => isAsyncValidatorNode(item) ? item : wValidatorAsync(item));
+        const nodes = Array.from(arguments)
+            .filter(Boolean)
+            .map(item => isAsyncValidatorNode(item) ? item : wValidatorAsync(item));
         return {
             type: WAsyncValidatorNodeType.Compound,
             mixer,

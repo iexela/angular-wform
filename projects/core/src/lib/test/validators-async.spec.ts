@@ -621,6 +621,18 @@ describe('async validators', () => {
                 expect(single.errors).toBeFalsy();
             }));
 
+            it('should allow nilable validators', fakeAsync(() => {
+                const single = controlWithValidator(WValidators.composeAsync(null, undefined, evenAsync, null, undefined));
+
+                single.setValue(1);
+                tick();
+                expect(single.errors).toEqual({ even: true });
+
+                single.setValue(2);
+                tick();
+                expect(single.errors).toBeFalsy();
+            }));
+
             it('should successed if all validators are successed', fakeAsync(() => {
                 const many = controlWithValidator(WValidators.composeAsync(evenAsync, moreThan10Async));
 

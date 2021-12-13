@@ -1,26 +1,18 @@
 import { AbstractControl } from '@angular/forms';
-import { ExtractFormValue, WFormNode } from './model';
-import { WForm } from './form';
-import { WFormNodeFactory } from './model';
-import { WFormOptions, WValidationStrategy } from './reconcilation';
-import { WKeyGenerator } from './reconcilation/model';
+import { WForm, WFormOptions } from './form';
+import { ExtractFormValue, WFormNode, WFormNodeFactory } from './model';
+import { DEFAULT_RECONCILATION_OPTIONS, WKeyGenerator, WValidationStrategy } from './reconcilation';
 import { calculateValue } from './utils';
 
 export interface WFormBuilderFactory {
     <TValue = any, TFormNode extends WFormNode = WFormNode>(factory: WFormNodeFactory<TValue, TFormNode>): WFormBuilder<ExtractFormValue<TValue, TFormNode>>;
 }
 
-function nilKeyGenerator(): undefined {
-    return;
-}
-
 export class WFormBuilder<T> {
     private _options: WFormOptions = {
-        validationStrategy: WValidationStrategy.Append,
+        ...DEFAULT_RECONCILATION_OPTIONS,
         updateOnChange: false,
-        keyGenerator: nilKeyGenerator,
-        strict: true,
-    }
+    };
 
     constructor(private _factory: WFormNodeFactory<T, WFormNode>) {
     }

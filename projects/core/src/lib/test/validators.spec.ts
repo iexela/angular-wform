@@ -617,6 +617,16 @@ describe('validators', () => {
                 expect(single.errors).toBeFalsy();
             });
 
+            it('should allow nilable validators', () => {
+                const single = controlWithValidator(WValidators.compose(null, undefined, even, null, undefined));
+
+                single.setValue(1);
+                expect(single.errors).toEqual({ even: true });
+
+                single.setValue(2);
+                expect(single.errors).toBeFalsy();
+            });
+
             it('should successed if all validators are successed', () => {
                 const many = controlWithValidator(WValidators.compose(even, moreThan10));
 

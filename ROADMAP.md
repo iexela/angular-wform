@@ -7,3 +7,4 @@
 16. Write documentation
 18. Log console.debug/console.warn only in dev mode?
 25. Is it a good idea to schedule dataChanges immediately
+26. required with trim?

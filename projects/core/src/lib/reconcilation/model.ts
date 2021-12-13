@@ -16,17 +16,26 @@ export interface WKeyGenerator {
     (path: WPathElement[], value: any): any;
 }
 
-export interface WFormOptions {
+export interface WFormReconcilationOptions {
     validationStrategy: WValidationStrategy;
-    updateOnChange: boolean;
     keyGenerator: WKeyGenerator;
     strict: boolean;
 }
 
 export interface WReconcilationRequest {
-    options: WFormOptions;
+    options: WFormReconcilationOptions;
     portalHost: WPortalHost;
     node: WFormNode;
     value: any,
     control?: AbstractControl;
 }
+
+function nilKeyGenerator(): undefined {
+    return;
+}
+
+export const DEFAULT_RECONCILATION_OPTIONS: WFormReconcilationOptions = {
+    validationStrategy: WValidationStrategy.Append,
+    keyGenerator: nilKeyGenerator,
+    strict: true,
+};

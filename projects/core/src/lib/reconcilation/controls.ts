@@ -31,23 +31,23 @@ export function processNode(ctx: WRenderContext, name: Maybe<WPathElement>, node
 }
 
 function processPortal(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFormPortal, value: any, control?: AbstractControl): AbstractControl {
-    const form = ctx.portalHost.getForm(node.name);
-    if (form == null) {
+    const portal = ctx.portalHost.get(node.name);
+    if (portal == null) {
         throw Error(`Portal node is rendered when it is not bound to the wform: ${ctx.pathTo(name).join('.')}
                     Typically this happens when portal is used in the root of the form.
                     But portal is not allowed to use in the root of the form.`);
     }
 
-    registerRoot(form.control, { disabled: ctx.tryDisabled(false) });
+    registerRoot(portal.control, { disabled: ctx.tryDisabled(false) });
 
-    if (form.control === control) {
+    if (portal.control === control) {
         // Do not update value on connect
-        form.setValue(value);
+        portal.setValue(value);
     } else {
-        form.update();
+        portal.update();
     }
 
-    return form.control;
+    return portal.control;
 }
 
 function processNative(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFormNative<any>, value: any): AbstractControl {
@@ -267,7 +267,7 @@ function processArray(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFor
             }
 
             if (isPortalNode(child)) {
-                return getLastFormNode(ctx.portalHost.getForm(child.name).control).key;
+                return getLastFormNode(ctx.portalHost.get(child.name).control).key;
             }
             return child.key;
         },
