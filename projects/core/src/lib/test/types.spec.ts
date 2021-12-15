@@ -17,49 +17,65 @@ const first: Spaceship = {
 describe('type', () => {
     describe('control', () => {
         it('should be "any" if value is undefined', () => {
-            const form = wForm(() => wControl()).build(1);
+            const form = wForm(() => wControl())
+                .updateOnChange(false)
+                .build(1);
     
             must<Is<typeof form.value, any>>(true);
         });
 
         it('should take into account type of value passed into control when root value is undefined', () => {
-            const form = wForm(() => wControl({ value: '1' })).build('1');
+            const form = wForm(() => wControl({ value: '1' }))
+                .updateOnChange(false)
+                .build('1');
     
             must<Is<typeof form.value, string>>(true);
         });
     
         it('should be equal to value type', () => {
-            const form = wForm((n: number) => wControl()).build(1);
+            const form = wForm((n: number) => wControl())
+                .updateOnChange(false)
+                .build(1);
     
             must<Is<typeof form.value, number>>(true);
         });
     
         it('should be equal to value type (complex type)', () => {
-            const form = wForm((n: Spaceship) => wControl()).build(first);
+            const form = wForm((n: Spaceship) => wControl())
+                .updateOnChange(false)
+                .build(first);
     
             must<Is<typeof form.value, Spaceship>>(true);
         });
     
         it('should be equal to value type (| undefined)', () => {
-            const form = wForm((n: number | undefined) => wControl()).build(1);
+            const form = wForm((n: number | undefined) => wControl())
+                .updateOnChange(false)
+                .build(1);
     
             must<Is<typeof form.value, number | undefined>>(true);
         });
     
         it('should be equal to value type (| null)', () => {
-            const form = wForm((n: number | null) => wControl()).build(1);
+            const form = wForm((n: number | null) => wControl())
+                .updateOnChange(false)
+                .build(1);
     
             must<Is<typeof form.value, number | null>>(true);
         });
     
         it('should be equal to value type (| null | undefined)', () => {
-            const form = wForm((n: number | null | undefined) => wControl()).build(1);
+            const form = wForm((n: number | null | undefined) => wControl())
+                .updateOnChange(false)
+                .build(1);
     
             must<Is<typeof form.value, number | null | undefined>>(true);
         });
 
         it('should take into account type of value passed into control when root is defined', () => {
-            const form = wForm((n: number) => wControl({ value: 1 })).build(1);
+            const form = wForm((n: number) => wControl({ value: 1 }))
+                .updateOnChange(false)
+                .build(1);
     
             must<Is<typeof form.value, number>>(true);
         });
@@ -70,7 +86,7 @@ describe('type', () => {
             const form = wForm(() => wGroup({
                 a: wControl(),
                 b: wControl(),
-            })).build({});
+            })).updateOnChange(false).build({});
 
             must<Is<GetField<typeof form.value, 'a'>, any | undefined>>(true);
             must<Is<GetField<typeof form.value, 'b'>, any | undefined>>(true);
@@ -80,7 +96,7 @@ describe('type', () => {
             const form = wForm(() => wGroup({
                 a: wControl({ value: '1' }),
                 b: wControl(),
-            })).build({});
+            })).updateOnChange(false).build({});
 
             must<Is<GetField<typeof form.value, 'a'>, string | undefined>>(true);
             must<Is<GetField<typeof form.value, 'b'>, any | undefined>>(true);
@@ -95,7 +111,7 @@ describe('type', () => {
             const form = wForm((s: TestSpaceship) => wGroup({
                 name: wControl(),
                 speed: wControl(),
-            })).build(first);
+            })).updateOnChange(false).build(first);
 
             must<Is<GetField<typeof form.value, 'name'>, string | undefined>>(true);
             must<Is<GetField<typeof form.value, 'speed'>, number | null>>(true);
@@ -110,7 +126,7 @@ describe('type', () => {
             const form = wForm((s: TestSpaceship) => wGroup({
                 name: wControl(),
                 speed: wControl(),
-            })).build(first);
+            })).updateOnChange(false).build(first);
 
             must<Is<GetField<typeof form.value, 'name'>, string | undefined>>(true);
         });
@@ -124,7 +140,7 @@ describe('type', () => {
             const form = wForm((s: TestSpaceship) => wGroup({
                 name: wControl(),
                 speed: wControl(),
-            })).build(first);
+            })).updateOnChange(false).build(first);
 
             must<Is<GetField<typeof form.value, 'name'>, string>>(true);
             must<Is<GetField<typeof form.value, 'speed'>, number>>(true);
@@ -139,7 +155,7 @@ describe('type', () => {
             const form = wForm((s: TestSpaceship) => wGroup({
                 name: wControl(),
                 speed: wControl(),
-            })).build(first);
+            })).updateOnChange(false).build(first);
 
             must<Is<GetField<typeof form.value, 'name'>, string | undefined>>(true);
             must<Is<GetField<typeof form.value, 'speed'>, number | undefined>>(true);
@@ -172,7 +188,7 @@ describe('type', () => {
                 name: wControl(),
                 speed: wControl(),
                 price: wControl(),
-            })).build({ ...first });
+            })).updateOnChange(false).build({ ...first });
 
             must<HasField<typeof form.value, 'price'>>(false);
         });
@@ -187,7 +203,7 @@ describe('type', () => {
                 name: wControl(),
                 speed: wControl(),
                 price: wValue(1),
-            })).build({ ...first });
+            })).updateOnChange(false).build({ ...first });
 
             must<HasField<typeof form.value, 'price'>>(false);
         });
@@ -195,25 +211,33 @@ describe('type', () => {
 
     describe('array', () => {
         it('should declare all items as "any" if value is undefined', () => {
-            const form = wForm(() => wArray([wControl(), wControl()])).build([]);
+            const form = wForm(() => wArray([wControl(), wControl()]))
+                .updateOnChange(false)
+                .build([]);
 
             must<Is<typeof form.value, any[]>>(true);
         });
 
         it('should declare all items as "any" if any value is undefined', () => {
-            const form = wForm(() => wArray([wControl({ value: 1 }), wControl()])).build([]);
+            const form = wForm(() => wArray([wControl({ value: 1 }), wControl()]))
+                .updateOnChange(false)
+                .build([]);
 
             must<Is<typeof form.value, any[]>>(true);
         });
 
         it('should declare all items as "<type>" if values of the same type are passed into all controls', () => {
-            const form = wForm(() => wArray([wControl({ value: 1 }), wControl({ value: 1 })])).build([]);
+            const form = wForm(() => wArray([wControl({ value: 1 }), wControl({ value: 1 })]))
+                .updateOnChange(false)
+                .build([]);
 
             must<Is<typeof form.value, number[]>>(true);
         });
 
         it('should declare all items as "<union of all types>" if values of different types are passed into all controls', () => {
-            const form = wForm(() => wArray([wControl({ value: 1 }), wControl({ value: '1' })])).build([]);
+            const form = wForm(() => wArray([wControl({ value: 1 }), wControl({ value: '1' })]))
+                .updateOnChange(false)
+                .build([]);
 
             must<Is<typeof form.value, (number | string)[]>>(true);
         });

@@ -34,13 +34,17 @@ describe('formDataAsync', () => {
     
     it('should return wnode data', () => {
         const pipe = new FormDataAsyncPipe(changeDetectorRef);
-        const form = wForm(() => wControl({ data: { value: 12 }})).build(1);
+        const form = wForm(() => wControl({ data: { value: 12 }}))
+            .updateOnChange(false)
+            .build(1);
         expect(pipe.transform(form.control)).toEqual({ value: 12 });
     });
 
     it('should return last wnode data', () => {
         const pipe = new FormDataAsyncPipe(changeDetectorRef);
-        const form = wForm((value: number) => wControl({ data: { value: value * value }})).build(2);
+        const form = wForm((value: number) => wControl({ data: { value: value * value }}))
+            .updateOnChange(false)
+            .build(2);
 
         pipe.transform(form.control);
 
@@ -56,7 +60,7 @@ describe('formDataAsync', () => {
         const form = wForm(() => wGroup({
             a: wControl({ data: { value: 12 }}),
             b: wControl({ data: { value: 17 }}),
-        })).build({ a: 1, b: 2 });
+        })).updateOnChange(false).build({ a: 1, b: 2 });
 
         pipe.transform(form.get('a'));
 
@@ -68,7 +72,7 @@ describe('formDataAsync', () => {
         const form = wForm(({ a, b }: { a: number, b: number }) => wGroup({
             a: wControl({ data: { value: a * a }}),
             b: wControl({ data: { value: b * b * b }}),
-        })).build({ a: 1, b: 2 });
+        })).updateOnChange(false).build({ a: 1, b: 2 });
 
         pipe.transform(form.get('a'));
 

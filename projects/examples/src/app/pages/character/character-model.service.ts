@@ -35,7 +35,6 @@ export class CharacterModel {
     
     constructor() {
         this.form = wForm((character) => this.buildRootForm(character))
-            .updateOnChange()
             .build(defaultCharacter);
     }
 

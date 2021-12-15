@@ -24,7 +24,7 @@ describe('basic', () => {
     describe('virtual function', () => {
         it('should accept initial value', () => {
             const fn = jasmine.createSpy('virtual-fn').and.returnValue(wControl());
-            wForm(fn).build(1);
+            wForm(fn).updateOnChange(false).build(1);
     
             expect(fn.calls.count()).toBe(1);
             expect(fn.calls.mostRecent().args[0]).toBe(1);
@@ -32,7 +32,7 @@ describe('basic', () => {
     
         it('should accept value passed into "setValue" method', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).build(1);
+            const form = wForm(fn).updateOnChange(false).build(1);
     
             form.setValue(5);
     
@@ -42,7 +42,7 @@ describe('basic', () => {
     
         it('should accept current value if "update" is called', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).build(1);
+            const form = wForm(fn).updateOnChange(false).build(1);
     
             form.update();
     
@@ -52,7 +52,7 @@ describe('basic', () => {
     
         it('should not be called if value was changed using "control.setValue"', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).build(1);
+            const form = wForm(fn).updateOnChange(false).build(1);
     
             form.control.setValue(5);
     
@@ -64,7 +64,7 @@ describe('basic', () => {
     describe('setValue', () => {
         it('should pass value into virtual function', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).build(1);
+            const form = wForm(fn).updateOnChange(false).build(1);
     
             form.setValue(5);
     
@@ -72,7 +72,7 @@ describe('basic', () => {
         });
         it('should pass value transformed by value function into virtual function', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).build(2);
+            const form = wForm(fn).updateOnChange(false).build(2);
     
             form.setValue(value => value + 1);
     
@@ -84,7 +84,7 @@ describe('basic', () => {
         it('should attach existing reactive form to wform', () => {
             const control = createFlightForm(belarusToRussia);
 
-            const form = wForm(createFlightWNode).attach(control);
+            const form = wForm(createFlightWNode).updateOnChange(false).attach(control);
 
             expect(form.value).toEqual(belarusToRussia);
             expect(form.control).toBe(control);
@@ -103,7 +103,7 @@ describe('basic', () => {
         it('should leave builder in "strict" mode', () => {
             const control = createFlightForm(belarusToRussia);
 
-            const form = wForm(createFlightWNode).attach(control);
+            const form = wForm(createFlightWNode).updateOnChange(false).attach(control);
 
             const group = form.control as FormGroup;
 
@@ -114,11 +114,26 @@ describe('basic', () => {
     });
 
     describe('updateOnChange', () => {
-        it('should update form as soon as some value has changed', () => {
+        it('[when false] should not update form when some value has changed', () => {
             const factory = jasmine.createSpy('virtual-fn').and.callFake(flightFactory);
 
             const form = wForm(factory)
-                .updateOnChange()
+                .updateOnChange(false)
+                .build(belarusToAustralia);
+
+            expect(factory).toHaveBeenCalledWith(belarusToAustralia);
+            expect(factory).toHaveBeenCalledTimes(1);
+
+            form.get('cost.price').setValue(99);
+
+            expect(factory).toHaveBeenCalledTimes(1);
+        });
+
+        it('[when true] should update form as soon as some value has changed', () => {
+            const factory = jasmine.createSpy('virtual-fn').and.callFake(flightFactory);
+
+            const form = wForm(factory)
+                .updateOnChange(true)
                 .build(belarusToAustralia);
 
             expect(factory).toHaveBeenCalledWith(belarusToAustralia);
@@ -137,11 +152,11 @@ describe('basic', () => {
             expect(factory).toHaveBeenCalledTimes(2);
         });
 
-        it('should update form as soon as some value has changed (even when corresponding control is disabled)', () => {
+        it('[when true] should update form as soon as some value has changed (even when corresponding control is disabled)', () => {
             const factory = jasmine.createSpy('virtual-fn').and.callFake(flightFactory);
 
             const form = wForm(factory)
-                .updateOnChange()
+                .updateOnChange(true)
                 .build(belarusToAustralia);
 
             expect(factory).toHaveBeenCalledWith(belarusToAustralia);
@@ -160,9 +175,10 @@ describe('basic', () => {
     describe('keyGenerator', () => {
         it('key generator does not generate key for existing controls', () => {
             const keyGenerator = jasmine.createSpy();
-            wForm(() =>
-                wGroup({ abc: vTaxModel }),
-            ).keyGenerator(keyGenerator).build({ abc: { tax1: 1, tax2: [3, 4] } });
+            wForm(() => wGroup({ abc: vTaxModel }))
+                .keyGenerator(keyGenerator)
+                .updateOnChange(false)
+                .build({ abc: { tax1: 1, tax2: [3, 4] } });
 
             expect(keyGenerator).not.toHaveBeenCalled();
         });
@@ -173,7 +189,10 @@ describe('basic', () => {
                 wGroup(flag
                         ? { abc: vTaxModel, tax: vTaxModelWithKeys }
                         : { abc: vTaxModel }),
-            ).keyGenerator(keyGenerator).lenient().build(false);
+            ).updateOnChange(false)
+                .keyGenerator(keyGenerator)
+                .lenient()
+                .build(false);
 
             const group = form.control as FormGroup;
             group.setControl('tax', createTaxControl());
@@ -209,7 +228,7 @@ describe('basic', () => {
                 volume: wControl({
                     disabled: value.weight! < 10,
                 }),
-            })).build(mouse);
+            })).updateOnChange(false).build(mouse);
 
             form.valueChanges.subscribe(subscriber);
             form.rawValueChanges.subscribe(rawSubscriber);
@@ -225,13 +244,17 @@ describe('basic', () => {
 
     describe('errors', () => {
         it('"group" should throw error if control is not FormGroup', () => {
-            const form = wForm(() => wControl()).build(1);
+            const form = wForm(() => wControl())
+                .updateOnChange(false)
+                .build(1);
 
             expect(() => form.group).toThrowError(errorHasMessage('Root', 'FormGroup'));
         });
 
         it('"array" should throw error if control is not FormArray', () => {
-            const form = wForm(() => wControl()).build(1);
+            const form = wForm(() => wControl())
+                .updateOnChange(false)
+                .build(1);
 
             expect(() => form.array).toThrowError(errorHasMessage('Root', 'FormArray'));
         });
@@ -246,7 +269,7 @@ describe('basic', () => {
                         }),
                     ]),
                 }),
-            })).build({});
+            })).updateOnChange(false).build({});
 
             expect(form.get('nested.arr.1.field').value).toBe('abc');
             expect(() => form.get('a.b.c.0')).toThrowError(errorHasMessage('a.b.c.0'));
@@ -265,7 +288,7 @@ describe('basic', () => {
                         }),
                     ]),
                 }),
-            })).build({});
+            })).updateOnChange(false).build({});
 
             expect(form.getGroup('nested').value).toBeTruthy();
             expect(() => form.getGroup('nested.arr')).toThrowError(errorHasMessage('FormGroup', 'nested.arr'));
@@ -282,7 +305,7 @@ describe('basic', () => {
                         }),
                     ]),
                 }),
-            })).build({});
+            })).updateOnChange(false).build({});
 
             expect(form.getArray('nested.arr').value).toBeTruthy();
             expect(() => form.getArray('nested')).toThrowError(errorHasMessage('FormArray', 'nested'));
@@ -297,7 +320,7 @@ describe('basic', () => {
                         wControl({ key: 'abracadabra' }),
                     ]),
                 }),
-            })).build({});
+            })).updateOnChange(false).build({});
             
             expect(() => form.update()).toThrowError(errorHasMessage('abracadabra', 'group.nested.{0, 1}'));
         });
@@ -311,7 +334,7 @@ describe('basic', () => {
                         wControl({ key: 2 }),
                     ]),
                 }),
-            })).build({})).toThrowError(errorHasMessage('group.nested.1'));
+            })).updateOnChange(false).build({})).toThrowError(errorHasMessage('group.nested.1'));
         });
 
         it('"reconcilation of WFormControl" should throw error if type of wnode is different', () => {
@@ -323,7 +346,7 @@ describe('basic', () => {
                         wControl({ key: 3 }),
                     ]),
                 }),
-            })).build(false as boolean);
+            })).updateOnChange(false).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError(errorHasMessage(
                 'group.nested.1',
@@ -341,7 +364,7 @@ describe('basic', () => {
                         wControl({ key: 3 }),
                     ]),
                 }),
-            })).build(false as boolean);
+            })).updateOnChange(false).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError(errorHasMessage(
                 'group.nested.1',
@@ -359,7 +382,7 @@ describe('basic', () => {
                         wControl({ key: 3 }),
                     ]),
                 }),
-            })).build(false as boolean);
+            })).updateOnChange(false).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError(errorHasMessage(
                 'group.nested.1',
@@ -374,6 +397,7 @@ describe('basic', () => {
 
         it('"render operation" should throw error if validation strategy is unknown', () => {
             const form = wForm(() => wControl({ required: true }))
+                .updateOnChange(false)
                 .validationStrategy(123 as any)
                 .build(1);
 
@@ -388,7 +412,7 @@ describe('basic', () => {
                         wControl({ key: 'abracadabra' }),
                     ]),
                 }),
-            })).build({});
+            })).updateOnChange(false).build({});
 
             const array = form.get('group.nested') as FormArray;
 
@@ -398,19 +422,21 @@ describe('basic', () => {
         });
 
         it('"render operation" should throw error if root node is nil', () => {
-            expect(() => wForm(() => null as any).build(1)).toThrowError();
+            expect(() => wForm(() => null as any).updateOnChange(false).build(1)).toThrowError();
         });
 
         it('"render operation" should throw error if root node is a placeholder', () => {
-            expect(() => wForm(() => wSkip() as any).build(1)).toThrowError();
+            expect(() => wForm(() => wSkip() as any).updateOnChange(false).build(1)).toThrowError();
         });
 
         it('"render operation" should throw error if root node is a portal', () => {
-            expect(() => wForm(() => wPortal('name')).build(1)).toThrowError();
+            expect(() => wForm(() => wPortal('name')).updateOnChange(false).build(1)).toThrowError();
         });
 
         it('"reconcilation operation" should throw error if root node is nil', () => {
-            const form = wForm((n: number) => n < 0 ? null as any : wControl()).build(1 as number);
+            const form = wForm((n: number) => n < 0 ? null as any : wControl())
+                .updateOnChange(false)
+                .build(1 as number);
 
             expect(() => form.setValue(-1)).toThrowError();
         });
@@ -420,7 +446,7 @@ describe('basic', () => {
                 group: wGroup({
                     nested: null as any,
                 }),
-            })).build({})).toThrowError(errorHasMessage('group.nested'));
+            })).updateOnChange(false).build({})).toThrowError(errorHasMessage('group.nested'));
         });
 
         it('"reconcilation operation" should throw error if child of group is nil', () => {
@@ -428,7 +454,7 @@ describe('basic', () => {
                 group: wGroup({
                     nested: flag ? null as any : wControl({ key: 2 }),
                 }),
-            })).build(false as boolean);
+            })).updateOnChange(false).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError(errorHasMessage('group.nested'));
         });
@@ -442,7 +468,7 @@ describe('basic', () => {
                         wControl({ key: 3 }),
                     ]),
                 }),
-            })).build({})).toThrowError(errorHasMessage('group.nested.1'));
+            })).updateOnChange(false).build({})).toThrowError(errorHasMessage('group.nested.1'));
         });
 
         it('"reconcilation operation" should throw error if child of array is nil', () => {
@@ -454,18 +480,20 @@ describe('basic', () => {
                         wControl({ key: 3 }),
                     ]),
                 }),
-            })).build(false as boolean);
+            })).updateOnChange(false).build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError(errorHasMessage('group.nested.1'));
         });
 
         it('"render operation" should throw error if native control is rendered into nil', () => {
-            expect(() => wForm(() => wNative()).build(1)).toThrowError()
+            expect(() => wForm(() => wNative()).updateOnChange(false).build(1)).toThrowError()
         });
 
         it('"reconcilation operation" should throw error if native control is rendered into nil', () => {
             const control = new FormControl();
-            const form = wForm((flag: boolean) => wNative(flag ? undefined : control)).build(false as boolean);
+            const form = wForm((flag: boolean) => wNative(flag ? undefined : control))
+                .updateOnChange(false)
+                .build(false as boolean);
 
             expect(() => form.setValue(true)).toThrowError()
         });
@@ -473,13 +501,17 @@ describe('basic', () => {
 
     describe('data', () => {
         it('"getData" should return rendered data', () => {
-            const form = wForm((value: number) => wControl({ data: { value12: value + 12 } })).build(3);
+            const form = wForm((value: number) => wControl({ data: { value12: value + 12 } }))
+                .updateOnChange(false)
+                .build(3);
 
             expect(getData(form.control)).toEqual({ value12: 15 });
         });
 
         it('"getData" should return last rendered data', () => {
-            const form = wForm((value: number) => wControl({ data: { value12: value + 12 } })).build(3);
+            const form = wForm((value: number) => wControl({ data: { value12: value + 12 } }))
+                .updateOnChange(false)
+                .build(3);
 
             form.setValue(7);
 
@@ -491,7 +523,9 @@ describe('basic', () => {
         });
 
         it('"dataChanges" should stream data changes', () => {
-            const form = wForm((value: number) => wControl({ data: { value12: value + 12 } })).build(3);
+            const form = wForm((value: number) => wControl({ data: { value12: value + 12 } }))
+                .updateOnChange(false)
+                .build(3);
 
             const subscription = jasmine.createSpy();
             dataChanges(form.control).subscribe(subscription);
@@ -524,7 +558,7 @@ describe('basic', () => {
                         wControl({ key: 3 }),
                     ]),
                 }),
-            })).build({});
+            })).updateOnChange(false).build({});
 
             form.update();
 

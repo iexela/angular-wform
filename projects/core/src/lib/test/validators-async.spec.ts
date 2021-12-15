@@ -56,7 +56,9 @@ async function hasControlAsyncValidator(control: AbstractControl, asyncValidator
 }
 
 function controlWithValidator(node: WAsyncValidatorNode): AbstractControl {
-    const form = wForm((value) => wControl({ asyncValidator: node })).build(null);
+    const form = wForm((value) => wControl({ asyncValidator: node }))
+        .updateOnChange(false)
+        .build(null);
     return form.control;
 }
 
@@ -68,7 +70,7 @@ describe('async validators', () => {
             it('should assign validator', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorAsync(testValidator1),
-                })).build(5);
+                })).updateOnChange(false).build(5);
 
                 expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
             });
@@ -78,7 +80,7 @@ describe('async validators', () => {
             it('should assign validator', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? undefined : wValidatorAsync(testValidator1),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -88,7 +90,7 @@ describe('async validators', () => {
             it('should remove validator', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : undefined,
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -98,7 +100,7 @@ describe('async validators', () => {
             it('should not change validator if validator function was not modified', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorAsync(testValidator1),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 const tracker = trackAsyncValidators(form.control);
 
@@ -111,7 +113,7 @@ describe('async validators', () => {
             it('should change validator if validator function was modified', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -122,7 +124,7 @@ describe('async validators', () => {
             it('should not change validator if locals are empty', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorAsync(testValidator1, []) : wValidatorAsync(testValidator2, []),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 const tracker = trackAsyncValidators(form.control);
 
@@ -135,7 +137,7 @@ describe('async validators', () => {
             it('should not change validator if locals are the same', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorAsync(testValidator1, [1, 'abc']) : wValidatorAsync(testValidator2, [1, 'abc']),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 const tracker = trackAsyncValidators(form.control);
 
@@ -148,7 +150,7 @@ describe('async validators', () => {
             it('should change validator if locals are different', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorAsync(testValidator1, [1, 'abc']) : wValidatorAsync(testValidator2, [2, 'abc']),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -161,7 +163,7 @@ describe('async validators', () => {
                     asyncValidator: n < 10
                         ? wValidatorAsync(testValidator1, [1, 'abc'])
                         : wValidatorFactoryAsync(() => testValidator2)(),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -176,7 +178,7 @@ describe('async validators', () => {
             it('should assign created validator', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorFactoryAsync(() => testValidator1)(),
-                })).build(5);
+                })).updateOnChange(false).build(5);
 
                 expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
             });
@@ -186,7 +188,7 @@ describe('async validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorFactoryAsync(factory)(1, 'abc', true),
-                })).build(5);
+                })).updateOnChange(false).build(5);
 
                 expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
                 expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
@@ -199,7 +201,7 @@ describe('async validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? undefined : wValidatorFactoryAsync(factory)(1, 'abc', true),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -212,7 +214,7 @@ describe('async validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorFactoryAsync(factory)(1, 'abc', true) : undefined,
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -224,7 +226,7 @@ describe('async validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorFactoryAsync(factory)(1, 'abc', true),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 const tracker = trackAsyncValidators(form.control);
 
@@ -240,7 +242,7 @@ describe('async validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorFactoryAsync(factory)(1, 'abc', true) : wValidatorFactoryAsync(factory)(1, 'abc', false),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -255,7 +257,7 @@ describe('async validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorFactoryAsync(factory1)(1, 'abc', false) : wValidatorFactoryAsync(factory2)(1, 'abc', false),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -271,7 +273,7 @@ describe('async validators', () => {
                     asyncValidator: n < 10
                         ? wValidatorFactoryAsync(() => testValidator1)()
                         : wValidatorAsync(testValidator2, [1, 'abc']),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -293,7 +295,7 @@ describe('async validators', () => {
                         wValidatorAsync(testValidator2),
                         testValidator3,
                     ),
-                })).build(5);
+                })).updateOnChange(false).build(5);
                 
                 expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
             });
@@ -304,7 +306,7 @@ describe('async validators', () => {
                 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: compoundValidator(testValidator1),
-                })).build(5);
+                })).updateOnChange(false).build(5);
 
                 expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
                 expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
@@ -323,7 +325,7 @@ describe('async validators', () => {
                         wValidatorAsync(testValidator2),
                         testValidator3,
                     ),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -341,7 +343,7 @@ describe('async validators', () => {
                 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? compoundValidator(testValidator1) : undefined,
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -367,7 +369,7 @@ describe('async validators', () => {
                             wValidatorAsync(testValidator2),
                             testValidator3,
                         ),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -391,7 +393,7 @@ describe('async validators', () => {
                             wValidatorFactoryAsync<V3>(factory1)(),
                             wValidatorAsync(testValidator3, ['abc']),
                         ),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -414,7 +416,7 @@ describe('async validators', () => {
                         wValidatorFactoryAsync<V3>(factory1)(),
                         n < 10 ? wValidatorAsync(testValidator2, ['abc']) : wValidatorAsync(testValidator3, ['def']),
                     ),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -433,7 +435,7 @@ describe('async validators', () => {
                     asyncValidator: n < 10
                         ? compoundValidator1(testValidator5)
                         : compoundValidator2(testValidator5),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -453,7 +455,7 @@ describe('async validators', () => {
                     asyncValidator: n < 10
                         ? compoundValidator(testValidator1)
                         : wValidatorAsync(testValidator3, [1, 'abc']),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -469,7 +471,7 @@ describe('async validators', () => {
             it('should restore removed validator', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorAsync(testValidator1),
-                })).build(5);
+                })).updateOnChange(false).build(5);
     
                 form.control.setAsyncValidators(null);
     
@@ -483,7 +485,7 @@ describe('async validators', () => {
             it('should not remove other validators', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorAsync(testValidator1),
-                })).build(5);
+                })).updateOnChange(false).build(5);
     
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator2]);
     
@@ -499,7 +501,7 @@ describe('async validators', () => {
             it('should not remove other validators, if set of validators was modified', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
                 
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator3]);
     
@@ -517,7 +519,7 @@ describe('async validators', () => {
             it('should update set of validators, even if initial validator was composed', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
                 
                 form.control.setAsyncValidators(Validators.composeAsync([form.control.asyncValidator!, testValidator3]));
     
@@ -537,7 +539,9 @@ describe('async validators', () => {
             it('should restore removed validator', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorAsync(testValidator1),
-                })).validationStrategy(WValidationStrategy.Replace).build(5);
+                })).updateOnChange(false)
+                    .validationStrategy(WValidationStrategy.Replace)
+                    .build(5);
     
                 form.control.setAsyncValidators(null);
     
@@ -551,7 +555,9 @@ describe('async validators', () => {
             it('should remove other validators', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorAsync(testValidator1),
-                })).validationStrategy(WValidationStrategy.Replace).build(5);
+                })).updateOnChange(false)
+                    .validationStrategy(WValidationStrategy.Replace)
+                    .build(5);
     
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator2]);
     
@@ -567,7 +573,9 @@ describe('async validators', () => {
             it('should remove other validators, if set of validators was modified', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
-                })).validationStrategy(WValidationStrategy.Replace).build<number>(5);
+                })).updateOnChange(false)
+                    .validationStrategy(WValidationStrategy.Replace)
+                    .build<number>(5);
     
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator3]);
     
@@ -585,7 +593,9 @@ describe('async validators', () => {
             it('should replace set of validators, even if initial validator was composed', async () => {
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorAsync(testValidator1) : wValidatorAsync(testValidator2),
-                })).validationStrategy(WValidationStrategy.Replace).build<number>(5);
+                })).updateOnChange(false)
+                    .validationStrategy(WValidationStrategy.Replace)
+                    .build<number>(5);
     
                 form.control.setAsyncValidators(Validators.composeAsync([form.control.asyncValidator!, testValidator3]));
     

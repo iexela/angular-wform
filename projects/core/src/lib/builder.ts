@@ -11,7 +11,7 @@ export interface WFormBuilderFactory {
 export class WFormBuilder<T> {
     private _options: WFormOptions = {
         ...DEFAULT_RECONCILATION_OPTIONS,
-        updateOnChange: false,
+        updateOnChange: true,
     };
 
     constructor(private _factory: WFormNodeFactory<T, WFormNode>) {
@@ -23,8 +23,8 @@ export class WFormBuilder<T> {
         return this;
     }
 
-    updateOnChange(): this {
-        this._options.updateOnChange = true;
+    updateOnChange(updateOnChange: boolean = true): this {
+        this._options.updateOnChange = updateOnChange;
         return this;
     }
 

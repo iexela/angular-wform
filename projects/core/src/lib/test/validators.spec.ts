@@ -54,7 +54,9 @@ function hasControlValidator(control: AbstractControl, validator: ValidatorFn): 
 }
 
 function controlWithValidator(node: WValidatorNode): AbstractControl {
-    const form = wForm(() => wControl({ validator: node })).build(null);
+    const form = wForm(() => wControl({ validator: node }))
+        .updateOnChange(false)
+        .build(null);
     return form.control;
 }
 
@@ -66,7 +68,7 @@ describe('validators', () => {
             it('should assign validator', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
-                })).build(5);
+                })).updateOnChange(false).build(5);
 
                 expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
             });
@@ -76,7 +78,7 @@ describe('validators', () => {
             it('should assign validator', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? undefined : wValidator(testValidator1),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -86,7 +88,7 @@ describe('validators', () => {
             it('should remove validator', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : undefined,
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -96,7 +98,7 @@ describe('validators', () => {
             it('should not change validator if validator function was not modified', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 const tracker = trackValidators(form.control);
 
@@ -109,7 +111,7 @@ describe('validators', () => {
             it('should change validator if validator function was modified', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -120,7 +122,7 @@ describe('validators', () => {
             it('should not change validator if locals are empty', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1, []) : wValidator(testValidator2, []),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 const tracker = trackValidators(form.control);
 
@@ -133,7 +135,7 @@ describe('validators', () => {
             it('should not change validator if locals are the same', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1, [1, 'abc']) : wValidator(testValidator2, [1, 'abc']),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 const tracker = trackValidators(form.control);
 
@@ -146,7 +148,7 @@ describe('validators', () => {
             it('should change validator if locals are different', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1, [1, 'abc']) : wValidator(testValidator2, [2, 'abc']),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -159,7 +161,7 @@ describe('validators', () => {
                     validator: n < 10
                         ? wValidator(testValidator1, [1, 'abc'])
                         : wValidatorFactory(() => testValidator2)(),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -174,7 +176,7 @@ describe('validators', () => {
             it('should assign created validator', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidatorFactory(() => testValidator1)(),
-                })).build(5);
+                })).updateOnChange(false).build(5);
 
                 expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
             });
@@ -184,7 +186,7 @@ describe('validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     validator: wValidatorFactory(factory)(1, 'abc', true),
-                })).build(5);
+                })).updateOnChange(false).build(5);
 
                 expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
                 expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
@@ -197,7 +199,7 @@ describe('validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? undefined : wValidatorFactory(factory)(1, 'abc', true),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -210,7 +212,7 @@ describe('validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidatorFactory(factory)(1, 'abc', true) : undefined,
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -222,7 +224,7 @@ describe('validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     validator: wValidatorFactory(factory)(1, 'abc', true),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 const tracker = trackValidators(form.control);
 
@@ -238,7 +240,7 @@ describe('validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidatorFactory(factory)(1, 'abc', true) : wValidatorFactory(factory)(1, 'abc', false),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -253,7 +255,7 @@ describe('validators', () => {
 
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidatorFactory(factory1)(1, 'abc', false) : wValidatorFactory(factory2)(1, 'abc', false),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -269,7 +271,7 @@ describe('validators', () => {
                     validator: n < 10
                         ? wValidatorFactory(() => testValidator1)()
                         : wValidator(testValidator2, [1, 'abc']),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -291,7 +293,7 @@ describe('validators', () => {
                         wValidator(testValidator2),
                         testValidator3,
                     ),
-                })).build(5);
+                })).updateOnChange(false).build(5);
                 
                 expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
             });
@@ -302,7 +304,7 @@ describe('validators', () => {
                 
                 const form = wForm((n: number) => wControl({
                     validator: compoundValidator(testValidator1),
-                })).build(5);
+                })).updateOnChange(false).build(5);
 
                 expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
                 expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
@@ -321,7 +323,7 @@ describe('validators', () => {
                         wValidator(testValidator2),
                         testValidator3,
                     ),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -339,7 +341,7 @@ describe('validators', () => {
                 
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? compoundValidator(testValidator1) : undefined,
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -365,7 +367,7 @@ describe('validators', () => {
                             wValidator(testValidator2),
                             testValidator3,
                         ),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -389,7 +391,7 @@ describe('validators', () => {
                             wValidatorFactory<V3>(factory1)(),
                             wValidator(testValidator3, ['abc']),
                         ),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -412,7 +414,7 @@ describe('validators', () => {
                         wValidatorFactory<V3>(factory1)(),
                         n < 10 ? wValidator(testValidator2, ['abc']) : wValidator(testValidator3, ['def']),
                     ),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -431,7 +433,7 @@ describe('validators', () => {
                     validator: n < 10
                         ? compoundValidator1(testValidator5)
                         : compoundValidator2(testValidator5),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
                 
@@ -451,7 +453,7 @@ describe('validators', () => {
                     validator: n < 10
                         ? compoundValidator(testValidator1)
                         : wValidator(testValidator3, [1, 'abc']),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
 
@@ -467,7 +469,7 @@ describe('validators', () => {
             it('should restore removed validator', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
-                })).build(5);
+                })).updateOnChange(false).build(5);
     
                 form.control.setValidators(null);
     
@@ -481,7 +483,7 @@ describe('validators', () => {
             it('should not remove other validators', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
-                })).build(5);
+                })).updateOnChange(false).build(5);
     
                 form.control.setValidators([form.control.validator!, testValidator2]);
     
@@ -497,7 +499,7 @@ describe('validators', () => {
             it('should not remove other validators, if set of validators was modified', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
                 
                 form.control.setValidators([form.control.validator!, testValidator3]);
     
@@ -515,7 +517,7 @@ describe('validators', () => {
             it('should update set of validators, even if initial validator was composed', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
-                })).build<number>(5);
+                })).updateOnChange(false).build<number>(5);
                 
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
     
@@ -535,7 +537,9 @@ describe('validators', () => {
             it('should restore removed validator', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
-                })).validationStrategy(WValidationStrategy.Replace).build(5);
+                })).updateOnChange(false)
+                    .validationStrategy(WValidationStrategy.Replace)
+                    .build(5);
     
                 form.control.setValidators(null);
     
@@ -549,7 +553,9 @@ describe('validators', () => {
             it('should remove other validators', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
-                })).validationStrategy(WValidationStrategy.Replace).build(5);
+                })).updateOnChange(false)
+                    .validationStrategy(WValidationStrategy.Replace)
+                    .build(5);
     
                 form.control.setValidators([form.control.validator!, testValidator2]);
     
@@ -565,7 +571,9 @@ describe('validators', () => {
             it('should remove other validators, if set of validators was modified', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
-                })).validationStrategy(WValidationStrategy.Replace).build<number>(5);
+                })).updateOnChange(false)
+                    .validationStrategy(WValidationStrategy.Replace)
+                    .build<number>(5);
     
                 form.control.setValidators([form.control.validator!, testValidator3]);
     
@@ -583,7 +591,9 @@ describe('validators', () => {
             it('should replace set of validators, even if initial validator was composed', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
-                })).validationStrategy(WValidationStrategy.Replace).build<number>(5);
+                })).updateOnChange(false)
+                    .validationStrategy(WValidationStrategy.Replace)
+                    .build<number>(5);
     
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
     

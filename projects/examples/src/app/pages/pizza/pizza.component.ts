@@ -65,7 +65,7 @@ export class PizzaComponent {
                     validator: WValidators.compose(WValidators.min(1), WValidators.max(10)),
                 }),
             }))),
-    })).updateOnChange().build({ size: 23, base: 'classic', ingredients: [] });
+    })).build({ size: 23, base: 'classic', ingredients: [] });
 
     constructor(private snackBar: MatSnackBar) {}
 

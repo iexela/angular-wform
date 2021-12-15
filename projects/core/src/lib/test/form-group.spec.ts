@@ -24,7 +24,10 @@ function withWeightAndVolume(box: Box, weight?: WFormControlOptions<number>, vol
 }
 
 function renderGroup(initial: Box, options: WFormGroupOptions = {}, children?: WFormGroupChildren): WForm<Box> {
-    return wForm((current: Box) => wGroup(options, children || withWeightAndVolume(current))).lenient().build(initial);
+    return wForm((current: Box) => wGroup(options, children || withWeightAndVolume(current)))
+        .updateOnChange(false)
+        .lenient()
+        .build(initial);
 }
 
 function renderConditionalGroup(initial: Box,
@@ -37,7 +40,7 @@ function renderConditionalGroup(initial: Box,
             isLess ? optionsLess : optionsMore,
             (isLess ? childrenLess : childrenMore) || withWeightAndVolume(value),
         );
-    }).lenient().build(initial);
+    }).updateOnChange(false).lenient().build(initial);
 }
 
 function renderDisabledConditionalGroup(initial: Box, anchor: number): WForm<Box> {
@@ -45,7 +48,7 @@ function renderDisabledConditionalGroup(initial: Box, anchor: number): WForm<Box
 }
 
 function flightFormBuilder(): WFormBuilder<Flight> {
-    return wForm(createFlightWNode);
+    return wForm(createFlightWNode).updateOnChange(false);
 }
 
 describe('WFormGroup', () => {
@@ -207,7 +210,7 @@ describe('WFormGroup', () => {
                 name: wControl(),
                 weight: wSkip(),
                 volume: wControl(),
-            })).build(elephant);
+            })).updateOnChange(false).build(elephant);
 
             expect(form.value).toEqual({
                 name: elephant.name,
@@ -221,7 +224,7 @@ describe('WFormGroup', () => {
                 name: wControl(),
                 weight: wNative(),
                 volume: wControl(),
-            })).build(elephant);
+            })).updateOnChange(false).build(elephant);
 
             expect(form.value).toEqual({
                 name: elephant.name,
@@ -236,7 +239,7 @@ describe('WFormGroup', () => {
                 name: wControl(),
                 weight: wNative(control),
                 volume: wControl(),
-            })).build(elephant);
+            })).updateOnChange(false).build(elephant);
 
             expect(form.value).toEqual(elephant);
             expect(form.control.get('weight')).toBeTruthy();
@@ -247,7 +250,7 @@ describe('WFormGroup', () => {
                 name: wControl(),
                 weight: wPortal('weight'),
                 volume: wControl(),
-            })).build(elephant);
+            })).updateOnChange(false).build(elephant);
 
             expect(form.value).toEqual({
                 name: elephant.name,
@@ -409,7 +412,9 @@ describe('WFormGroup', () => {
         });
 
         it('should do nothing if disabled flag was not modified in wform tree', () => {
-            const form = wForm(() => wGroup({ disabled: true }, withWeightAndVolume(parcel))).build(parcel);
+            const form = wForm(() => wGroup({ disabled: true }, withWeightAndVolume(parcel)))
+                .updateOnChange(false)
+                .build(parcel);
     
             const tracker = trackControl(form.control);
     
@@ -528,7 +533,9 @@ describe('WFormGroup', () => {
             });
     
             it('should do nothing if validators were not changed', () => {
-                const form = wForm(() => wGroup({ validator: [small, light] }, withWeightAndVolume(parcel))).build(parcel);
+                const form = wForm(() => wGroup({ validator: [small, light] }, withWeightAndVolume(parcel)))
+                    .updateOnChange(false)
+                    .build(parcel);
         
                 const tracker = trackControl(form.control);
         
@@ -598,7 +605,9 @@ describe('WFormGroup', () => {
             }));
     
             it('should do nothing if async validators were not changed', fakeAsync(() => {
-                const form = wForm(() => wGroup({ asyncValidator: [smallAsync, lightAsync] }, withWeightAndVolume(parcel))).build(parcel);
+                const form = wForm(() => wGroup({ asyncValidator: [smallAsync, lightAsync] }, withWeightAndVolume(parcel)))
+                    .updateOnChange(false)
+                    .build(parcel);
         
                 tick();
 
@@ -768,7 +777,7 @@ describe('WFormGroup', () => {
                 name: wControl(),
                 weight: current.weight! < 50 ? wSkip() : wControl(),
                 volume: wControl(),
-            })).build(mouse);
+            })).updateOnChange(false).build(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
             
@@ -782,7 +791,7 @@ describe('WFormGroup', () => {
                 name: wControl(),
                 weight: current.weight! < 50 ? wSkip() : wControl(),
                 volume: wControl(),
-            })).build(elephant);
+            })).updateOnChange(false).build(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
             
@@ -797,7 +806,7 @@ describe('WFormGroup', () => {
                 name: wControl(),
                 weight: wNative(current.weight! < 50 ? undefined : control),
                 volume: wControl(),
-            })).build(mouse);
+            })).updateOnChange(false).build(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
             expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume });
@@ -814,7 +823,7 @@ describe('WFormGroup', () => {
                 name: wControl(),
                 weight: wNative(current.weight! < 50 ? undefined : control),
                 volume: wControl(),
-            })).build(elephant);
+            })).updateOnChange(false).build(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
             expect(form.value).toEqual(elephant);
@@ -826,12 +835,14 @@ describe('WFormGroup', () => {
         });
 
         it('should add portal control, if it was connected', () => {
-            const weightForm = wForm(() => wControl()).build(elephant.weight);
+            const weightForm = wForm(() => wControl())
+                .updateOnChange(false)
+                .build(elephant.weight);
             const form = wForm((current: Box) => wGroup({
                 name: wControl(),
                 weight: wPortal('weight'),
                 volume: wControl(),
-            })).build(elephant);
+            })).updateOnChange(false).build(elephant);
 
             form.connect('weight', weightForm);
 
@@ -840,12 +851,14 @@ describe('WFormGroup', () => {
         });
 
         it('should remove portal control, if it was disconnected', () => {
-            const weightForm = wForm(() => wControl()).build(elephant.weight);
+            const weightForm = wForm(() => wControl())
+                .updateOnChange(false)
+                .build(elephant.weight);
             const form = wForm((current: Box) => wGroup({
                 name: wControl(),
                 weight: wPortal('weight'),
                 volume: wControl(),
-            })).build(elephant);
+            })).updateOnChange(false).build(elephant);
 
             form.connect('weight', weightForm);
             form.disconnect('weight');
@@ -885,7 +898,7 @@ describe('WFormGroup', () => {
             const node3 = wGroup(withVolume(parcel, { validator: even }));
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = wForm(fn).build(parcel);
+            const form = wForm(fn).updateOnChange(false).build(parcel);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

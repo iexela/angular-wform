@@ -8,11 +8,15 @@ import { belarusToRussia, createFlightForm, even, evenAsync, moreThan10, moreTha
 import { andTick, trackControl } from './test-utils';
 
 function renderControl(control: AbstractControl, options?: WFormNativeOptions<number>): WForm<number> {
-    return wForm(() => wNative(control, options)).build(control.value);
+    return wForm(() => wNative(control, options))
+        .updateOnChange(false)
+        .build(control.value);
 }
 
 function renderConditionalControl(control: AbstractControl, anchor: number, optionsLess: WFormNativeOptions<number>, optionsMore: WFormNativeOptions<number>): WForm<number> {
-    return wForm((value: number) => wNative(control, value < anchor ? optionsLess : optionsMore)).build(control.value);
+    return wForm((value: number) => wNative(control, value < anchor ? optionsLess : optionsMore))
+        .updateOnChange(false)
+        .build(control.value);
 }
 
 function testControl(n: number): FormControl {
@@ -110,7 +114,9 @@ describe('WFormNative', () => {
         }));
 
         it('should render value passed into wnode', () => {
-            const form = wForm((value: number) => wNative(testControl(1), { value: value + 1 })).build(1 as number);
+            const form = wForm((value: number) => wNative(testControl(1), { value: value + 1 }))
+                .updateOnChange(false)
+                .build(1 as number);
 
             expect(form.value).toBe(2);
         });
@@ -242,7 +248,9 @@ describe('WFormNative', () => {
     
         it('should not modify control if value is the same', () => {
             const control = createFlightForm(belarusToRussia);
-            const form = wForm(() => wNative(control)).build(belarusToRussia);
+            const form = wForm(() => wNative(control))
+                .updateOnChange(false)
+                .build(belarusToRussia);
     
             const tracker = trackControl(form.control);
     
@@ -253,7 +261,9 @@ describe('WFormNative', () => {
     
         it('should modify control if value is different', () => {
             const control = createFlightForm(belarusToRussia);
-            const form = wForm(() => wNative(control)).build(belarusToRussia);
+            const form = wForm(() => wNative(control))
+                .updateOnChange(false)
+                .build(belarusToRussia);
     
             const tracker = trackControl(form.control);
     
@@ -290,7 +300,9 @@ describe('WFormNative', () => {
     describe('reconcilation', () => {
         it('should not update control if it was not changed', () => {
             const control = new FormControl();
-            const form = wForm(() => wNative(control)).build(1);
+            const form = wForm(() => wNative(control))
+                .updateOnChange(false)
+                .build(1);
 
             expect(form.control).toBe(control);
             form.update();
@@ -301,7 +313,9 @@ describe('WFormNative', () => {
             const control1 = new FormControl();
             const control2 = new FormControl();
             const factory = jasmine.createSpy().and.returnValues(wNative(control1), wNative(control2));
-            const form = wForm(factory).build(1);
+            const form = wForm(factory)
+                .updateOnChange(false)
+                .build(1);
 
             expect(form.control).toBe(control1);
             form.update();
@@ -332,7 +346,9 @@ describe('WFormNative', () => {
 
         it('should do nothing if disabled flag was not modified in wform tree', () => {
             const control = testControl(1);
-            const form = wForm(() => wNative(control, { disabled: true })).build(2);
+            const form = wForm(() => wNative(control, { disabled: true }))
+                .updateOnChange(false)
+                .build(2);
     
             const tracker = trackControl(form.control);
     
@@ -386,7 +402,9 @@ describe('WFormNative', () => {
     
             it('should do nothing if validators were not changed', () => {
                 const control = testControl(1);
-                const form = wForm(() => wNative(control, { validator: [moreThan10, even] })).build(1);
+                const form = wForm(() => wNative(control, { validator: [moreThan10, even] }))
+                    .updateOnChange(false)
+                    .build(1);
         
                 const tracker = trackControl(form.control);
         
@@ -457,7 +475,9 @@ describe('WFormNative', () => {
     
             it('should do nothing if async validators were not changed', fakeAsync(() => {
                 const control = testControl(1);
-                const form = wForm((v: number) => wNative(control, { validator: [moreThan10, even] })).build(1);
+                const form = wForm((v: number) => wNative(control, { validator: [moreThan10, even] }))
+                    .updateOnChange(false)
+                    .build(1);
         
                 tick();
 
@@ -473,7 +493,9 @@ describe('WFormNative', () => {
 
         it('should update value by value passed into wnode', () => {
             const control = testControl(1);
-            const form = wForm((value: number) => wNative(control, { value: value + 1 })).build(1 as number);
+            const form = wForm((value: number) => wNative(control, { value: value + 1 }))
+                .updateOnChange(false)
+                .build(1 as number);
 
             form.setValue(10);
 
@@ -595,7 +617,7 @@ describe('WFormNative', () => {
             const node3 = wNative(control, { validator: even });
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = wForm(fn).build(1);
+            const form = wForm(fn).updateOnChange(false).build(1);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

@@ -57,7 +57,7 @@ export class SnickersComponent {
                 validator: WValidators.compose(WValidators.min(1), WValidators.max(countOfThisSize)),
             }),
         });
-    }).updateOnChange().build({
+    }).build({
         brand: this.availableBrands[0],
         size: this.brands[this.availableBrands[0]][0].size,
         count: 0,

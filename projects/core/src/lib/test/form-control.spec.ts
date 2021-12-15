@@ -8,11 +8,13 @@ import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
 function renderNumber(n: number, options?: WFormControlOptions<number>): WForm<number> {
-    return wForm(() => wControl(options)).build(n);
+    return wForm(() => wControl(options)).updateOnChange(false).build(n);
 }
 
 function renderConditionalNumber(initial: number, anchor: number, optionsLess: WFormControlOptions<number>, optionsMore: WFormControlOptions<number>): WForm<number> {
-    return wForm((value: number) => wControl(value < anchor ? optionsLess : optionsMore)).build(initial);
+    return wForm((value: number) => wControl(value < anchor ? optionsLess : optionsMore))
+        .updateOnChange(false)
+        .build(initial);
 }
 
 function renderDisabledConditionalNumber(initial: number, anchor: number): WForm<number> {
@@ -112,7 +114,9 @@ describe('WFormControl', () => {
         }));
 
         it('should render value passed into wnode', () => {
-            const form = wForm((value: number) => wControl({ value: value + 1 })).build(1 as number);
+            const form = wForm((value: number) => wControl({ value: value + 1 }))
+                .updateOnChange(false)
+                .build(1 as number);
 
             expect(form.value).toBe(2);
         });
@@ -253,7 +257,9 @@ describe('WFormControl', () => {
         });
 
         it('should do nothing if disabled flag was not modified in wform tree', () => {
-            const form = wForm((v: number) => wControl({ disabled: true })).build(2);
+            const form = wForm((v: number) => wControl({ disabled: true }))
+                .updateOnChange(false)
+                .build(2);
     
             const tracker = trackControl(form.control);
     
@@ -306,7 +312,9 @@ describe('WFormControl', () => {
             });
     
             it('should do nothing if validators were not changed', () => {
-                const form = wForm((v: number) => wControl({ required: true, validator: [moreThan10, even] })).build(1);
+                const form = wForm((v: number) => wControl({ required: true, validator: [moreThan10, even] }))
+                    .updateOnChange(false)
+                    .build(1);
         
                 const tracker = trackControl(form.control);
         
@@ -376,7 +384,9 @@ describe('WFormControl', () => {
             }));
     
             it('should do nothing if async validators were not changed', fakeAsync(() => {
-                const form = wForm((v: number) => wControl({ required: true, validator: [moreThan10, even] })).build(1);
+                const form = wForm((v: number) => wControl({ required: true, validator: [moreThan10, even] }))
+                    .updateOnChange(false)
+                    .build(1);
         
                 tick();
 
@@ -391,7 +401,9 @@ describe('WFormControl', () => {
         });
 
         it('should update value by value passed into wnode', () => {
-            const form = wForm((value: number) => wControl({ value: value + 1 })).build(1 as number);
+            const form = wForm((value: number) => wControl({ value: value + 1 }))
+                .updateOnChange(false)
+                .build(1 as number);
 
             form.setValue(10);
 
@@ -508,7 +520,7 @@ describe('WFormControl', () => {
             const node3 = wControl({ validator: even });
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = wForm(fn).build(1);
+            const form = wForm(fn).updateOnChange(false).build(1);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

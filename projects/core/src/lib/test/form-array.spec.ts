@@ -30,7 +30,10 @@ const lengthLessThan10Async = wValidatorAsync(control => Promise.resolve(control
 const startedFrom0Async = wValidatorAsync(control => Promise.resolve(control.value[0] !== 0 ? { zero: true } : null));
 
 function renderArray(initial: number[], options: WFormArrayOptions = {}, children?: WFormArrayChildren): WForm<number[]> {
-    return wForm((current: number[]) => wArray(options, children || withItem(current))).lenient().build(initial);
+    return wForm((current: number[]) => wArray(options, children || withItem(current)))
+        .updateOnChange(false)
+        .lenient()
+        .build(initial);
 }
 
 function renderConditionalArray(initial: number[],
@@ -40,7 +43,7 @@ function renderConditionalArray(initial: number[],
     return wForm((value: number[]) => {
         const isLess = value.every(v => v < anchor);
         return wArray(isLess ? optionsLess : optionsMore, (isLess ? childrenLess : childrenMore) || withItem(value));
-    }).lenient().build(initial);
+    }).updateOnChange(false).lenient().build(initial);
 }
 
 function renderDisabledConditionalGroup(initial: number[], anchor: number): WForm<number[]> {
@@ -52,7 +55,7 @@ function boxArrayFormBuilder(): WFormBuilder<Box[]> {
         name: wControl(),
         weight: wControl(),
         volume: wControl(),
-    }))));
+    })))).updateOnChange(false);
 }
 
 function boxArrayFormBuilderWithoutKeys(): WFormBuilder<Box[]> {
@@ -60,7 +63,7 @@ function boxArrayFormBuilderWithoutKeys(): WFormBuilder<Box[]> {
         name: wControl(),
         weight: wControl(),
         volume: wControl(),
-    }))));
+    })))).updateOnChange(false);
 }
 
 describe('WFormArray', () => {
@@ -212,7 +215,7 @@ describe('WFormArray', () => {
                 wSkip(),
                 wControl({ key: 1, value: numbers[0] }),
                 wControl({ key: 2, value: numbers[1] }),
-            ])).build([10, 20]);
+            ])).updateOnChange(false).build([10, 20]);
 
             const array = form.control as FormArray;
             expect(form.value).toEqual([10, 20]);
@@ -224,7 +227,7 @@ describe('WFormArray', () => {
                 wNative(),
                 wControl({ key: 1, value: numbers[0] }),
                 wControl({ key: 2, value: numbers[1] }),
-            ])).build([10, 20]);
+            ])).updateOnChange(false).build([10, 20]);
 
             const array = form.control as FormArray;
             expect(form.value).toEqual([10, 20]);
@@ -237,7 +240,7 @@ describe('WFormArray', () => {
                 wNative(control, { key: 999, value: control.value }),
                 wControl({ key: 1, value: numbers[0] }),
                 wControl({ key: 2, value: numbers[1] }),
-            ])).build([10, 20]);
+            ])).updateOnChange(false).build([10, 20]);
 
             const array = form.control as FormArray;
             expect(form.value).toEqual([999, 10, 20]);
@@ -249,7 +252,7 @@ describe('WFormArray', () => {
                 wPortal('start'),
                 wControl({ key: 1, value: numbers[0] }),
                 wControl({ key: 2, value: numbers[1] }),
-            ])).build([10, 20]);
+            ])).updateOnChange(false).build([10, 20]);
 
             const array = form.control as FormArray;
             expect(form.value).toEqual([10, 20]);
@@ -288,13 +291,17 @@ describe('WFormArray', () => {
         });
     
         it('should return only fields mapped to controls', () => {
-            const form = wForm(() => wArray(withItem(fibonaci5))).build(fibonaci10);
+            const form = wForm(() => wArray(withItem(fibonaci5)))
+                .updateOnChange(false)
+                .build(fibonaci10);
 
             expect(form.value).toEqual(fibonaci5);
         });
     
         it('should return all fields mapped to controls', () => {
-            const form = wForm(() => wArray(withItem(fibonaci10))).build(fibonaci5);
+            const form = wForm(() => wArray(withItem(fibonaci10)))
+                .updateOnChange(false)
+                .build(fibonaci5);
 
             expect(form.value).toEqual(fibonaci10);
         });
@@ -419,7 +426,9 @@ describe('WFormArray', () => {
         });
 
         it('should do nothing if disabled flag was not modified in wform tree', () => {
-            const form = wForm(() => wArray({ disabled: true }, withItem(fibonaci5))).build(fibonaci5);
+            const form = wForm(() => wArray({ disabled: true }, withItem(fibonaci5)))
+                .updateOnChange(false)
+                .build(fibonaci5);
     
             const tracker = trackControl(form.control);
     
@@ -540,7 +549,7 @@ describe('WFormArray', () => {
             it('should do nothing if validators were not changed', () => {
                 const form = wForm(() => wArray({
                     validator: [lengthLessThan10, startedFrom0],
-                }, withItem(fibonaci5))).build(fibonaci5);
+                }, withItem(fibonaci5))).updateOnChange(false).build(fibonaci5);
         
                 const tracker = trackControl(form.control);
         
@@ -612,7 +621,7 @@ describe('WFormArray', () => {
             it('should do nothing if async validators were not changed', fakeAsync(() => {
                 const form = wForm(() => wArray({
                     asyncValidator: [lengthLessThan10Async, startedFrom0Async],
-                }, withItem(fibonaci5))).build(fibonaci5);
+                }, withItem(fibonaci5))).updateOnChange(false).build(fibonaci5);
         
                 tick();
         
@@ -829,7 +838,7 @@ describe('WFormArray', () => {
                 numbers.some(n => n < 0) ? wSkip() : wControl({ key: 'sum', value: numbers[0] + numbers[1] }),
                 wControl({ key: 1, value: numbers[0] }),
                 wControl({ key: 2, value: numbers[1] }),
-            ])).build([-10, -20]);
+            ])).updateOnChange(false).build([-10, -20]);
 
             const array = form.control as FormArray;
 
@@ -847,7 +856,7 @@ describe('WFormArray', () => {
                 numbers.some(n => n < 0) ? wSkip() : wControl({ key: 'sum', value: numbers[0] + numbers[1] }),
                 wControl({ key: 1, value: numbers[0] }),
                 wControl({ key: 2, value: numbers[1] }),
-            ])).build([10, 20]);
+            ])).updateOnChange(false).build([10, 20]);
 
             const array = form.control as FormArray;
             
@@ -866,7 +875,7 @@ describe('WFormArray', () => {
                 wNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum', value: control.value }),
                 wControl({ key: 1, value: numbers[0] }),
                 wControl({ key: 2, value: numbers[1] }),
-            ])).build([-10, -20]);
+            ])).updateOnChange(false).build([-10, -20]);
 
             const array = form.control as FormArray;
 
@@ -885,7 +894,7 @@ describe('WFormArray', () => {
                 wNative(numbers.some(n => n < 0) ? undefined : control, { key: 'sum', value: control.value }),
                 wControl({ key: 1, value: numbers[0] }),
                 wControl({ key: 2, value: numbers[1] }),
-            ])).build([10, 20]);
+            ])).updateOnChange(false).build([10, 20]);
 
             const array = form.control as FormArray;
 
@@ -899,12 +908,14 @@ describe('WFormArray', () => {
         });
 
         it('should add portal control, if it was connected', () => {
-            const startForm = wForm((value: number) => wControl({ key: 0 })).build(999);
+            const startForm = wForm((value: number) => wControl({ key: 0 }))
+                .updateOnChange(false)
+                .build(999);
             const form = wForm((numbers: number[]) => wArray([
                 wPortal('start'),
                 wControl({ key: 1, value: numbers[0] }),
                 wControl({ key: 2, value: numbers[1] }),
-            ])).build([10, 20]);
+            ])).updateOnChange(false).build([10, 20]);
 
             form.connect('start', startForm);
 
@@ -915,12 +926,14 @@ describe('WFormArray', () => {
         });
 
         it('should remove portal control, if it was disconnected', () => {
-            const startForm = wForm((value: number) => wControl({ key: 999 })).build(999);
+            const startForm = wForm((value: number) => wControl({ key: 999 }))
+                .updateOnChange(false)
+                .build(999);
             const form = wForm((numbers: number[]) => wArray([
                 wPortal('start'),
                 wControl({ key: 1, value: numbers[numbers.length - 2] }),
                 wControl({ key: 2, value: numbers[numbers.length - 1] }),
-            ])).build([10, 20]);
+            ])).updateOnChange(false).build([10, 20]);
 
             form.connect('start', startForm);
             form.disconnect('start');
@@ -954,7 +967,7 @@ describe('WFormArray', () => {
             }, withItem(fibonaci10));
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = wForm(fn).build(fibonaci10);
+            const form = wForm(fn).updateOnChange(false).build(fibonaci10);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 
