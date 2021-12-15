@@ -4,7 +4,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { MoviesComponent } from './pages/movies/movies.component';
 import { PizzaComponent } from './pages/pizza/pizza.component';
 import { SnickersComponent } from './pages/snickers/snickers.component';
-import { SuperComponent } from './pages/super/super.component';
+import { CharacterComponent } from './pages/character/character.component';
 
 const routes: Routes = [{
   path: '',
@@ -23,8 +23,8 @@ const routes: Routes = [{
   component: SnickersComponent,
   path: 'snickers',
 }, {
-  component: SuperComponent,
-  path: 'super',
+  component: CharacterComponent,
+  path: 'character',
 }];
 
 @NgModule({

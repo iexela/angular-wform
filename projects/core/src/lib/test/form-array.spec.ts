@@ -899,7 +899,7 @@ describe('WFormArray', () => {
         });
 
         it('should add portal control, if it was connected', () => {
-            const startForm = wForm((value: number) => wControl()).build(999);
+            const startForm = wForm((value: number) => wControl({ key: 0 })).build(999);
             const form = wForm((numbers: number[]) => wArray([
                 wPortal('start'),
                 wControl({ key: 1, value: numbers[0] }),

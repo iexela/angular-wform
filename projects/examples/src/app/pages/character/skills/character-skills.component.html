@@ -1,0 +1,11 @@
+<section class="sub-content" [formGroup]="group">
+    <span class="info">Max number of skills: {{maxSkills}}</span>
+    <section class="flex-column">
+        <section *ngFor="let skill of skills" class="flex-row flex-space-between">
+            <mat-checkbox [formControlName]="skill">{{getSkillName(skill)}}</mat-checkbox>
+            <span [class.color-error]="group.get(skill)?.hasError('minAbility')">
+                (Min {{getRequiredAbilityName(skill)}} is {{getRequiredAbilityMin(skill)}})
+            </span>
+        </section>
+    </section>
+</section>

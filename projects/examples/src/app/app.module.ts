@@ -13,6 +13,10 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { WFormModule } from 'angular-wform';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -22,9 +26,13 @@ import { LoginComponent } from './pages/login/login.component';
 import { PageContentComponent } from './components/page-content/page-content.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PizzaComponent } from './pages/pizza/pizza.component';
-import { SuperComponent } from './pages/super/super.component';
+import { CharacterComponent } from './pages/character/character.component';
 import { SnickersComponent } from './pages/snickers/snickers.component';
 import { MoviesComponent } from './pages/movies/movies.component';
+import { CharacterProfileComponent } from './pages/character/profile/character-profile.component';
+import { CharacterAbilitiesComponent } from './pages/character/abilities/character-abilities.component';
+import { CharacterSkillsComponent } from './pages/character/skills/character-skills.component';
+import { CharacterThingsComponent } from './pages/character/things/character-things.component';
 
 @NgModule({
   declarations: [
@@ -33,14 +41,18 @@ import { MoviesComponent } from './pages/movies/movies.component';
     PizzaComponent,
     MoviesComponent,
     SnickersComponent,
-    SuperComponent,
+    CharacterComponent,
+    CharacterProfileComponent,
+    CharacterAbilitiesComponent,
+    CharacterSkillsComponent,
+    CharacterThingsComponent,
     PageContentComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-
+    
     MatSidenavModule,
     MatListModule,
     MatToolbarModule,
@@ -55,6 +67,10 @@ import { MoviesComponent } from './pages/movies/movies.component';
     MatSnackBarModule,
     MatSelectModule,
     MatMenuModule,
+    MatExpansionModule,
+    MatTabsModule,
+    MatTableModule,
+    MatAutocompleteModule,
 
     WFormModule,
   ],

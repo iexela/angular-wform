@@ -57,7 +57,7 @@ export class MoviesComponent {
                 duration: 5000,
             });
         } else {
-            this.snackBar.open('We have started to search moview!', 'Dismiss', {
+            this.snackBar.open('We have started to search movie!', 'Dismiss', {
                 duration: 5000,
             });
         }

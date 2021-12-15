@@ -9,7 +9,7 @@ import { getControlTypeName } from '../../utils';
 export class AsFormArrayPipe implements PipeTransform {
     transform(control: AbstractControl | null | undefined): FormArray {
         if (!control) {
-            throw new Error(`Control is "{{control}}"`);
+            throw new Error(`Control is nil`);
         }
         if (!(control instanceof FormArray)) {
             throw new Error(`Control is not FormArray: ${getControlTypeName(control)}`);

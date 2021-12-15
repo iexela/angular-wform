@@ -43,6 +43,10 @@ export {
 
 export {
     WValidators,
+    wValidator,
+    wValidatorFactory,
+    wValidatorAsync,
+    wValidatorFactoryAsync,
 } from './lib/validators';
 
 export {

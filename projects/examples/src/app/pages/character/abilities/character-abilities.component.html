@@ -1,0 +1,15 @@
+<section class="sub-content" [formGroup]="group">
+    <div class="flex-row flex-end">
+        <mat-form-field class="form-field form-field--half">
+            <input name="scores" placeholder="Scores Available" matInput readOnly formControlName="scores">
+            <mat-error *ngIf="group.get('scores')?.hasError('min')">Reduce abilities on {{-group.get('scores')?.value}} scores</mat-error>
+            <mat-error *ngIf="group.get('scores')?.hasError('max')">Scores are still available</mat-error>
+        </mat-form-field>
+    </div>
+    <mat-form-field *ngFor="let ability of abilities" class="form-field">
+        <input [name]="ability" [placeholder]="getPlaceholder(ability)" type="number" matInput [formControlName]="ability">
+        <mat-error *ngIf="group.get(ability)?.hasError('required')">{{getPlaceholder(ability)}} is required</mat-error>
+        <mat-error *ngIf="group.get(ability)?.hasError('min')">Should not be less than {{getMin(ability)}}</mat-error>
+        <mat-error *ngIf="group.get(ability)?.hasError('max')">Should not be more than {{getMax(ability)}}</mat-error>
+    </mat-form-field>
+</section>
