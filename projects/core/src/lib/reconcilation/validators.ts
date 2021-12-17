@@ -131,7 +131,7 @@ function appendValidatorsByComposing(ctx: WRenderContext, control: AbstractContr
     if (hasValidators) {
         if (!hasCompiledValidator) {
             ctx.markValidatorsChanged();
-            const bundle = createValidatorBundle(added.concat(common).concat(arrayify(control.validator)));
+            const bundle = createValidatorBundle(added.concat(common), control.validator || undefined);
             control.validator = bundle.compiled || null;
             return bundle;
         } else if (areValidatorsModified) {

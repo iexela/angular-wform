@@ -119,7 +119,7 @@ function appendValidatorsInBulk(ctx: WRenderContext, control: AbstractControl, l
 function appendValidatorsByComposing(ctx: WRenderContext, control: AbstractControl, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
-    const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
+    const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.asyncValidator;
     const hasValidators = added.length > 0 || common.length > 0;
     const areValidatorsModified = added.length > 0 || removed.length > 0;
 
@@ -131,7 +131,7 @@ function appendValidatorsByComposing(ctx: WRenderContext, control: AbstractContr
     if (hasValidators) {
         if (!hasCompiledValidator) {
             ctx.markValidatorsChanged();
-            const bundle = createAsyncValidatorBundle(added.concat(common).concat(arrayify(control.asyncValidator)));
+            const bundle = createAsyncValidatorBundle(added.concat(common), control.asyncValidator || undefined);
             control.asyncValidator = bundle.compiled || null;
             return bundle;
         } else if (areValidatorsModified) {
@@ -151,7 +151,7 @@ function appendValidatorsByComposing(ctx: WRenderContext, control: AbstractContr
 function replaceValidators(ctx: WRenderContext, control: AbstractControl, lastValidatorBundle: AsyncValidatorBundle, nextValidators: AsyncValidatorFn[]): AsyncValidatorBundle {
     const { added, removed, common } = arrayDiffUnordered(lastValidatorBundle.children, nextValidators);
 
-    const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.validator;
+    const hasCompiledValidator = lastValidatorBundle.compiled && lastValidatorBundle.compiled === control.asyncValidator;
     const hasValidators = added.length > 0 || common.length > 0;
     const areValidatorsModified = added.length > 0 || removed.length > 0;
 

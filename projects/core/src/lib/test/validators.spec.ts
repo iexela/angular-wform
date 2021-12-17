@@ -520,16 +520,22 @@ describe('validators', () => {
                 })).updateOnChange(false).build<number>(5);
                 
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
+
+                form.update();
+
+                form.control.setValidators(Validators.compose([form.control.validator!, testValidator4]));
     
                 expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
                 expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
                 expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
                 
                 form.setValue(20);
                 
                 expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
                 expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
                 expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
             });
         });
 

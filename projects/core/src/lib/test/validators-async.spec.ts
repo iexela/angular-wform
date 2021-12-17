@@ -523,15 +523,21 @@ describe('async validators', () => {
                 
                 form.control.setAsyncValidators(Validators.composeAsync([form.control.asyncValidator!, testValidator3]));
     
+                form.update();
+
+                form.control.setAsyncValidators(Validators.composeAsync([form.control.asyncValidator!, testValidator4]));
+
                 expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
                 expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeFalse();
                 expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
                 
                 form.setValue(20);
                 
                 expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
                 expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
                 expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
             });
         });
 

@@ -24,16 +24,18 @@ export interface CompiledAsyncValidatorFn extends AsyncValidatorFn {
 const CompiledValidatorFnMarker = Symbol('compiled-validator-fn');
 const CompiledAsyncValidatorFnMarker = Symbol('compiled-async-validator-fn');
 
-export function createValidatorBundle(children: ValidatorFn[]): ValidatorBundle {
+export function createValidatorBundle(disposable: ValidatorFn[], persistent?: ValidatorFn): ValidatorBundle {
     return {
-        children,
-        compiled: children.length ? createCompiledValidator(children) : undefined,
+        children: disposable,
+        compiled: disposable.length || persistent ? createCompiledValidator(disposable, persistent) : undefined,
     };
 }
 
-function createCompiledValidator(children: ValidatorFn[]): CompiledValidatorFn {
-    let composed: Nullable<ValidatorFn> = Validators.compose(children);
-    children = [];
+function createCompiledValidator(disposable: ValidatorFn[], persistent?: ValidatorFn): CompiledValidatorFn {
+    let composed: Nullable<ValidatorFn> = Validators.compose(
+        persistent ? disposable.concat([persistent]) : disposable);
+    let isDisposed = false;
+    disposable = [];
 
     const compiled = (control: AbstractControl) => {
         if (composed) {
@@ -45,25 +47,31 @@ function createCompiledValidator(children: ValidatorFn[]): CompiledValidatorFn {
     (compiled as any)[CompiledValidatorFnMarker] = true;
 
     compiled.setValidators = (validators: ValidatorFn[]) => {
-        composed = Validators.compose(validators);
+        if (isDisposed) {
+            throw Error('Async compiled validator is being changed when it is already in disposed state');
+        }
+        composed = Validators.compose(persistent ? validators.concat([persistent]) : validators);
     };
     compiled.dispose = () => {
-        composed = null;
+        isDisposed = true;
+        composed = persistent || null;
     };
 
     return compiled;
 }
 
-export function createAsyncValidatorBundle(children: AsyncValidatorFn[]): AsyncValidatorBundle {
+export function createAsyncValidatorBundle(disposable: AsyncValidatorFn[], persistent?: AsyncValidatorFn): AsyncValidatorBundle {
     return {
-        children,
-        compiled: children.length ? createCompiledAsyncValidator(children) : undefined,
+        children: disposable,
+        compiled: disposable.length || persistent ? createCompiledAsyncValidator(disposable, persistent) : undefined,
     };
 }
 
-function createCompiledAsyncValidator(children: AsyncValidatorFn[]): CompiledAsyncValidatorFn {
-    let composed: Nullable<AsyncValidatorFn> = Validators.composeAsync(children);
-    children = [];
+function createCompiledAsyncValidator(disposable: AsyncValidatorFn[], persistent?: AsyncValidatorFn): CompiledAsyncValidatorFn {
+    let composed: Nullable<AsyncValidatorFn> = Validators.composeAsync(
+        persistent ? disposable.concat([persistent]) : disposable);
+    let isDisposed = false;
+    disposable = [];
 
     const compiled = (control: AbstractControl) => {
         if (composed) {
@@ -75,10 +83,14 @@ function createCompiledAsyncValidator(children: AsyncValidatorFn[]): CompiledAsy
     (compiled as any)[CompiledAsyncValidatorFnMarker] = true;
 
     compiled.setAsyncValidators = (validators: AsyncValidatorFn[]) => {
-        composed = Validators.composeAsync(validators);
+        if (isDisposed) {
+            throw Error('Async compiled validator is being changed when it is already in disposed state');
+        }
+        composed = Validators.composeAsync(persistent ? validators.concat([persistent]) : validators);
     };
     compiled.dispose = () => {
-        composed = null;
+        isDisposed = true;
+        composed = persistent || null;
     };
 
     return compiled;
