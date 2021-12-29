@@ -4,41 +4,41 @@ import { WValidators } from 'angular-wform';
 import { wValidator } from 'projects/core/src/lib/validators';
 import { wControl, wForm, wGroup } from 'projects/core/src/public-api';
 
-interface SnickersBrand {
+interface SneackersBrand {
     name: string;
-    sizes: SnickersSize[];
+    sizes: SneackersSize[];
 }
 
-interface SnickersSize {
+interface SneackersSize {
     size: number;
     count: number;
 }
 
-interface Snickers {
+interface Sneackers {
     brand: string;
     size?: number;
     count?: number;
 }
 
-function size(size: number, count: number): SnickersSize {
+function size(size: number, count: number): SneackersSize {
     return { size, count };
 }
 
 @Component({
-    selector: 'wform-snickers',
-    templateUrl: 'snickers.component.html',
+    selector: 'wform-sneackers',
+    templateUrl: 'sneackers.component.html',
 })
-export class SnickersComponent {
-    brands: Record<string, SnickersSize[]> = {
+export class SneackersComponent {
+    brands: Record<string, SneackersSize[]> = {
         'Nike': [size(39, 3), size(40, 3), size(41, 4), size(42, 0)],
         'Adidas': [size(39, 1), size(42, 0), size(43, 7), size(44, 12), size(45, 13)],
         'Reebok': [size(37, 2), size(41, 3), size(42, 0)],
     };
     availableBrands = Object.keys(this.brands);
 
-    form = wForm((snickers: Snickers) => {
-        const brand = snickers.brand && this.brands[snickers.brand];
-        const size = brand && brand.find(size => size.size === snickers.size);
+    form = wForm((sneackers: Sneackers) => {
+        const brand = sneackers.brand && this.brands[sneackers.brand];
+        const size = brand && brand.find(size => size.size === sneackers.size);
         const countOfThisSize = size && size.count || 0;
         const hasOfThisSize = countOfThisSize > 0;
 
@@ -51,7 +51,7 @@ export class SnickersComponent {
                 }, [hasOfThisSize]),
             }),
             count: wControl({
-                value: hasOfThisSize ? snickers.count : 0,
+                value: hasOfThisSize ? sneackers.count : 0,
                 disabled: !hasOfThisSize,
                 required: true,
                 validator: WValidators.compose(WValidators.min(1), WValidators.max(countOfThisSize)),
@@ -63,7 +63,7 @@ export class SnickersComponent {
         count: 0,
     });
 
-    get selectedSize(): SnickersSize | undefined {
+    get selectedSize(): SneackersSize | undefined {
         const { brand, size } = this.form.value;
         if (brand && size) {
             return this.brands[brand].find(s => s.size === size);
@@ -89,7 +89,7 @@ export class SnickersComponent {
                 duration: 5000,
             });
         } else {
-            this.snackBar.open('Your snickers are on the way to you!', 'Dismiss', {
+            this.snackBar.open('Your sneackers are on the way to you!', 'Dismiss', {
                 duration: 5000,
             });
         }

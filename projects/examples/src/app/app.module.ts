@@ -27,7 +27,7 @@ import { PageContentComponent } from './components/page-content/page-content.com
 import { ReactiveFormsModule } from '@angular/forms';
 import { PizzaComponent } from './pages/pizza/pizza.component';
 import { CharacterComponent } from './pages/character/character.component';
-import { SnickersComponent } from './pages/snickers/snickers.component';
+import { SneackersComponent } from './pages/sneackers/sneackers.component';
 import { MoviesComponent } from './pages/movies/movies.component';
 import { CharacterProfileComponent } from './pages/character/profile/character-profile.component';
 import { CharacterAbilitiesComponent } from './pages/character/abilities/character-abilities.component';
@@ -40,7 +40,7 @@ import { CharacterThingsComponent } from './pages/character/things/character-thi
     LoginComponent,
     PizzaComponent,
     MoviesComponent,
-    SnickersComponent,
+    SneackersComponent,
     CharacterComponent,
     CharacterProfileComponent,
     CharacterAbilitiesComponent,

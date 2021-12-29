@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './pages/login/login.component';
 import { MoviesComponent } from './pages/movies/movies.component';
 import { PizzaComponent } from './pages/pizza/pizza.component';
-import { SnickersComponent } from './pages/snickers/snickers.component';
+import { SneackersComponent } from './pages/sneackers/sneackers.component';
 import { CharacterComponent } from './pages/character/character.component';
 
 const routes: Routes = [{
@@ -20,8 +20,8 @@ const routes: Routes = [{
   component: MoviesComponent,
   path: 'movies',
 }, {
-  component: SnickersComponent,
-  path: 'snickers',
+  component: SneackersComponent,
+  path: 'sneackers',
 }, {
   component: CharacterComponent,
   path: 'character',

@@ -1,7 +1,7 @@
 <wform-page-content>
     <mat-card class="fixed-width-center w-400">
         <form [formGroup]="form.group" (submit)="onSubmit()">
-            <mat-card-title>Buy Snickers!</mat-card-title>
+            <mat-card-title>Buy Sneackers!</mat-card-title>
             <mat-card-content>
                 <mat-form-field class="form-field">
                     <mat-select formControlName="brand">
@@ -13,7 +13,7 @@
                         <mat-option *ngFor="let size of brands[this.form.value.brand]" [value]="size.size">{{size.size}}</mat-option>
                     </mat-select>
                     <mat-error *ngIf="form.get('size').hasError('noSize')">
-                        There is no snickers of this size anymore
+                        There is no sneackers of this size anymore
                     </mat-error>
                     <mat-hint *ngIf="selectedSize && selectedSize.count > 0 && selectedSize.count <= 3">
                         Hurry up! Only {{selectedSize.count}} in stock!
@@ -22,13 +22,13 @@
                 <mat-form-field class="form-field">
                     <input formControlName="count" type="number" matInput min="0" [max]="selectedSize && selectedSize.count || 0">
                     <mat-error *ngIf="form.get('count').hasError('required')">
-                        How many snickers are you going to order?
+                        How many sneackers are you going to order?
                     </mat-error>
                     <mat-error *ngIf="form.get('count').hasError('min')">
-                        You have to order at least one pair of snickers
+                        You have to order at least one pair of sneackers
                     </mat-error>
                     <mat-error *ngIf="form.get('count').hasError('max')">
-                        There are no so many snickers in stock
+                        There are no so many sneackers in stock
                     </mat-error>
                 </mat-form-field>
             </mat-card-content>
