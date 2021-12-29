@@ -9,6 +9,11 @@ export enum WValidatorNodeType {
     Compound, Simple, Factory
 }
 
+export enum WValidationStrategy {
+    Append,
+    Replace,
+}
+
 export interface WValidatorFactory {
     (...args: any[]): ValidatorFn;
 }
@@ -90,6 +95,7 @@ export interface WFormNodeBase {
     disabled: boolean;
     validator?: WValidatorNode;
     asyncValidator?: WAsyncValidatorNode;
+    validationStrategy?: WValidationStrategy;
     dirty?: boolean;
     touched?: boolean;
 }

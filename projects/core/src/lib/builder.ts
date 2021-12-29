@@ -1,7 +1,7 @@
 import { AbstractControl } from '@angular/forms';
 import { WForm, WFormOptions } from './form';
-import { ExtractFormValue, WFormNode, WFormNodeFactory } from './model';
-import { DEFAULT_RECONCILATION_OPTIONS, WKeyGenerator, WValidationStrategy } from './reconcilation';
+import { ExtractFormValue, WFormNode, WFormNodeFactory, WValidationStrategy } from './model';
+import { DEFAULT_RECONCILATION_OPTIONS, WKeyGenerator } from './reconcilation';
 import { calculateValue } from './utils';
 
 export interface WFormBuilderFactory {

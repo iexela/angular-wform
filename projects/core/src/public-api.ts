@@ -26,6 +26,7 @@ export {
     WValidatorMixer,
     WValidatorNode,
     WValidatorNodeType,
+    WValidationStrategy,
     isAsyncValidatorNode,
     isValidatorNode,
 } from './lib/model';
@@ -65,7 +66,6 @@ export {
 
 export {
     WKeyGenerator,
-    WValidationStrategy,
     WFormReconcilationOptions,
     getLastFormNode,
     getData,

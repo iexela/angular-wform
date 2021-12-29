@@ -1,9 +1,8 @@
 import { AbstractControl, AsyncValidatorFn } from '@angular/forms';
-import { WAsyncValidatorNode, WAsyncValidatorNodeType } from '../model';
+import { WAsyncValidatorNode, WAsyncValidatorNodeType, WValidationStrategy } from '../model';
 import { arrayDiffUnordered, arrayify, flatMap } from '../utils';
 import { canAccessListOfValidators, canManageValidatorsIndividually } from './flags';
 import { AsyncValidatorBundle, createAsyncValidatorBundle } from './internal-model';
-import { WValidationStrategy } from './model';
 import { getLastAsyncValidatorBundle, getLastFormNodeOrNothing } from './registry';
 import { WRenderContext } from './render-context';
 
@@ -13,7 +12,7 @@ interface Control12AsyncValidatorsApi {
     removeAsyncValidators(validator: AsyncValidatorFn): void;
 }
 
-export function processAsyncValidators(ctx: WRenderContext, node?: WAsyncValidatorNode, control?: AbstractControl): AsyncValidatorBundle {
+export function processAsyncValidators(ctx: WRenderContext, strategy?: WValidationStrategy, node?: WAsyncValidatorNode, control?: AbstractControl): AsyncValidatorBundle {
     if (!control) {
         return createAsyncValidatorBundle(createValidators(node));
     }
@@ -23,7 +22,7 @@ export function processAsyncValidators(ctx: WRenderContext, node?: WAsyncValidat
 
     return applyValidators(
         ctx,
-        ctx.options.validationStrategy,
+        strategy != null ? strategy : ctx.options.validationStrategy,
         control,
         lastValidatorBundle,
         areValidatorsChanged(lastNode, node) ? createValidators(node) : lastValidatorBundle.children,

@@ -1,9 +1,9 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { AbstractControl, AsyncValidatorFn, FormControl, Validators } from '@angular/forms';
+import { WValidationStrategy } from 'angular-wform';
 import { wControl } from '../basic';
 import { wForm } from '../builder';
 import { WAsyncValidatorNode } from '../model';
-import { WValidationStrategy } from '../reconcilation';
 import { wCompoundValidatorAsync, wValidatorAsync, wValidatorFactoryAsync, WValidators } from '../validators';
 import { evenAsync, moreThan10Async } from './test-mocks';
 import { toPromise } from './test-utils';

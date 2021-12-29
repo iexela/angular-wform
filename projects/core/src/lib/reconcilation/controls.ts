@@ -69,8 +69,8 @@ function processNative(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFo
         }
     }
 
-    const validator = processValidators(ctx, node.validator, control);
-    const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
+    const validator = processValidators(ctx, node.validationStrategy, node.validator, control);
+    const asyncValidator = processAsyncValidators(ctx, node.validationStrategy, node.asyncValidator, control);
 
     if (!isControlValue(control, value)) {
         control.setValue(value);
@@ -91,8 +91,8 @@ function processControl(ctx: WRenderContext, name: Maybe<WPathElement>, node: WF
     value = node.hasOwnProperty('value') ? node.value : value;
 
     if (!node || !control) {
-        const validator = processValidators(ctx, node.validator);
-        const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
+        const validator = processValidators(ctx, node.validationStrategy, node.validator);
+        const asyncValidator = processAsyncValidators(ctx, node.validationStrategy, node.asyncValidator);
         const newControl = new FormControl({
             value,
             disabled: ctx.tryDisabled(node.disabled),
@@ -122,8 +122,8 @@ function processControl(ctx: WRenderContext, name: Maybe<WPathElement>, node: WF
         }
     }
 
-    const validator = processValidators(ctx, node.validator, control);
-    const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
+    const validator = processValidators(ctx, node.validationStrategy, node.validator, control);
+    const asyncValidator = processAsyncValidators(ctx, node.validationStrategy, node.asyncValidator, control);
 
     if (control.value !== value) {
         control.setValue(value);
@@ -144,8 +144,8 @@ function processGroup(ctx: WRenderContext,name: Maybe<WPathElement>, node: WForm
     if (!control) {
         ctx.push(name, node);
 
-        const validator = processValidators(ctx, node.validator);
-        const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
+        const validator = processValidators(ctx, node.validationStrategy, node.validator);
+        const asyncValidator = processAsyncValidators(ctx, node.validationStrategy, node.asyncValidator);
         const group = new FormGroup(
             mapValues(
                 pickBy(node.children, ctx.isUsedNode),
@@ -196,8 +196,8 @@ function processGroup(ctx: WRenderContext,name: Maybe<WPathElement>, node: WForm
     //     control.disable();
     // }
 
-    const validator = processValidators(ctx, node.validator, control);
-    const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
+    const validator = processValidators(ctx, node.validationStrategy, node.validator, control);
+    const asyncValidator = processAsyncValidators(ctx, node.validationStrategy, node.asyncValidator, control);
     
     if (ctx.validatorsChanged) {
         control.updateValueAndValidity();
@@ -217,8 +217,8 @@ function processArray(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFor
     if (!control) {
         ctx.push(name, node);
 
-        const validator = processValidators(ctx, node.validator);
-        const asyncValidator = processAsyncValidators(ctx, node.asyncValidator);
+        const validator = processValidators(ctx, node.validationStrategy, node.validator);
+        const asyncValidator = processAsyncValidators(ctx, node.validationStrategy, node.asyncValidator);
 
         const array = new FormArray(
             node.children.filter(ctx.isUsedNode).map((child, i) => processNode(ctx, i, child, value?.[i])),
@@ -307,8 +307,8 @@ function processArray(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFor
     //     control.disable();
     // }
 
-    const validator = processValidators(ctx, node.validator, control);
-    const asyncValidator = processAsyncValidators(ctx, node.asyncValidator, control);
+    const validator = processValidators(ctx, node.validationStrategy, node.validator, control);
+    const asyncValidator = processAsyncValidators(ctx, node.validationStrategy, node.asyncValidator, control);
     
     if (ctx.validatorsChanged) {
         control.updateValueAndValidity();

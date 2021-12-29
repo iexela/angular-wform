@@ -1,9 +1,8 @@
 import { AbstractControl, ValidatorFn } from '@angular/forms';
-import { WValidatorNode,WValidatorNodeType } from '../model';
+import { WValidationStrategy, WValidatorNode,WValidatorNodeType } from '../model';
 import { arrayDiffUnordered, arrayify, flatMap } from '../utils';
 import { canAccessListOfValidators, canManageValidatorsIndividually } from './flags';
 import { createValidatorBundle, ValidatorBundle } from './internal-model';
-import { WValidationStrategy } from './model';
 import { getLastFormNodeOrNothing, getLastValidatorBundleOrCreate } from './registry';
 import { WRenderContext } from './render-context';
 
@@ -13,7 +12,7 @@ interface Control12ValidatorsApi {
     removeValidators(validator: ValidatorFn): void;
 }
 
-export function processValidators(ctx: WRenderContext, node?: WValidatorNode, control?: AbstractControl): ValidatorBundle {    
+export function processValidators(ctx: WRenderContext, strategy?: WValidationStrategy, node?: WValidatorNode, control?: AbstractControl): ValidatorBundle {    
     if (!control) {
         return createValidatorBundle(createValidators(node));
     }
@@ -23,7 +22,7 @@ export function processValidators(ctx: WRenderContext, node?: WValidatorNode, co
 
     return applyValidators(
         ctx,
-        ctx.options.validationStrategy,
+        strategy != null ? strategy : ctx.options.validationStrategy,
         control,
         lastValidatorBundle,
         areValidatorsChanged(lastNode, node) ? createValidators(node) : lastValidatorBundle.children,
