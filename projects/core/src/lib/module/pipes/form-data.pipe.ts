@@ -5,10 +5,10 @@ import { Observable, startWith } from 'rxjs';
 import { dataChanges, getData } from '../../reconcilation';
 
 @Pipe({
-    name: 'formDataAsync',
+    name: 'formData',
     pure: false,
 })
-export class FormDataAsyncPipe implements PipeTransform, OnDestroy {
+export class FormDataPipe implements PipeTransform, OnDestroy {
     private async: AsyncPipe;
     private lastControl?: AbstractControl;
     private stream?: Observable<Record<string, any>>;

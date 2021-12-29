@@ -81,6 +81,6 @@ export {
     AsFormArrayPipe,
     AsFormControlPipe,
     AsFormGroupPipe,
-    FormDataAsyncPipe,
+    FormDataPipe,
     WFormModule,
 } from './lib/module';

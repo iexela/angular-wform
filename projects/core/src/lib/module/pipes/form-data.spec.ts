@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { FormControl } from '@angular/forms';
 import { wControl, wGroup } from '../../basic';
 import { wForm } from '../../builder';
-import { FormDataAsyncPipe } from './form-data-async.pipe';
+import { FormDataPipe } from './form-data.pipe';
 
 @Component({
     selector: 'wform-test',
@@ -13,7 +13,7 @@ class TestComponent {
 
 }
 
-describe('formDataAsync', () => {
+describe('formData', () => {
     let changeDetectorRef: ChangeDetectorRef;
 
     beforeEach(() => {
@@ -22,18 +22,18 @@ describe('formDataAsync', () => {
     });
 
     it('should throw error if control is nil', () => {
-        const pipe = new FormDataAsyncPipe(changeDetectorRef);
+        const pipe = new FormDataPipe(changeDetectorRef);
         expect(() => pipe.transform(null as any)).toThrow();
         expect(() => pipe.transform(undefined as any)).toThrow();
     });
 
     it('should throw error if control is not bound to form', () => {
-        const pipe = new FormDataAsyncPipe(changeDetectorRef);
+        const pipe = new FormDataPipe(changeDetectorRef);
         expect(() => pipe.transform(new FormControl())).toThrow();
     });
     
     it('should return wnode data', () => {
-        const pipe = new FormDataAsyncPipe(changeDetectorRef);
+        const pipe = new FormDataPipe(changeDetectorRef);
         const form = wForm(() => wControl({ data: { value: 12 }}))
             .updateOnChange(false)
             .build(1);
@@ -41,7 +41,7 @@ describe('formDataAsync', () => {
     });
 
     it('should return last wnode data', () => {
-        const pipe = new FormDataAsyncPipe(changeDetectorRef);
+        const pipe = new FormDataPipe(changeDetectorRef);
         const form = wForm((value: number) => wControl({ data: { value: value * value }}))
             .updateOnChange(false)
             .build(2);
@@ -56,7 +56,7 @@ describe('formDataAsync', () => {
     });
 
     it('should return wnode data of new control', () => {
-        const pipe = new FormDataAsyncPipe(changeDetectorRef);
+        const pipe = new FormDataPipe(changeDetectorRef);
         const form = wForm(() => wGroup({
             a: wControl({ data: { value: 12 }}),
             b: wControl({ data: { value: 17 }}),
@@ -68,7 +68,7 @@ describe('formDataAsync', () => {
     });
 
     it('should return last wnode data of new control', () => {
-        const pipe = new FormDataAsyncPipe(changeDetectorRef);
+        const pipe = new FormDataPipe(changeDetectorRef);
         const form = wForm(({ a, b }: { a: number, b: number }) => wGroup({
             a: wControl({ data: { value: a * a }}),
             b: wControl({ data: { value: b * b * b }}),

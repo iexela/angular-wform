@@ -2,20 +2,20 @@ import { NgModule } from '@angular/core';
 import { AsFormArrayPipe } from './pipes/as-form-array.pipe';
 import { AsFormControlPipe } from './pipes/as-form-control.pipe';
 import { AsFormGroupPipe } from './pipes/as-form-group.pipe';
-import { FormDataAsyncPipe } from './pipes/form-data-async.pipe';
+import { FormDataPipe } from './pipes/form-data.pipe';
 
 @NgModule({
     declarations: [
         AsFormArrayPipe,
         AsFormControlPipe,
         AsFormGroupPipe,
-        FormDataAsyncPipe,
+        FormDataPipe,
     ],
     exports: [
         AsFormArrayPipe,
         AsFormControlPipe,
         AsFormGroupPipe,
-        FormDataAsyncPipe,
+        FormDataPipe,
     ],
 })
 export class WFormModule {
