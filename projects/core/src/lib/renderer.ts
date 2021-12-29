@@ -1,6 +1,6 @@
 import { AbstractControl } from '@angular/forms';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, OperatorFunction, pipe } from 'rxjs';
+import { filter, mapTo, switchMap } from 'rxjs/operators';
 import { Maybe } from './common';
 import { WFormNode } from './model';
 import { WPortal, WPortalHost } from './portal-host';
@@ -32,6 +32,14 @@ export class WFormRenderer<T> {
 
         this.controlObservable = this._control$$.pipe(filter(Boolean));
         this.reconcilationInProgressOnbservable = this._reconcilationInProgress$$.asObservable();
+    }
+
+    afterReconcilation<U>(): OperatorFunction<U, U> {
+        return pipe(
+            switchMap(value =>
+                this.reconcilationInProgressOnbservable.pipe(
+                    filter(flag => !flag),
+                    mapTo(value))))
     }
 
     render<U extends T>(node: WFormNode, value?: U): void {

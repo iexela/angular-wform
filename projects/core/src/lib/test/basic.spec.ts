@@ -1,6 +1,7 @@
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { wArray, wControl, wGroup, wNative, wPortal, wSkip } from '../basic';
 import { wForm } from '../builder';
+import { WForm } from '../form';
 import { WFormNodeType } from '../model';
 import { dataChanges, getData, getLastFormNode } from '../reconcilation';
 import { WValidators } from '../validators';
@@ -214,12 +215,11 @@ describe('basic', () => {
         });
     });
 
-    describe('valueChanges', () => {
-        it('should emit value once for each reconcile operation', () => {
-            const subscriber = jasmine.createSpy('subscriber')
-            const rawSubscriber = jasmine.createSpy('raw-subscriber')
+    describe('afterReconcilation', () => {
+        let form: WForm<Box>;
 
-            const form = wForm((value: Box) => wGroup({
+        beforeEach(() => {
+            form = wForm((value: Box) => wGroup({
                 name: wControl(),
                 weight: wControl({
                     disabled: value.volume! > 100,
@@ -229,16 +229,30 @@ describe('basic', () => {
                     disabled: value.weight! < 10,
                 }),
             })).updateOnChange(false).build(mouse);
+        });
 
-            form.valueChanges.subscribe(subscriber);
-            form.rawValueChanges.subscribe(rawSubscriber);
+        it('should emit value once for each reconcile operation', () => {
+            const subscriber = jasmine.createSpy('subscriber');
+
+            form.control.valueChanges.pipe(form.afterReconcilation()).subscribe(subscriber);
 
             form.setValue(elephant);
 
             const { weight, ...elephantWithoutVolume } = elephant;
 
             expect(subscriber).toHaveBeenCalledOnceWith(elephantWithoutVolume);
-            expect(rawSubscriber).toHaveBeenCalledOnceWith(elephant);
+        });
+
+        it('should not affect operations outside of reconcilation', () => {
+            const subscriber = jasmine.createSpy('subscriber');
+
+            form.control.valueChanges.pipe(form.afterReconcilation()).subscribe(subscriber);
+
+            form.get('weight').disable();
+            form.get('volume').enable();
+            form.group.setValue(elephant);
+
+            expect(subscriber).toHaveBeenCalledTimes(3);
         });
     });
 

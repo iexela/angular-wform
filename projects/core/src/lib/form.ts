@@ -1,6 +1,6 @@
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { Observable, OperatorFunction } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { ProcedureFn, TransformFn } from './common';
 import { WFormNode, WFormNodeFactory } from './model';
 import { WPortal } from './portal-host';
@@ -77,12 +77,7 @@ export class WForm<T> implements WPortal<T> {
         const nativeValueChanges = renderer.controlObservable
             .pipe(switchMap(control => control.valueChanges));
 
-        this.valueChanges = combineLatest([
-            nativeValueChanges,
-            renderer.reconcilationInProgressOnbservable,
-        ]).pipe(
-            filter(([_, reconcilationInProgress]: [T, boolean]) => !reconcilationInProgress),
-            map(([value]) => value));
+        this.valueChanges = nativeValueChanges.pipe(renderer.afterReconcilation());
         this.rawValueChanges = this.valueChanges.pipe(map(() => this.rawValue));
 
         this._factory = factory;
@@ -94,6 +89,10 @@ export class WForm<T> implements WPortal<T> {
                 }
             });
         }
+    }
+
+    afterReconcilation<U>(): OperatorFunction<U, U> {
+        return this._renderer.afterReconcilation();
     }
 
     setValue<U extends T>(valueFn: TransformFn<T, U>): void;
