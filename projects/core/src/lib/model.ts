@@ -1,5 +1,5 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
-import { ArrayItemOf, Is } from './common';
+import { ArrayItemOf, Omit, Is } from './common';
 
 export type WPathElement = string | number;
 

@@ -37,7 +37,7 @@ function applyValidators(ctx: WRenderContext,
     switch (strategy) {
         case WValidationStrategy.Append:
             if (canManageValidatorsIndividually) {
-                return appendValidatorsIndividually(ctx, control as Control12ValidatorsApi, lastValidatorBundle, nextValidators);
+                return appendValidatorsIndividually(ctx, control as unknown as Control12ValidatorsApi, lastValidatorBundle, nextValidators);
             } else if (canAccessListOfValidators) {
                 return appendValidatorsInBulk(ctx, control, lastValidatorBundle, nextValidators);
             } else {

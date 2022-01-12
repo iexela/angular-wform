@@ -1,6 +1,6 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn, Validators } from '@angular/forms';
 import { WAsyncValidatorNode, WFormNative, WFormPlaceholder, WFormPortal } from './model';
-import { Maybe } from './common';
+import { Maybe, Omit } from './common';
 import { WFormArray, WFormArrayChildren, WFormControl, WFormGroup, WFormGroupChildren, WFormNodeType, WValidatorNode } from './model';
 import { arrayify } from './utils';
 import { andValidators, composeAsyncValidators, composeValidators, wValidator } from './validators';

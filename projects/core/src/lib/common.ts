@@ -17,3 +17,11 @@ export type OptionalKeys<T> = { [P in keyof T]-?: undefined extends T[P] ? P : n
 export type RequiredKeys<T> = Exclude<keyof T, OptionalKeys<T>>;
 
 export type Is<A, B> = (<G>() => G extends A ? 1 : 2) extends (<G>() => G extends B ? 1 : 2) ? true : false;
+
+export type Pick<T, K extends keyof T> = {
+    [P in K]: T[P];
+};
+
+export type Exclude<T, U> = T extends U ? never : T;
+
+export type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;

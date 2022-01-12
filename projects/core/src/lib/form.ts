@@ -126,7 +126,7 @@ export class WForm<T> implements WPortal<T> {
     }
 
     markAllAsTouched(): void {
-        this.control.markAllAsTouched();
+        this.forEach(control => control.markAsTouched({ onlySelf: true }));
     }
 
     markAllAsUntouched(): void {
