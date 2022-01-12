@@ -48,9 +48,9 @@ export function calculateValue(control: AbstractControl): any {
 
 export function isControlValue(control: AbstractControl, value: any): boolean {
     if (control instanceof FormGroup) {
-        return Object.keys(control.controls).every(key => isControlValue(control.controls[key], value?.[key]));
+        return Object.keys(control.controls).every(key => isControlValue(control.controls[key], get(value, key)));
     } else if (control instanceof FormArray) {
-        return control.controls.every((child, i) => isControlValue(child, value?.[i]));
+        return control.controls.every((child, i) => isControlValue(child, get(value, i)));
     } else {
         return control.value === value;
     }
@@ -72,6 +72,17 @@ export function pickBy(obj: Dictionary<any>, predicate: PredicateFn<any>): Dicti
         }
         return result;
     }, {} as any);
+}
+
+export function get<T extends object, K extends keyof T>(obj: T | null, key: K): T[K] | null;
+export function get<T extends object, K extends keyof T>(obj: T | undefined, key: K): T[K] | undefined;
+export function get<T extends object, K extends keyof T>(obj: T | null | undefined, key: K): T[K] | null | undefined;
+export function get<T extends object, K extends keyof T>(obj: T, key: K): T[K];
+export function get<T extends object, K extends keyof T>(obj: T, key: K): T[K] {
+    if (isNil(obj)) {
+        return obj;
+    }
+    return obj[key];
 }
 
 export function isNil(value: any): value is null | undefined {
@@ -193,12 +204,12 @@ function indexate<T>(arr: T[], toKey: TransformFn<T, any>, errorCtx?: any[]): Ma
         let key = toKey(item);
 
         if (key == null) {
-            const path = errorCtx?.join('.');
+            const path = errorCtx && errorCtx.join('.');
             console.warn(`Key is undefined or null for the array item node: ${path ? path + '.' : ''}${i}`);
             key = getKeyByIndex(i);
         }
         if (items.has(key)) {
-            const path = errorCtx?.join('.');
+            const path = errorCtx && errorCtx.join('.');
             throw new Error(`Items has the same key (${key}): ${path ? path + '.' : ''}{${items.get(key).index}, ${i}}`);
         }
 

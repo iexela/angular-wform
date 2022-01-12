@@ -3,7 +3,7 @@ import { getLastFormNode } from './registry';
 import { WFormNative, WFormPlaceholder, WFormPortal, WPathElement, WThisFormNode } from '../model';
 import { Maybe } from '../common';
 import { WFormArray, WFormControl, WFormGroup, WFormNode, WFormNodeType } from '../model';
-import { arrayDiff, getControlTypeName, hasField, isControlValue, mapValues, objectDiff, pickBy } from '../utils';
+import { arrayDiff, get, getControlTypeName, hasField, isControlValue, mapValues, objectDiff, pickBy } from '../utils';
 import { getLastFormNodeOrNothing, registerRenderResult, registerRoot } from './registry';
 import { WRenderContext } from './render-context';
 import { processValidators } from './validators';
@@ -149,7 +149,7 @@ function processGroup(ctx: WRenderContext,name: Maybe<WPathElement>, node: WForm
         const group = new FormGroup(
             mapValues(
                 pickBy(node.children, ctx.isUsedNode),
-                (child, key) => processNode(ctx, key, child as WFormNode, value?.[key])),
+                (child, key) => processNode(ctx, key, child as WFormNode, get(value, key))),
             {
                 validators: validator.compiled,
                 asyncValidators: asyncValidator.compiled,
@@ -187,10 +187,10 @@ function processGroup(ctx: WRenderContext,name: Maybe<WPathElement>, node: WForm
     const { added, removed, updated } = objectDiff(currentChildrenNodes, pickBy(node.children, ctx.isUsedNode));
     added.forEach(key => control.setControl(
         key,
-        processNode(ctx, key, node.children[key] as WFormNode, value?.[key]),
+        processNode(ctx, key, node.children[key] as WFormNode, get(value, key)),
     ));
     removed.forEach(key => control.removeControl(key));
-    updated.forEach(key => processNode(ctx, key, node.children[key] as WFormNode, value?.[key], control.controls[key]));
+    updated.forEach(key => processNode(ctx, key, node.children[key] as WFormNode, get(value, key), control.controls[key]));
 
     // if (control.disabled !== nextDisabled && nextDisabled) {
     //     control.disable();
@@ -221,7 +221,7 @@ function processArray(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFor
         const asyncValidator = processAsyncValidators(ctx, node.validationStrategy, node.asyncValidator);
 
         const array = new FormArray(
-            node.children.filter(ctx.isUsedNode).map((child, i) => processNode(ctx, i, child, value?.[i])),
+            node.children.filter(ctx.isUsedNode).map((child, i) => processNode(ctx, i, child, get(value, i))),
             {
                 validators: validator.compiled,
                 asyncValidators: asyncValidator.compiled,
@@ -284,12 +284,12 @@ function processArray(ctx: WRenderContext, name: Maybe<WPathElement>, node: WFor
     removed.reverse().forEach(index => control.removeAt(index));
     added.forEach(index => control.insert(
         index,
-        processNode(ctx, index, nextChildrenNodes[index] as WFormNode, value?.[index]),
+        processNode(ctx, index, nextChildrenNodes[index] as WFormNode, get(value, index)),
     ));
     updated.forEach(({ previous, next }) => {
         const nextControl = indexToControl[previous];
 
-        processNode(ctx, next, nextChildrenNodes[next] as WFormNode, value?.[next], nextControl);
+        processNode(ctx, next, nextChildrenNodes[next] as WFormNode, get(value, next), nextControl);
 
         if (control.controls[next] !== nextControl) {
             control.setControl(next, nextControl);

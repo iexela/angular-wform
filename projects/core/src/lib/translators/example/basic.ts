@@ -1,7 +1,7 @@
 import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
 import { WAsyncValidatorNode, WValidatorNode } from '../../model';
 import { Maybe } from '../../common';
-import { arrayify } from '../../utils';
+import { arrayif, get } from '../../utils';
 import { composeAsyncValidators, composeValidators } from '../../validators';
 import { toCondition, whenAll } from './conditions';
 import { FormSampleArray, FormSampleControl, FormSampleGroup, FormSampleNative, FormSampleNode, FormSampleNodeType, FormSampleNoOptionsNoOptions, FormSampleOptions, FormSamplePlaceholder, FormSamplePortal, SampleEnvironmentPredicate } from './model';
@@ -70,9 +70,9 @@ export function sControl<T = any>(options?: FormSampleControlOptions<T>): FormSa
     return {
         type: FormSampleNodeType.Control,
         ...options,
-        visible: resolveFlag(options?.visible, true),
-        enabled: resolveFlag(options?.enabled, true),
-        required: resolveFlag(options?.required, false),
+        visible: resolveFlag(get(options, 'visible'), true),
+        enabled: resolveFlag(get(options, 'enabled'), true),
+        required: resolveFlag(get(options, 'required'), false),
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator),
     };
@@ -86,8 +86,8 @@ export function sGroup(optionsOrChildren?: FormSampleGroupOptions | FormSampleGr
     return {
         type: FormSampleNodeType.Group,
         ...options,
-        visible: resolveFlag(options?.visible, true),
-        enabled: resolveFlag(options?.enabled, true),
+        visible: resolveFlag(get(options, 'visible'), true),
+        enabled: resolveFlag(get(options, 'enabled'), true),
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
         children,
@@ -102,8 +102,8 @@ export function sArray(optionsOrChildren: FormSampleArrayOptions | FormSampleArr
     return {
         type: FormSampleNodeType.Array,
         ...options,
-        visible: resolveFlag(options?.visible, true),
-        enabled: resolveFlag(options?.enabled, true),
+        visible: resolveFlag(get(options, 'visible'), true),
+        enabled: resolveFlag(get(options, 'enabled'), true),
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
         children,
@@ -121,8 +121,8 @@ export function sNative<T = any>(control?: AbstractControl, options?: FormSample
         type: FormSampleNodeType.Native,
         control,
         ...options,
-        visible: resolveFlag(options?.visible, true),
-        enabled: resolveFlag(options?.enabled, true),
+        visible: resolveFlag(get(options, 'visible'), true),
+        enabled: resolveFlag(get(options, 'enabled'), true),
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
     };

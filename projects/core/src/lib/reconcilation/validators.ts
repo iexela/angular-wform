@@ -1,6 +1,6 @@
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { WValidationStrategy, WValidatorNode,WValidatorNodeType } from '../model';
-import { arrayDiffUnordered, arrayify, flatMap } from '../utils';
+import { arrayDiffUnordered, arrayify, flatMap, get } from '../utils';
 import { canAccessListOfValidators, canManageValidatorsIndividually } from './flags';
 import { createValidatorBundle, ValidatorBundle } from './internal-model';
 import { getLastFormNodeOrNothing, getLastValidatorBundleOrCreate } from './registry';
@@ -17,7 +17,7 @@ export function processValidators(ctx: WRenderContext, strategy?: WValidationStr
         return createValidatorBundle(createValidators(node));
     }
 
-    const lastNode = getLastFormNodeOrNothing(control)?.validator;
+    const lastNode = get(getLastFormNodeOrNothing(control), 'validator');
     const lastValidatorBundle = getLastValidatorBundleOrCreate(control);
 
     return applyValidators(

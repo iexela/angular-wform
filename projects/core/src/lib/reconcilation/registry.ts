@@ -2,7 +2,8 @@ import { AbstractControl } from '@angular/forms';
 import { WThisFormNode } from '../model';
 import { Maybe } from '../common';
 import { AsyncValidatorBundle, createAsyncValidatorBundle, createValidatorBundle, ValidatorBundle } from './internal-model';
-import { BehaviorSubject, map, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface VRenderResult {
     node: WThisFormNode;
@@ -25,7 +26,7 @@ const roots = new WeakMap<AbstractControl, VRoot>();
 export function registerRenderResult(control: AbstractControl, result: VRenderResult): void {
     const previousResult = results.get(control);
     results.set(control, { ...previousResult, ...result });
-    if (previousResult?.nodeSubject) {
+    if (previousResult && previousResult.nodeSubject) {
         previousResult.nodeSubject.next(result.node);
     }
 }

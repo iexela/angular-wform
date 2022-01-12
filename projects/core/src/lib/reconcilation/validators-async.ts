@@ -1,6 +1,6 @@
 import { AbstractControl, AsyncValidatorFn } from '@angular/forms';
 import { WAsyncValidatorNode, WAsyncValidatorNodeType, WValidationStrategy } from '../model';
-import { arrayDiffUnordered, arrayify, flatMap } from '../utils';
+import { arrayDiffUnordered, arrayify, flatMap, get } from '../utils';
 import { canAccessListOfValidators, canManageValidatorsIndividually } from './flags';
 import { AsyncValidatorBundle, createAsyncValidatorBundle } from './internal-model';
 import { getLastAsyncValidatorBundle, getLastFormNodeOrNothing } from './registry';
@@ -17,7 +17,7 @@ export function processAsyncValidators(ctx: WRenderContext, strategy?: WValidati
         return createAsyncValidatorBundle(createValidators(node));
     }
 
-    const lastNode = getLastFormNodeOrNothing(control)?.asyncValidator;
+    const lastNode = get(getLastFormNodeOrNothing(control), 'asyncValidator');
     const lastValidatorBundle = getLastAsyncValidatorBundle(control);
 
     return applyValidators(
