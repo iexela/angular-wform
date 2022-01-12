@@ -9,8 +9,8 @@ import { FormSampleArray, FormSampleControl, FormSampleGroup, FormSampleNative, 
 type AnyValidator = ValidatorFn | WValidatorNode | (ValidatorFn | WValidatorNode)[];
 type AnyAsyncValidator = AsyncValidatorFn | WAsyncValidatorNode | (AsyncValidatorFn | WAsyncValidatorNode)[];
 
-type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator' | 'asyncValidator' | 'disabled' | 'visible'>> & {
-    disabled?: SampleEnvironmentFlag;
+type MakeOptions<T> = Partial<Omit<T, 'type' | 'validator' | 'asyncValidator' | 'enabled' | 'visible'>> & {
+    enabled?: SampleEnvironmentFlag;
     visible?: SampleEnvironmentFlag;
     validator?: AnyValidator,
     asyncValidator?: AnyAsyncValidator,
@@ -71,7 +71,7 @@ export function sControl<T = any>(options?: FormSampleControlOptions<T>): FormSa
         type: FormSampleNodeType.Control,
         ...options,
         visible: resolveFlag(options?.visible, true),
-        disabled: resolveFlag(options?.disabled, false),
+        enabled: resolveFlag(options?.enabled, true),
         required: resolveFlag(options?.required, false),
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator),
@@ -87,7 +87,7 @@ export function sGroup(optionsOrChildren?: FormSampleGroupOptions | FormSampleGr
         type: FormSampleNodeType.Group,
         ...options,
         visible: resolveFlag(options?.visible, true),
-        disabled: resolveFlag(options?.disabled, false),
+        enabled: resolveFlag(options?.enabled, true),
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
         children,
@@ -103,7 +103,7 @@ export function sArray(optionsOrChildren: FormSampleArrayOptions | FormSampleArr
         type: FormSampleNodeType.Array,
         ...options,
         visible: resolveFlag(options?.visible, true),
-        disabled: resolveFlag(options?.disabled, false),
+        enabled: resolveFlag(options?.enabled, true),
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
         children,
@@ -122,7 +122,7 @@ export function sNative<T = any>(control?: AbstractControl, options?: FormSample
         control,
         ...options,
         visible: resolveFlag(options?.visible, true),
-        disabled: resolveFlag(options?.disabled, false),
+        enabled: resolveFlag(options?.enabled, true),
         validator: options && createValidator(options.validator) || undefined,
         asyncValidator: options && createAsyncValidator(options.asyncValidator) || undefined,
     };

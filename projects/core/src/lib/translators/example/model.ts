@@ -18,6 +18,8 @@ export interface SampleEnvironment {
     mode: FormSampleMode;
     location: Location;
     language: string;
+    permissions: string[];
+    role: string;
 }
 
 export type SampleEnvironmentPredicate = PredicateFn<SampleEnvironment>;
@@ -26,7 +28,7 @@ export interface FormSampleNodeBase {
     key?: any;
     type: FormSampleNodeType;
     visible: SampleEnvironmentPredicate;
-    disabled: SampleEnvironmentPredicate;
+    enabled: SampleEnvironmentPredicate;
     validator?: WValidatorNode;
     asyncValidator?: WAsyncValidatorNode;
     dirty?: boolean;

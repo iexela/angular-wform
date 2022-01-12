@@ -10,6 +10,8 @@ import { Location, FormSampleArray, FormSampleControl, FormSampleGroup, FormSamp
 interface Options {
     location: Location;
     language: string;
+    permissions: string[];
+    role: string;
 }
 
 export class VSampleTreeVisitor implements WFormTreeVisitor {
@@ -68,7 +70,7 @@ export class VSampleTreeVisitor implements WFormTreeVisitor {
     endGroup(node: FormSampleGroup, children: Record<string, WFormNode>): WFormNode {
         const group: WFormGroup = {
             type: WFormNodeType.Group,
-            disabled: this.resolveBoolean(node.disabled),
+            disabled: !this.resolveBoolean(node.enabled),
             ...pick(node, ['dirty', 'touched', 'updateOn', 'key', 'validator', 'asyncValidator']),
             data: {
                 visible: this.tryVisible(this.resolveBoolean(node.visible)),
@@ -87,7 +89,7 @@ export class VSampleTreeVisitor implements WFormTreeVisitor {
     endArray(node: FormSampleGroup, children: WFormNode[]): WFormNode {
         const array: WFormArray = {
             type: WFormNodeType.Array,
-            disabled: this.resolveBoolean(node.disabled),
+            disabled: !this.resolveBoolean(node.enabled),
             ...pick(node, ['dirty', 'touched', 'updateOn', 'key', 'validator', 'asyncValidator']),
             data: {
                 visible: this.tryVisible(this.resolveBoolean(node.visible)),
@@ -101,7 +103,7 @@ export class VSampleTreeVisitor implements WFormTreeVisitor {
         const visible = this.tryVisible(this.resolveBoolean(node.visible));
         return {
             type: WFormNodeType.Control,
-            disabled: !visible || this.resolveBoolean(node.disabled),
+            disabled: !visible || !this.resolveBoolean(node.enabled),
             ...pick(node, ['value', 'dirty', 'touched', 'updateOn', 'key', 'asyncValidator']),
             validator: createControlValidator(node.validator, this.resolveBoolean(node.required)),
             data: {
@@ -112,7 +114,7 @@ export class VSampleTreeVisitor implements WFormTreeVisitor {
     native(node: FormSampleNative<any>): WFormNative<any> {
         return {
             type: WFormNodeType.Native,
-            disabled: this.resolveBoolean(node.disabled),
+            disabled: !this.resolveBoolean(node.enabled),
             ...pick(node, ['value', 'dirty', 'touched', 'key', 'validator', 'asyncValidator']),
             data: {
                 visible: this.tryVisible(this.resolveBoolean(node.visible)),
@@ -131,6 +133,8 @@ export class VSampleTreeVisitor implements WFormTreeVisitor {
             mode: this._mode,
             location: this._options.location,
             language: this._options.language,
+            permissions: this._options.permissions,
+            role: this._options.role,
         });
     }
 

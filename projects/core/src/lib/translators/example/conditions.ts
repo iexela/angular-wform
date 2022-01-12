@@ -10,6 +10,10 @@ export function whenSome(...conditions: (SampleEnvironmentPredicate | boolean)[]
     return env => predicates.some(p => p(env));
 }
 
+export function whenNot(predicate: SampleEnvironmentPredicate): SampleEnvironmentPredicate {
+    return env => !predicate(env);
+}
+
 export function toCondition(bool: boolean | SampleEnvironmentPredicate): SampleEnvironmentPredicate {
     if (typeof bool === 'boolean') {
         return () => bool;
@@ -27,6 +31,14 @@ export function whenMode(targetMode: FormSampleMode): SampleEnvironmentPredicate
 
 export function whenLanguage(targetLanguage: string): SampleEnvironmentPredicate {
     return ({ language }) => language === targetLanguage;
+}
+
+export function whenInRole(targetRole: string): SampleEnvironmentPredicate {
+    return ({ role }) => role === targetRole;
+}
+
+export function whenHasPermission(permission: string): SampleEnvironmentPredicate {
+    return ({ permissions }) => permissions.includes(permission);
 }
 
 export const whenApac = whenLocation(Location.APAC);
