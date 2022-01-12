@@ -357,7 +357,7 @@ function getOrRestoreFormNodeWithKey(ctx: WRenderContext, name: Maybe<WPathEleme
                     Since wform works in strict mode, unmanaged controls are not allowed.
                     You need to do one of the following
                     * Get rid of adding unmanaged controls
-                    * If you really need to add controls manually, try to use vNative/vPortal
+                    * If you really need to add controls manually, try to use wNative/wPortal
                     * Switch off strict mode`);
     }
 
