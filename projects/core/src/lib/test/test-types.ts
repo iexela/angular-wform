@@ -15,7 +15,7 @@ export type IsNilable<T> = null extends T ? true : (undefined extends T ? true :
 export type IsEmpty<T> = Is<T, []>;
 
 export type First<T> = T extends [infer R, ...any[]] ? R : never;
-export type Tail<T> = T extends [any, ...(infer R)] ? R : never;
+// export type Tail<T> = T extends [any, ...(infer R)] ? R : never;
 
 const NO_FIELD = Symbol('no-field');
 type NoField = typeof NO_FIELD;

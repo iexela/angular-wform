@@ -73,22 +73,22 @@ describe('WFormArray', () => {
         });
     
         it('should render enabled control, by default', () => {
-            expect(renderArray(fibonaci5).control.disabled).toBeFalse();
+            expect(renderArray(fibonaci5).control.disabled).toBe(false);;
         });
     
         it('should render disabled control if "disabled" flag is set to "true"', () => {
-            expect(renderArray(fibonaci5, { disabled: true }).control.disabled).toBeTrue();
+            expect(renderArray(fibonaci5, { disabled: true }).control.disabled).toBe(true);;
         });
     
         it('should render enabled control if "disabled" flag is set to "false"', () => {
-            expect(renderArray(fibonaci5, { disabled: false }).control.disabled).toBeFalse();
+            expect(renderArray(fibonaci5, { disabled: false }).control.disabled).toBe(false);;
         });
 
         it('should enable all internal controls, by default', () => {
             const form = renderArray(fibonaci5, {}, withItem(fibonaci5));
 
-            expect(form.get('0').disabled).toBeFalse();
-            expect(form.get('1').disabled).toBeFalse();
+            expect(form.get('0').disabled).toBe(false);;
+            expect(form.get('1').disabled).toBe(false);;
         });
 
         it('should disable all internal controls if "disabled" is true', () => {
@@ -96,8 +96,8 @@ describe('WFormArray', () => {
                 disabled: true,
             }, withItem(fibonaci5));
 
-            expect(form.get('0').disabled).toBeTrue();
-            expect(form.get('1').disabled).toBeTrue();
+            expect(form.get('0').disabled).toBe(true);;
+            expect(form.get('1').disabled).toBe(true);;
         });
 
         it('should disable all internal controls if "disabled" is true (regardless internal controls disabled flag)', () => {
@@ -105,8 +105,8 @@ describe('WFormArray', () => {
                 disabled: true,
             }, withItem(fibonaci5, () => ({ disabled: false })));
 
-            expect(form.get('0').disabled).toBeTrue();
-            expect(form.get('1').disabled).toBeTrue();
+            expect(form.get('0').disabled).toBe(true);;
+            expect(form.get('1').disabled).toBe(true);;
         });
 
         it('should leave "disabled" state for internal controls as they desire when "disabled" is false', () => {
@@ -114,8 +114,8 @@ describe('WFormArray', () => {
                 disabled: false,
             }, withItem(fibonaci5, (_, i) => ({ disabled: (i % 2) === 0 })));
 
-            expect(form.get('0').disabled).toBeTrue();
-            expect(form.get('1').disabled).toBeFalse();
+            expect(form.get('0').disabled).toBe(true);;
+            expect(form.get('1').disabled).toBe(false);;
         });
 
         describe('validator', () => {
@@ -177,37 +177,37 @@ describe('WFormArray', () => {
         it('should not mark control as dirty if corresponding tiny flag is not set', () => {
             const form = renderArray(fibonaci5, {});
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should not mark control as dirty if corresponding tiny flag is set to false', () => {
             const form = renderArray(fibonaci5, { dirty: false });
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
             const form = renderArray(fibonaci5, { dirty: true });
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should not mark control as touched if corresponding tiny flag is not set', () => {
             const form = renderArray(fibonaci5, {});
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should not mark control as touched if corresponding tiny flag is set to false', () => {
             const form = renderArray(fibonaci5, { touched: false });
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should mark control as touched if corresponding tiny flag is set to true', () => {
             const form = renderArray(fibonaci5, { touched: true });
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should not render skipped control', () => {
@@ -340,7 +340,7 @@ describe('WFormArray', () => {
             form.setValue(fibonaci2_5);
     
             expect(form.value).toEqual(fibonaci2_5);
-            expect(tracker.changed).toBeTrue();
+            expect(tracker.changed).toBe(true);;
         });
     
         it('should not update control if value was not changed', () => {
@@ -350,7 +350,7 @@ describe('WFormArray', () => {
     
             form.setValue([ ...fibonaci5 ]);
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
     
         it('should not update control if unrelated field was added', () => {
@@ -360,7 +360,7 @@ describe('WFormArray', () => {
     
             form.setValue(fibonaci10);
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
     });
 
@@ -372,7 +372,7 @@ describe('WFormArray', () => {
     
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
 
         it('should do nothing if only value was changed', () => {
@@ -384,7 +384,7 @@ describe('WFormArray', () => {
 
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
 
         it('should do nothing if value of child control was changed', () => {
@@ -396,7 +396,7 @@ describe('WFormArray', () => {
 
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
     });
 
@@ -404,25 +404,25 @@ describe('WFormArray', () => {
         it('should switch state of control from enabled to disabled', () => {
             const form = renderDisabledConditionalGroup(fibonaci10, 20);
     
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
     
             form.setValue(fibonaci5);
     
-            expect(form.control.disabled).toBeTrue();
-            expect(form.get('0').disabled).toBeTrue();
-            expect(form.get('1').disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
+            expect(form.get('0').disabled).toBe(true);;
+            expect(form.get('1').disabled).toBe(true);;
         });
 
         it('should switch state of control from disabled to enabled', () => {
             const form = renderDisabledConditionalGroup(fibonaci5, 20);
     
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
     
             form.setValue(fibonaci10);
     
-            expect(form.control.disabled).toBeFalse();
-            expect(form.get('0').disabled).toBeFalse();
-            expect(form.get('1').disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
+            expect(form.get('0').disabled).toBe(false);;
+            expect(form.get('1').disabled).toBe(false);;
         });
 
         it('should do nothing if disabled flag was not modified in wform tree', () => {
@@ -434,7 +434,7 @@ describe('WFormArray', () => {
     
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
 
         it('should disable internal controls if "disabled" flag was switched to true (regardles of "disabled" flag of internal controls)', () => {
@@ -450,13 +450,13 @@ describe('WFormArray', () => {
                     withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
                 ]);
     
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
     
             form.setValue(fibonaci10);
     
-            expect(form.control.disabled).toBeTrue();
-            expect(form.get('0').disabled).toBeTrue();
-            expect(form.get('1').disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
+            expect(form.get('0').disabled).toBe(true);;
+            expect(form.get('1').disabled).toBe(true);;
         });
 
         it('should respect "disabled" state of internal controls if "disabled" flag was switched to false', () => {
@@ -472,13 +472,13 @@ describe('WFormArray', () => {
                     withItem(fibonaci2_10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
                 ]);
     
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
     
             form.setValue(fibonaci2_10);
     
-            expect(form.control.disabled).toBeFalse();
-            expect(form.get('0').disabled).toBeFalse();
-            expect(form.get('1').disabled).toBeTrue();
+            expect(form.control.disabled).toBe(false);;
+            expect(form.get('0').disabled).toBe(false);;
+            expect(form.get('1').disabled).toBe(true);;
         });
 
         it('should switch state of internal controls (if any) if "disabled" flag is set to false', () => {
@@ -494,13 +494,13 @@ describe('WFormArray', () => {
                     withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
                 ]);
     
-            expect(form.get('0').disabled).toBeTrue();
-            expect(form.get('1').disabled).toBeFalse();
+            expect(form.get('0').disabled).toBe(true);;
+            expect(form.get('1').disabled).toBe(false);;
     
             form.setValue(fibonaci2_10);
     
-            expect(form.get('0').disabled).toBeFalse();
-            expect(form.get('1').disabled).toBeTrue();
+            expect(form.get('0').disabled).toBe(false);;
+            expect(form.get('1').disabled).toBe(true);;
         });
 
         describe('validator', () => {
@@ -555,7 +555,7 @@ describe('WFormArray', () => {
         
                 form.update();
         
-                expect(tracker.changed).toBeFalse();
+                expect(tracker.changed).toBe(false);;
             });
         });
 
@@ -631,7 +631,7 @@ describe('WFormArray', () => {
 
                 tick();
         
-                expect(tracker.changed).toBeFalse();
+                expect(tracker.changed).toBe(false);;
             }));
         });
 
@@ -640,13 +640,13 @@ describe('WFormArray', () => {
 
             form.setValue(fibonaci2_10);
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
 
             form.control.markAsDirty();
 
             form.setValue(fibonaci2_10.concat([999]));
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should unset dirty flag if corresponding tiny flag is set to false', () => {
@@ -654,13 +654,13 @@ describe('WFormArray', () => {
 
             form.setValue(fibonaci2_10);
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
 
             form.control.markAsDirty();
 
             form.setValue(fibonaci2_10.concat(999));
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
@@ -668,13 +668,13 @@ describe('WFormArray', () => {
 
             form.setValue(fibonaci2_10);
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
 
             form.control.markAsPristine();
 
             form.setValue(fibonaci2_10.concat(999));
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should not update touched flag if corresponding tiny flag is not set', () => {
@@ -682,13 +682,13 @@ describe('WFormArray', () => {
 
             form.setValue(fibonaci2_10);
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
 
             form.control.markAsTouched();
 
             form.setValue(fibonaci2_10);
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should unset touched flag if corresponding tiny flag is set to false', () => {
@@ -696,13 +696,13 @@ describe('WFormArray', () => {
 
             form.setValue(fibonaci2_10);
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
 
             form.control.markAsTouched();
 
             form.setValue(fibonaci2_10.concat(999));
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
@@ -710,13 +710,13 @@ describe('WFormArray', () => {
 
             form.setValue(fibonaci2_10);
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
 
             form.control.markAsUntouched();
 
             form.setValue(fibonaci2_10.concat(999));
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
     
         it('should not recreate underlying FormControl', () => {
@@ -985,11 +985,11 @@ describe('WFormArray', () => {
 
             form.control.disable();
 
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
             
             form.update();
 
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
         });
 
         it('should restore disabled state', () => {
@@ -997,11 +997,11 @@ describe('WFormArray', () => {
 
             form.control.enable();
 
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
             
             form.update();
 
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
         });
 
         it('should do nothing if touched state is not specified', () => {
@@ -1009,19 +1009,19 @@ describe('WFormArray', () => {
 
             form.control.markAsTouched()
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
             
             form.update();
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
 
             form.control.markAsUntouched();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
 
             form.update();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should restore untouched state', () => {
@@ -1029,11 +1029,11 @@ describe('WFormArray', () => {
 
             form.control.markAsTouched()
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
             
             form.update();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should restore touched state', () => {
@@ -1041,11 +1041,11 @@ describe('WFormArray', () => {
 
             form.control.markAsUntouched();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
             
             form.update();
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should do nothing if dirty state is not specified', () => {
@@ -1053,19 +1053,19 @@ describe('WFormArray', () => {
 
             form.control.markAsDirty()
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
             
             form.update();
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
 
             form.control.markAsPristine();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
             
             form.update();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should restore pristine state', () => {
@@ -1073,11 +1073,11 @@ describe('WFormArray', () => {
 
             form.control.markAsDirty()
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
             
             form.update();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should restore dirty state', () => {
@@ -1085,11 +1085,11 @@ describe('WFormArray', () => {
 
             form.control.markAsPristine();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
             
             form.update();
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should remove not specified controls', () => {

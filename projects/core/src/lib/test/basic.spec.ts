@@ -240,7 +240,8 @@ describe('basic', () => {
 
             const { weight, ...elephantWithoutVolume } = elephant;
 
-            expect(subscriber).toHaveBeenCalledOnceWith(elephantWithoutVolume);
+            expect(subscriber).toHaveBeenCalledTimes(1);
+            expect(subscriber).toHaveBeenCalledWith(elephantWithoutVolume);
         });
 
         it('should not affect operations outside of reconcilation', () => {
@@ -557,7 +558,7 @@ describe('basic', () => {
     });
 
     describe('console messages', () => {
-        let warn: jasmine.Spy<typeof console['warn']>;
+        let warn: jasmine.Spy;
 
         beforeEach(() => {
             warn = spyOn(console, 'warn');

@@ -1,5 +1,5 @@
 import { AbstractControl } from '@angular/forms';
-import { ArrayItemOf, PredicateFn } from '../../common';
+import { ArrayItemOf, Omit, PredicateFn } from '../../common';
 import { WAsyncValidatorNode, WFormHooks, WValidatorNode } from '../../model';
 
 export enum FormSampleNodeType {
@@ -94,16 +94,18 @@ type CleanRemovedFields<T> = Omit<T, { [P in keyof T]: FieldToRemove extends T[P
 
 type FormSampleGroupValueOf<TValue extends object, TFormGroupChildren extends FormSampleGroupChildren> = CleanRemovedFields<{
     [P in keyof TValue]: P extends keyof TFormGroupChildren
-        ? ExtractFormSampleValue<TValue[P], TFormGroupChildren[P]>
+        ? ExtractFormSampleValue1<TValue[P], TFormGroupChildren[P]>
         : FieldToRemove;
 }>;
 
 type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends FormSampleArrayChildren> =
-    ExtractFormSampleValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+    ExtractFormSampleValue1<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
 
+// Starting from Typescript 3.7 recursive type references are possible
+// As we target Angular 7 (Typescript 3.2) we cannot use recursive type reference
 export type ExtractFormSampleValue<TValue, TNode> =
     TNode extends FormSampleOptions<infer ROptionsChild>
-        ? ExtractFormSampleValue<TValue, ROptionsChild>
+        ? ExtractFormSampleValue1<TValue, ROptionsChild>
         : (TNode extends FormSampleGroup<infer RGroupChildren>
             ? (TValue extends object ? FormSampleGroupValueOf<TValue, RGroupChildren> : never)
             : (TNode extends FormSampleArray<infer RArrayChildren>
@@ -112,13 +114,172 @@ export type ExtractFormSampleValue<TValue, TNode> =
                     ? TValue
                     : never)));
 
+type FormSampleGroupValueOf1<TValue extends object, TFormGroupChildren extends FormSampleGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormSampleValue2<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf1<TValue extends any[], TFormArrayChildren extends FormSampleArrayChildren> =
+    ExtractFormSampleValue2<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+
+export type ExtractFormSampleValue1<TValue, TNode> =
+    TNode extends FormSampleOptions<infer ROptionsChild>
+        ? ExtractFormSampleValue2<TValue, ROptionsChild>
+        : (TNode extends FormSampleGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormSampleGroupValueOf1<TValue, RGroupChildren> : never)
+            : (TNode extends FormSampleArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf1<TValue, RArrayChildren> : never)
+                : (TNode extends (FormSampleControl<any> | FormSampleNative<any> | FormSamplePortal | FormSamplePlaceholder)
+                    ? TValue
+                    : never)));
+
+type FormSampleGroupValueOf2<TValue extends object, TFormGroupChildren extends FormSampleGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormSampleValue3<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf2<TValue extends any[], TFormArrayChildren extends FormSampleArrayChildren> =
+    ExtractFormSampleValue3<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+
+export type ExtractFormSampleValue2<TValue, TNode> =
+    TNode extends FormSampleOptions<infer ROptionsChild>
+        ? ExtractFormSampleValue3<TValue, ROptionsChild>
+        : (TNode extends FormSampleGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormSampleGroupValueOf2<TValue, RGroupChildren> : never)
+            : (TNode extends FormSampleArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf2<TValue, RArrayChildren> : never)
+                : (TNode extends (FormSampleControl<any> | FormSampleNative<any> | FormSamplePortal | FormSamplePlaceholder)
+                    ? TValue
+                    : never)));
+
+type FormSampleGroupValueOf3<TValue extends object, TFormGroupChildren extends FormSampleGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormSampleValue4<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf3<TValue extends any[], TFormArrayChildren extends FormSampleArrayChildren> =
+    ExtractFormSampleValue4<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+
+export type ExtractFormSampleValue3<TValue, TNode> =
+    TNode extends FormSampleOptions<infer ROptionsChild>
+        ? ExtractFormSampleValue4<TValue, ROptionsChild>
+        : (TNode extends FormSampleGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormSampleGroupValueOf3<TValue, RGroupChildren> : never)
+            : (TNode extends FormSampleArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf3<TValue, RArrayChildren> : never)
+                : (TNode extends (FormSampleControl<any> | FormSampleNative<any> | FormSamplePortal | FormSamplePlaceholder)
+                    ? TValue
+                    : never)));
+
+type FormSampleGroupValueOf4<TValue extends object, TFormGroupChildren extends FormSampleGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormSampleValue5<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf4<TValue extends any[], TFormArrayChildren extends FormSampleArrayChildren> =
+    ExtractFormSampleValue5<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+
+export type ExtractFormSampleValue4<TValue, TNode> =
+    TNode extends FormSampleOptions<infer ROptionsChild>
+        ? ExtractFormSampleValue5<TValue, ROptionsChild>
+        : (TNode extends FormSampleGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormSampleGroupValueOf4<TValue, RGroupChildren> : never)
+            : (TNode extends FormSampleArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf4<TValue, RArrayChildren> : never)
+                : (TNode extends (FormSampleControl<any> | FormSampleNative<any> | FormSamplePortal | FormSamplePlaceholder)
+                    ? TValue
+                    : never)));
+
+type FormSampleGroupValueOf5<TValue extends object, TFormGroupChildren extends FormSampleGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormSampleValue6<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf5<TValue extends any[], TFormArrayChildren extends FormSampleArrayChildren> =
+    ExtractFormSampleValue6<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+
+export type ExtractFormSampleValue5<TValue, TNode> =
+    TNode extends FormSampleOptions<infer ROptionsChild>
+        ? ExtractFormSampleValue6<TValue, ROptionsChild>
+        : (TNode extends FormSampleGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormSampleGroupValueOf5<TValue, RGroupChildren> : never)
+            : (TNode extends FormSampleArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf5<TValue, RArrayChildren> : never)
+                : (TNode extends (FormSampleControl<any> | FormSampleNative<any> | FormSamplePortal | FormSamplePlaceholder)
+                    ? TValue
+                    : never)));
+
+export type ExtractFormSampleValue6<TValue, TNode> = any;
+
 export type GetFormSampleValue<TNode> =
     TNode extends FormSampleGroup<infer RGroupChildren>
-        ? { [P in keyof RGroupChildren]?: GetFormSampleValue<RGroupChildren[P]> }
+        ? { [P in keyof RGroupChildren]?: GetFormSampleValue1<RGroupChildren[P]> }
         : (TNode extends FormSampleArray<infer RArrayChildren>
-            ? GetFormSampleValue<ArrayItemOf<RArrayChildren>>[]
+            ? GetFormSampleValue1<ArrayItemOf<RArrayChildren>>[]
             : (TNode extends (FormSampleControl<infer R> | FormSampleNative<infer R>)
                 ? R
                 : (TNode extends (FormSamplePortal | FormSamplePlaceholder)
                     ? any
                     : never)));
+
+export type GetFormSampleValue1<TNode> =
+    TNode extends FormSampleGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormSampleValue2<RGroupChildren[P]> }
+        : (TNode extends FormSampleArray<infer RArrayChildren>
+            ? GetFormSampleValue2<ArrayItemOf<RArrayChildren>>[]
+            : (TNode extends (FormSampleControl<infer R> | FormSampleNative<infer R>)
+                ? R
+                : (TNode extends (FormSamplePortal | FormSamplePlaceholder)
+                    ? any
+                    : never)));
+
+export type GetFormSampleValue2<TNode> =
+    TNode extends FormSampleGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormSampleValue3<RGroupChildren[P]> }
+        : (TNode extends FormSampleArray<infer RArrayChildren>
+            ? GetFormSampleValue3<ArrayItemOf<RArrayChildren>>[]
+            : (TNode extends (FormSampleControl<infer R> | FormSampleNative<infer R>)
+                ? R
+                : (TNode extends (FormSamplePortal | FormSamplePlaceholder)
+                    ? any
+                    : never)));
+
+export type GetFormSampleValue3<TNode> =
+    TNode extends FormSampleGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormSampleValue4<RGroupChildren[P]> }
+        : (TNode extends FormSampleArray<infer RArrayChildren>
+            ? GetFormSampleValue4<ArrayItemOf<RArrayChildren>>[]
+            : (TNode extends (FormSampleControl<infer R> | FormSampleNative<infer R>)
+                ? R
+                : (TNode extends (FormSamplePortal | FormSamplePlaceholder)
+                    ? any
+                    : never)));
+                    
+export type GetFormSampleValue4<TNode> =
+    TNode extends FormSampleGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormSampleValue5<RGroupChildren[P]> }
+        : (TNode extends FormSampleArray<infer RArrayChildren>
+            ? GetFormSampleValue5<ArrayItemOf<RArrayChildren>>[]
+            : (TNode extends (FormSampleControl<infer R> | FormSampleNative<infer R>)
+                ? R
+                : (TNode extends (FormSamplePortal | FormSamplePlaceholder)
+                    ? any
+                    : never)));
+
+export type GetFormSampleValue5<TNode> =
+    TNode extends FormSampleGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormSampleValue6<RGroupChildren[P]> }
+        : (TNode extends FormSampleArray<infer RArrayChildren>
+            ? GetFormSampleValue6<ArrayItemOf<RArrayChildren>>[]
+            : (TNode extends (FormSampleControl<infer R> | FormSampleNative<infer R>)
+                ? R
+                : (TNode extends (FormSamplePortal | FormSamplePlaceholder)
+                    ? any
+                    : never)));
+
+export type GetFormSampleValue6<TNode> = any;

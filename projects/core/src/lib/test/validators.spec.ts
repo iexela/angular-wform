@@ -14,17 +14,17 @@ const testValidator4 = makeValidator(4);
 const testValidator5 = makeValidator(5);
 
 function trackValidators(control: AbstractControl) {
-    const add = spyOn(control, 'addValidators');
-    const remove = spyOn(control, 'removeValidators');
-    const clear = spyOn(control, 'clearValidators');
-    const set = spyOn(control, 'setValidators');
+    const spies = [spyOn(control, 'clearValidators'), spyOn(control, 'setValidators')];
+    if (control['addValidators']) {
+        spies.push(spyOn(control as any, 'addValidators'));
+    }
+    if (control['removeValidators']) {
+        spies.push(spyOn(control as any, 'removeValidators'));
+    }
 
     return {
         expectNotChanged: () => {
-            expect(add).not.toHaveBeenCalled();
-            expect(remove).not.toHaveBeenCalled();
-            expect(clear).not.toHaveBeenCalled();
-            expect(set).not.toHaveBeenCalled();
+            spies.forEach(spy => expect(spy).not.toHaveBeenCalled());
         },
     };
 }
@@ -69,7 +69,7 @@ describe('validators', () => {
                     validator: wValidator(testValidator1),
                 })).updateOnChange(false).build(5);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
         });
 
@@ -81,7 +81,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
 
             it('should remove validator', () => {
@@ -91,7 +91,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
             });
 
             it('should not change validator if validator function was not modified', () => {
@@ -103,7 +103,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 tracker.expectNotChanged();
             });
 
@@ -114,8 +114,8 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
             });
 
             it('should not change validator if locals are empty', () => {
@@ -127,7 +127,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 tracker.expectNotChanged();
             });
 
@@ -140,7 +140,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 tracker.expectNotChanged();
             });
 
@@ -151,8 +151,8 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
             });
 
             it('should assign another validator if node type of validator was changed', () => {
@@ -164,8 +164,8 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
             });
         });
     });
@@ -177,24 +177,25 @@ describe('validators', () => {
                     validator: wValidatorFactory(() => testValidator1)(),
                 })).updateOnChange(false).build(5);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
 
             it('should create validator with specified arguments and assign it to control', () => {
-                const factory = jasmine.createSpy<V3>().and.returnValue(testValidator1);
+                const factory = jasmine.createSpy().and.returnValue(testValidator1) as V3;
 
                 const form = wForm((n: number) => wControl({
                     validator: wValidatorFactory(factory)(1, 'abc', true),
                 })).updateOnChange(false).build(5);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith(1, 'abc', true);
             });
         });
 
         describe('reconcilation', () => {
             it('should assign new validator by creating it with specified arguments', () => {
-                const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
+                const factory = jasmine.createSpy().and.returnValues(testValidator1) as V3;
 
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? undefined : wValidatorFactory(factory)(1, 'abc', true),
@@ -202,12 +203,13 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith(1, 'abc', true);
             });
 
             it('should remove validator', () => {
-                const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
+                const factory = jasmine.createSpy().and.returnValues(testValidator1) as V3;
 
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidatorFactory(factory)(1, 'abc', true) : undefined,
@@ -215,11 +217,11 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
             });
 
             it('should not recreate validator if arguments are the same', () => {
-                const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
+                const factory = jasmine.createSpy().and.returnValues(testValidator1) as V3;
 
                 const form = wForm((n: number) => wControl({
                     validator: wValidatorFactory(factory)(1, 'abc', true),
@@ -229,13 +231,14 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith(1, 'abc', true);
                 tracker.expectNotChanged();
             });
 
             it('should recreate validator if arguments are different', () => {
-                const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1, testValidator2);
+                const factory = jasmine.createSpy().and.returnValues(testValidator1, testValidator2) as V3;
 
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidatorFactory(factory)(1, 'abc', true) : wValidatorFactory(factory)(1, 'abc', false),
@@ -243,14 +246,14 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(factory).toHaveBeenCalledWith(1, 'abc', false);
                 expect(factory).toHaveBeenCalledTimes(2);
             });
 
             it('should recreate validator if factory function was modified', () => {
-                const factory1 = jasmine.createSpy<V3>().and.returnValues(testValidator1);
-                const factory2 = jasmine.createSpy<V3>().and.returnValues(testValidator2);
+                const factory1 = jasmine.createSpy().and.returnValues(testValidator1) as V3;
+                const factory2 = jasmine.createSpy().and.returnValues(testValidator2) as V3;
 
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidatorFactory(factory1)(1, 'abc', false) : wValidatorFactory(factory2)(1, 'abc', false),
@@ -258,7 +261,7 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(factory1).toHaveBeenCalledWith(1, 'abc', false);
                 expect(factory2).toHaveBeenCalledWith(1, 'abc', false);
                 expect(factory1).toHaveBeenCalledTimes(1);
@@ -274,8 +277,8 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
             });
         });
     });
@@ -294,7 +297,8 @@ describe('validators', () => {
                     ),
                 })).updateOnChange(false).build(5);
                 
-                expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2, testValidator3]);
             });
 
             it('should assign to control all retrieved validators', () => {
@@ -305,9 +309,9 @@ describe('validators', () => {
                     validator: compoundValidator(testValidator1),
                 })).updateOnChange(false).build(5);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator5)).toBe(true);;
             });
         });
 
@@ -326,12 +330,13 @@ describe('validators', () => {
 
                 form.setValue(20);
                 
-                expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2, testValidator3]);
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator5)).toBe(true);;
             });
 
             it('should remove validators', () => {
@@ -344,9 +349,9 @@ describe('validators', () => {
 
                 form.setValue(20);
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator4)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator5)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator4)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator5)).toBe(false);;
             });
 
             it('should do not recreate validators if child validation nodes were not modified', () => {
@@ -370,9 +375,10 @@ describe('validators', () => {
 
                 form.setValue(20);
                 
-                expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
-                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2, testValidator3]);
+                expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator5)).toBe(true);;
             });
 
             it('should do not recreate validators if child validation nodes were not modified (local args)', () => {
@@ -394,9 +400,10 @@ describe('validators', () => {
 
                 form.setValue(20);
                 
-                expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2]);
-                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2]);
+                expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator5)).toBe(true);;
             });
 
             it('should recreate validators if at least on child validation node was modified', () => {
@@ -418,8 +425,8 @@ describe('validators', () => {
                 form.setValue(20);
                 
                 expect(factory).toHaveBeenCalledTimes(2);
-                expect(hasControlValidator(form.control, testValidator4)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator5)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator4)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator5)).toBe(true);;
             });
 
             it('should recreate validators if mixer function is different', () => {
@@ -436,12 +443,14 @@ describe('validators', () => {
 
                 form.setValue(20);
                 
-                expect(factory1).toHaveBeenCalledOnceWith([testValidator5]);
-                expect(factory2).toHaveBeenCalledOnceWith([testValidator5]);
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
+                expect(factory1).toHaveBeenCalledTimes(1);
+                expect(factory1).toHaveBeenCalledWith([testValidator5]);
+                expect(factory2).toHaveBeenCalledTimes(1);
+                expect(factory2).toHaveBeenCalledWith([testValidator5]);
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
             });
 
             it('should assign another validator if node type of validator was changed', () => {
@@ -456,9 +465,9 @@ describe('validators', () => {
 
                 form.setValue(20);
 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
             });
         });
     });
@@ -472,11 +481,11 @@ describe('validators', () => {
     
                 form.control.setValidators(null);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
     
                 form.update();
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
     
             it('should not remove other validators', () => {
@@ -486,13 +495,13 @@ describe('validators', () => {
     
                 form.control.setValidators([form.control.validator!, testValidator2]);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 
                 form.update();
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
             });
     
             it('should not remove other validators, if set of validators was modified', () => {
@@ -502,15 +511,15 @@ describe('validators', () => {
                 
                 form.control.setValidators([form.control.validator!, testValidator3]);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
             });
     
             it('should update set of validators, even if initial validator was composed', () => {
@@ -524,17 +533,17 @@ describe('validators', () => {
 
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator4]));
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
             });
         });
 
@@ -548,11 +557,11 @@ describe('validators', () => {
     
                 form.control.setValidators(null);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
     
                 form.update();
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
     
             it('should remove other validators', () => {
@@ -564,13 +573,13 @@ describe('validators', () => {
     
                 form.control.setValidators([form.control.validator!, testValidator2]);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 
                 form.update();
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
             });
     
             it('should remove other validators, if set of validators was modified', () => {
@@ -582,15 +591,15 @@ describe('validators', () => {
     
                 form.control.setValidators([form.control.validator!, testValidator3]);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator3)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(false);;
             });
     
             it('should replace set of validators, even if initial validator was composed', () => {
@@ -602,15 +611,15 @@ describe('validators', () => {
     
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator3)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(false);;
             });
         });
 
@@ -635,10 +644,10 @@ describe('validators', () => {
                 
                 form.update();
                 
-                expect(hasControlValidator(volumeControl, testValidator1)).toBeTrue();
-                expect(hasControlValidator(volumeControl, testValidator2)).toBeFalse();
-                expect(hasControlValidator(weightControl, testValidator3)).toBeTrue();
-                expect(hasControlValidator(weightControl, testValidator4)).toBeTrue();
+                expect(hasControlValidator(volumeControl, testValidator1)).toBe(true);;
+                expect(hasControlValidator(volumeControl, testValidator2)).toBe(false);;
+                expect(hasControlValidator(weightControl, testValidator3)).toBe(true);;
+                expect(hasControlValidator(weightControl, testValidator4)).toBe(true);;
             });
 
             it('should not affect nested validators', () => {
@@ -661,10 +670,10 @@ describe('validators', () => {
                 
                 form.update();
                 
-                expect(hasControlValidator(rootControl, testValidator1)).toBeTrue();
-                expect(hasControlValidator(rootControl, testValidator2)).toBeFalse();
-                expect(hasControlValidator(weightControl, testValidator3)).toBeTrue();
-                expect(hasControlValidator(weightControl, testValidator4)).toBeTrue();
+                expect(hasControlValidator(rootControl, testValidator1)).toBe(true);;
+                expect(hasControlValidator(rootControl, testValidator2)).toBe(false);;
+                expect(hasControlValidator(weightControl, testValidator3)).toBe(true);;
+                expect(hasControlValidator(weightControl, testValidator4)).toBe(true);;
             });
         });
 
@@ -679,11 +688,11 @@ describe('validators', () => {
     
                 form.control.setValidators(null);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
     
                 form.update();
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
     
             it('should not remove other validators', () => {
@@ -696,13 +705,13 @@ describe('validators', () => {
     
                 form.control.setValidators([form.control.validator!, testValidator2]);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 
                 form.update();
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
             });
     
             it('should not remove other validators, if set of validators was modified', () => {
@@ -715,15 +724,15 @@ describe('validators', () => {
                 
                 form.control.setValidators([form.control.validator!, testValidator3]);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
             });
     
             it('should update set of validators, even if initial validator was composed', () => {
@@ -740,17 +749,17 @@ describe('validators', () => {
 
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator4]));
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator4)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
             });
         });
 
@@ -765,11 +774,11 @@ describe('validators', () => {
     
                 form.control.setValidators(null);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
     
                 form.update();
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
     
             it('should remove other validators', () => {
@@ -782,13 +791,13 @@ describe('validators', () => {
     
                 form.control.setValidators([form.control.validator!, testValidator2]);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 
                 form.update();
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
             });
     
             it('should remove other validators, if set of validators was modified', () => {
@@ -801,15 +810,15 @@ describe('validators', () => {
     
                 form.control.setValidators([form.control.validator!, testValidator3]);
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator3)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(false);;
             });
     
             it('should replace set of validators, even if initial validator was composed', () => {
@@ -822,15 +831,15 @@ describe('validators', () => {
     
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
     
-                expect(hasControlValidator(form.control, testValidator1)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator2)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator3)).toBeTrue();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(hasControlValidator(form.control, testValidator1)).toBeFalse();
-                expect(hasControlValidator(form.control, testValidator2)).toBeTrue();
-                expect(hasControlValidator(form.control, testValidator3)).toBeFalse();
+                expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
+                expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
+                expect(hasControlValidator(form.control, testValidator3)).toBe(false);;
             });
         });
     });

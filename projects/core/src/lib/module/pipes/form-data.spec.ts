@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, WrappedValue } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl } from '@angular/forms';
 import { wControl, wGroup } from '../../basic';
@@ -13,10 +13,17 @@ class TestComponent {
 
 }
 
+function unwrap<T>(value: T | WrappedValue): T {
+    return WrappedValue.unwrap(value);
+}
+
 describe('formData', () => {
     let changeDetectorRef: ChangeDetectorRef;
 
     beforeEach(() => {
+        TestBed.configureTestingModule({
+            declarations: [TestComponent],
+        });
         const fixture = TestBed.createComponent(TestComponent);
         changeDetectorRef = fixture.debugElement.injector.get(ChangeDetectorRef);
     });
@@ -37,7 +44,7 @@ describe('formData', () => {
         const form = wForm(() => wControl({ data: { value: 12 }}))
             .updateOnChange(false)
             .build(1);
-        expect(pipe.transform(form.control)).toEqual({ value: 12 });
+        expect(unwrap(pipe.transform(form.control))).toEqual({ value: 12 });
     });
 
     it('should return last wnode data', () => {
@@ -49,10 +56,10 @@ describe('formData', () => {
         pipe.transform(form.control);
 
         form.setValue(7);
-        expect(pipe.transform(form.control)).toEqual({ value: 49 });
+        expect(unwrap(pipe.transform(form.control))).toEqual({ value: 49 });
 
         form.setValue(9);
-        expect(pipe.transform(form.control)).toEqual({ value: 81 });
+        expect(unwrap(pipe.transform(form.control))).toEqual({ value: 81 });
     });
 
     it('should return wnode data of new control', () => {
@@ -64,7 +71,7 @@ describe('formData', () => {
 
         pipe.transform(form.get('a'));
 
-        expect(pipe.transform(form.get('b'))).toEqual({ value: 17 });
+        expect(unwrap(pipe.transform(form.get('b')))).toEqual({ value: 17 });
     });
 
     it('should return last wnode data of new control', () => {
@@ -77,9 +84,9 @@ describe('formData', () => {
         pipe.transform(form.get('a'));
 
         form.setValue({ a: 3, b: 4 });
-        expect(pipe.transform(form.get('b'))).toEqual({ value: 64 });
+        expect(unwrap(pipe.transform(form.get('b')))).toEqual({ value: 64 });
 
         form.setValue({ a: 5, b: 6 });
-        expect(pipe.transform(form.get('b'))).toEqual({ value: 216 });
+        expect(unwrap(pipe.transform(form.get('b')))).toEqual({ value: 216 });
     });
 });

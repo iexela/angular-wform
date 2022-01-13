@@ -1,9 +1,8 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { AbstractControl, AsyncValidatorFn, FormControl, Validators } from '@angular/forms';
-import { WValidationStrategy } from 'angular-wform';
 import { wControl } from '../basic';
 import { wForm } from '../builder';
-import { WAsyncValidatorNode } from '../model';
+import { WAsyncValidatorNode, WValidationStrategy } from '../model';
 import { wCompoundValidatorAsync, wValidatorAsync, wValidatorFactoryAsync, WValidators } from '../validators';
 import { evenAsync, moreThan10Async } from './test-mocks';
 import { toPromise } from './test-utils';
@@ -17,17 +16,17 @@ const testValidator4 = makeAsyncValidator(4);
 const testValidator5 = makeAsyncValidator(5);
 
 function trackAsyncValidators(control: AbstractControl) {
-    const add = spyOn(control, 'addValidators');
-    const remove = spyOn(control, 'removeValidators');
-    const clear = spyOn(control, 'clearValidators');
-    const set = spyOn(control, 'setAsyncValidators');
+    const spies = [spyOn(control, 'clearAsyncValidators'), spyOn(control, 'setAsyncValidators')];
+    if (control['addAsyncValidators']) {
+        spies.push(spyOn(control as any, 'addAsyncValidators'));
+    }
+    if (control['removeAsyncValidators']) {
+        spies.push(spyOn(control as any, 'removeAsyncValidators'));
+    }
 
     return {
         expectNotChanged: () => {
-            expect(add).not.toHaveBeenCalled();
-            expect(remove).not.toHaveBeenCalled();
-            expect(clear).not.toHaveBeenCalled();
-            expect(set).not.toHaveBeenCalled();
+            spies.forEach(spy => expect(spy).not.toHaveBeenCalled());
         },
     };
 }
@@ -72,7 +71,7 @@ describe('async validators', () => {
                     asyncValidator: wValidatorAsync(testValidator1),
                 })).updateOnChange(false).build(5);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
             });
         });
 
@@ -84,7 +83,7 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
             });
 
             it('should remove validator', async () => {
@@ -94,7 +93,7 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
             });
 
             it('should not change validator if validator function was not modified', async () => {
@@ -106,7 +105,7 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
                 tracker.expectNotChanged();
             });
 
@@ -117,8 +116,8 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
             });
 
             it('should not change validator if locals are empty', async () => {
@@ -130,7 +129,7 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
                 tracker.expectNotChanged();
             });
 
@@ -143,7 +142,7 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
                 tracker.expectNotChanged();
             });
 
@@ -154,8 +153,8 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
             });
 
             it('should assign another validator if node type of validator was changed', async () => {
@@ -167,8 +166,8 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
             });
         });
     });
@@ -180,24 +179,25 @@ describe('async validators', () => {
                     asyncValidator: wValidatorFactoryAsync(() => testValidator1)(),
                 })).updateOnChange(false).build(5);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
             });
 
             it('should create validator with specified arguments and assign it to control', async () => {
-                const factory = jasmine.createSpy<V3>().and.returnValue(testValidator1);
+                const factory = jasmine.createSpy().and.returnValue(testValidator1) as V3;
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorFactoryAsync(factory)(1, 'abc', true),
                 })).updateOnChange(false).build(5);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith(1, 'abc', true);
             });
         });
 
         describe('reconcilation', () => {
             it('should assign new validator by creating it with specified arguments', async () => {
-                const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
+                const factory = jasmine.createSpy().and.returnValues(testValidator1) as V3;
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? undefined : wValidatorFactoryAsync(factory)(1, 'abc', true),
@@ -205,12 +205,13 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith(1, 'abc', true);
             });
 
             it('should remove validator', async () => {
-                const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
+                const factory = jasmine.createSpy().and.returnValues(testValidator1) as V3;
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorFactoryAsync(factory)(1, 'abc', true) : undefined,
@@ -218,11 +219,11 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
             });
 
             it('should not recreate validator if arguments are the same', async () => {
-                const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1);
+                const factory = jasmine.createSpy().and.returnValues(testValidator1) as V3;
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: wValidatorFactoryAsync(factory)(1, 'abc', true),
@@ -232,13 +233,14 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(factory).toHaveBeenCalledOnceWith(1, 'abc', true);
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith(1, 'abc', true);
                 tracker.expectNotChanged();
             });
 
             it('should recreate validator if arguments are different', async () => {
-                const factory = jasmine.createSpy<V3>().and.returnValues(testValidator1, testValidator2);
+                 const factory = jasmine.createSpy().and.returnValues(testValidator1, testValidator2) as V3;
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorFactoryAsync(factory)(1, 'abc', true) : wValidatorFactoryAsync(factory)(1, 'abc', false),
@@ -246,14 +248,14 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
                 expect(factory).toHaveBeenCalledWith(1, 'abc', false);
                 expect(factory).toHaveBeenCalledTimes(2);
             });
 
             it('should recreate validator if factory function was modified', async () => {
-                const factory1 = jasmine.createSpy<V3>().and.returnValues(testValidator1);
-                const factory2 = jasmine.createSpy<V3>().and.returnValues(testValidator2);
+                const factory1 = jasmine.createSpy().and.returnValues(testValidator1) as V3;
+                const factory2 = jasmine.createSpy().and.returnValues(testValidator2) as V3;
 
                 const form = wForm((n: number) => wControl({
                     asyncValidator: n < 10 ? wValidatorFactoryAsync(factory1)(1, 'abc', false) : wValidatorFactoryAsync(factory2)(1, 'abc', false),
@@ -261,7 +263,7 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
                 expect(factory1).toHaveBeenCalledWith(1, 'abc', false);
                 expect(factory2).toHaveBeenCalledWith(1, 'abc', false);
                 expect(factory1).toHaveBeenCalledTimes(1);
@@ -277,8 +279,8 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
             });
         });
     });
@@ -297,7 +299,8 @@ describe('async validators', () => {
                     ),
                 })).updateOnChange(false).build(5);
                 
-                expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2, testValidator3]);
             });
 
             it('should assign to control all retrieved validators', async () => {
@@ -308,9 +311,9 @@ describe('async validators', () => {
                     asyncValidator: compoundValidator(testValidator1),
                 })).updateOnChange(false).build(5);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBe(true);;
             });
         });
 
@@ -329,12 +332,13 @@ describe('async validators', () => {
 
                 form.setValue(20);
                 
-                expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBeTrue();
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2, testValidator3]);
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBe(true);;
             });
 
             it('should remove validators', async () => {
@@ -347,9 +351,9 @@ describe('async validators', () => {
 
                 form.setValue(20);
                 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBeFalse();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBe(false);;
             });
 
             it('should do not recreate validators if child validation nodes were not modified', async () => {
@@ -373,9 +377,10 @@ describe('async validators', () => {
 
                 form.setValue(20);
                 
-                expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2, testValidator3]);
-                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBeTrue();
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2, testValidator3]);
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBe(true);;
             });
 
             it('should do not recreate validators if child validation nodes were not modified (local args)', async () => {
@@ -397,9 +402,10 @@ describe('async validators', () => {
 
                 form.setValue(20);
                 
-                expect(factory).toHaveBeenCalledOnceWith([testValidator1, testValidator2]);
-                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBeTrue();
+                expect(factory).toHaveBeenCalledTimes(1);
+                expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2]);
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBe(true);;
             });
 
             it('should recreate validators if at least on child validation node was modified', async () => {
@@ -421,8 +427,8 @@ describe('async validators', () => {
                 form.setValue(20);
                 
                 expect(factory).toHaveBeenCalledTimes(2);
-                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator5)).toBe(true);;
             });
 
             it('should recreate validators if mixer function is different', async () => {
@@ -439,12 +445,14 @@ describe('async validators', () => {
 
                 form.setValue(20);
                 
-                expect(factory1).toHaveBeenCalledOnceWith([testValidator5]);
-                expect(factory2).toHaveBeenCalledOnceWith([testValidator5]);
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
+                expect(factory1).toHaveBeenCalledTimes(1);
+                expect(factory1).toHaveBeenCalledWith([testValidator5]);
+                expect(factory2).toHaveBeenCalledTimes(1);
+                expect(factory2).toHaveBeenCalledWith([testValidator5]);
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBe(true);;
             });
 
             it('should assign another validator if node type of validator was changed', async () => {
@@ -459,9 +467,9 @@ describe('async validators', () => {
 
                 form.setValue(20);
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(true);;
             });
         });
     });
@@ -475,11 +483,11 @@ describe('async validators', () => {
     
                 form.control.setAsyncValidators(null);
     
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
     
                 form.update();
     
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
             });
     
             it('should not remove other validators', async () => {
@@ -489,13 +497,13 @@ describe('async validators', () => {
     
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator2]);
     
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
                 
                 form.update();
                 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
             });
     
             it('should not remove other validators, if set of validators was modified', async () => {
@@ -505,15 +513,15 @@ describe('async validators', () => {
                 
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator3]);
     
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(true);;
             });
     
             it('should update set of validators, even if initial validator was composed', async () => {
@@ -527,17 +535,17 @@ describe('async validators', () => {
 
                 form.control.setAsyncValidators(Validators.composeAsync([form.control.asyncValidator!, testValidator4]));
 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator4)).toBe(true);;
             });
         });
 
@@ -551,11 +559,11 @@ describe('async validators', () => {
     
                 form.control.setAsyncValidators(null);
     
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
     
                 form.update();
     
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
             });
     
             it('should remove other validators', async () => {
@@ -567,13 +575,13 @@ describe('async validators', () => {
     
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator2]);
     
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
                 
                 form.update();
                 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeFalse();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(false);;
             });
     
             it('should remove other validators, if set of validators was modified', async () => {
@@ -585,15 +593,15 @@ describe('async validators', () => {
     
                 form.control.setAsyncValidators([form.control.asyncValidator!, testValidator3]);
     
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeFalse();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(false);;
             });
     
             it('should replace set of validators, even if initial validator was composed', async () => {
@@ -605,15 +613,15 @@ describe('async validators', () => {
     
                 form.control.setAsyncValidators(Validators.composeAsync([form.control.asyncValidator!, testValidator3]));
     
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeTrue();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(true);;
                 
                 form.setValue(20);
                 
-                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBeFalse();
-                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBeTrue();
-                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBeFalse();
+                expect(await hasControlAsyncValidator(form.control, testValidator1)).toBe(false);;
+                expect(await hasControlAsyncValidator(form.control, testValidator2)).toBe(true);;
+                expect(await hasControlAsyncValidator(form.control, testValidator3)).toBe(false);;
             });
         });
     });

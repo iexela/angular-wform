@@ -1,5 +1,4 @@
-import { wArray } from 'angular-wform';
-import { wControl, wGroup, wValue } from '../basic';
+import { wArray, wControl, wGroup, wValue } from '../basic';
 import { wForm } from '../builder';
 import { Is } from '../common';
 import { GetField, HasField, must } from './test-types';

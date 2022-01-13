@@ -164,13 +164,15 @@ type CleanRemovedFields<T> = Omit<T, { [P in keyof T]: FieldToRemove extends T[P
 
 type FormGroupValueOf<TValue extends object, TFormGroupChildren extends WFormGroupChildren> = CleanRemovedFields<{
     [P in keyof TValue]: P extends keyof TFormGroupChildren
-        ? ExtractFormValue<TValue[P], TFormGroupChildren[P]>
+        ? ExtractFormValue1<TValue[P], TFormGroupChildren[P]>
         : FieldToRemove;
 }>;
 
 type FormArrayValueOf<TValue extends any[], TFormArrayChildren extends WFormArrayChildren> =
-    ExtractFormValue<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+    ExtractFormValue1<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
 
+// Starting from Typescript 3.7 recursive type references are possible
+// As we target Angular 7 (Typescript 3.2) we cannot use recursive type reference
 export type ExtractFormValue<TValue, TFormNode> =
     Is<{}, TValue> extends true
         ? GetFormValue<TFormNode>
@@ -184,13 +186,183 @@ export type ExtractFormValue<TValue, TFormNode> =
                         ? any
                         : never))));
 
+
+type FormGroupValueOf1<TValue extends object, TFormGroupChildren extends WFormGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormValue2<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf1<TValue extends any[], TFormArrayChildren extends WFormArrayChildren> =
+    ExtractFormValue2<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+
+export type ExtractFormValue1<TValue, TFormNode> =
+    Is<{}, TValue> extends true
+        ? GetFormValue<TFormNode>
+        : (TFormNode extends WFormGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormGroupValueOf1<TValue, RGroupChildren> : never)
+            : (TFormNode extends WFormArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf1<TValue, RArrayChildren> : never)
+                : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                    ? TValue | (any extends R ? never : R)
+                    : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                        ? any
+                        : never))));
+
+type FormGroupValueOf2<TValue extends object, TFormGroupChildren extends WFormGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormValue3<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf2<TValue extends any[], TFormArrayChildren extends WFormArrayChildren> =
+    ExtractFormValue3<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+                            
+export type ExtractFormValue2<TValue, TFormNode> =
+    Is<{}, TValue> extends true
+        ? GetFormValue<TFormNode>
+        : (TFormNode extends WFormGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormGroupValueOf2<TValue, RGroupChildren> : never)
+            : (TFormNode extends WFormArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf2<TValue, RArrayChildren> : never)
+                : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                    ? TValue | (any extends R ? never : R)
+                    : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                        ? any
+                        : never))));
+
+type FormGroupValueOf3<TValue extends object, TFormGroupChildren extends WFormGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormValue4<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf3<TValue extends any[], TFormArrayChildren extends WFormArrayChildren> =
+    ExtractFormValue4<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+                            
+export type ExtractFormValue3<TValue, TFormNode> =
+    Is<{}, TValue> extends true
+        ? GetFormValue<TFormNode>
+        : (TFormNode extends WFormGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormGroupValueOf3<TValue, RGroupChildren> : never)
+            : (TFormNode extends WFormArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf3<TValue, RArrayChildren> : never)
+                : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                    ? TValue | (any extends R ? never : R)
+                    : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                        ? any
+                        : never))));
+
+type FormGroupValueOf4<TValue extends object, TFormGroupChildren extends WFormGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormValue5<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf4<TValue extends any[], TFormArrayChildren extends WFormArrayChildren> =
+    ExtractFormValue5<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+                            
+export type ExtractFormValue4<TValue, TFormNode> =
+    Is<{}, TValue> extends true
+        ? GetFormValue<TFormNode>
+        : (TFormNode extends WFormGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormGroupValueOf4<TValue, RGroupChildren> : never)
+            : (TFormNode extends WFormArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf4<TValue, RArrayChildren> : never)
+                : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                    ? TValue | (any extends R ? never : R)
+                    : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                        ? any
+                        : never))));
+
+type FormGroupValueOf5<TValue extends object, TFormGroupChildren extends WFormGroupChildren> = CleanRemovedFields<{
+    [P in keyof TValue]: P extends keyof TFormGroupChildren
+        ? ExtractFormValue6<TValue[P], TFormGroupChildren[P]>
+        : FieldToRemove;
+}>;
+
+type FormArrayValueOf5<TValue extends any[], TFormArrayChildren extends WFormArrayChildren> =
+    ExtractFormValue6<ArrayItemOf<TValue>, ArrayItemOf<TFormArrayChildren>>[];
+                            
+export type ExtractFormValue5<TValue, TFormNode> =
+    Is<{}, TValue> extends true
+        ? GetFormValue<TFormNode>
+        : (TFormNode extends WFormGroup<infer RGroupChildren>
+            ? (TValue extends object ? FormGroupValueOf5<TValue, RGroupChildren> : never)
+            : (TFormNode extends WFormArray<infer RArrayChildren>
+                ? (TValue extends any[] ? FormArrayValueOf5<TValue, RArrayChildren> : never)
+                : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                    ? TValue | (any extends R ? never : R)
+                    : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                        ? any
+                        : never))));
+
+export type ExtractFormValue6<TValue, TFormNode> = any;
+
 export type GetFormValue<TFormNode> =
     TFormNode extends WFormGroup<infer RGroupChildren>
-        ? { [P in keyof RGroupChildren]?: GetFormValue<RGroupChildren[P]> }
+        ? { [P in keyof RGroupChildren]?: GetFormValue1<RGroupChildren[P]> }
         : (TFormNode extends WFormArray<infer RArrayChildren>
-            ? GetFormValue<ArrayItemOf<RArrayChildren>>[]
+            ? GetFormValue1<ArrayItemOf<RArrayChildren>>[]
             : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
                 ? R
                 : (TFormNode extends (WFormPortal | WFormPlaceholder)
                     ? any
                     : never)));
+
+export type GetFormValue1<TFormNode> =
+    TFormNode extends WFormGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormValue2<RGroupChildren[P]> }
+        : (TFormNode extends WFormArray<infer RArrayChildren>
+            ? GetFormValue2<ArrayItemOf<RArrayChildren>>[]
+            : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                ? R
+                : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                    ? any
+                    : never)));
+
+export type GetFormValue2<TFormNode> =
+    TFormNode extends WFormGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormValue3<RGroupChildren[P]> }
+        : (TFormNode extends WFormArray<infer RArrayChildren>
+            ? GetFormValue3<ArrayItemOf<RArrayChildren>>[]
+            : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                ? R
+                : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                    ? any
+                    : never)));
+
+export type GetFormValue3<TFormNode> =
+    TFormNode extends WFormGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormValue4<RGroupChildren[P]> }
+        : (TFormNode extends WFormArray<infer RArrayChildren>
+            ? GetFormValue4<ArrayItemOf<RArrayChildren>>[]
+            : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                ? R
+                : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                    ? any
+                    : never)));
+
+export type GetFormValue4<TFormNode> =
+    TFormNode extends WFormGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormValue5<RGroupChildren[P]> }
+        : (TFormNode extends WFormArray<infer RArrayChildren>
+            ? GetFormValue5<ArrayItemOf<RArrayChildren>>[]
+            : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                ? R
+                : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                    ? any
+                    : never)));
+
+export type GetFormValue5<TFormNode> =
+    TFormNode extends WFormGroup<infer RGroupChildren>
+        ? { [P in keyof RGroupChildren]?: GetFormValue6<RGroupChildren[P]> }
+        : (TFormNode extends WFormArray<infer RArrayChildren>
+            ? GetFormValue6<ArrayItemOf<RArrayChildren>>[]
+            : (TFormNode extends (WFormControl<infer R> | WFormNative<infer R>)
+                ? R
+                : (TFormNode extends (WFormPortal | WFormPlaceholder)
+                    ? any
+                    : never)));
+
+export type GetFormValue6<TFormNode> = any;

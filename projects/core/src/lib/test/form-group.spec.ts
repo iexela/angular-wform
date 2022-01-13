@@ -58,29 +58,29 @@ describe('WFormGroup', () => {
         });
     
         it('should render enabled control, by default', () => {
-            expect(renderGroup(parcel).control.disabled).toBeFalse();
+            expect(renderGroup(parcel).control.disabled).toBe(false);;
         });
     
         it('should render disabled control if "disabled" flag is set to "true"', () => {
-            expect(renderGroup(parcel, { disabled: true }).control.disabled).toBeTrue();
+            expect(renderGroup(parcel, { disabled: true }).control.disabled).toBe(true);;
         });
     
         it('should render enabled control if "disabled" flag is set to "false"', () => {
-            expect(renderGroup(parcel, { disabled: false }).control.disabled).toBeFalse();
+            expect(renderGroup(parcel, { disabled: false }).control.disabled).toBe(false);;
         });
 
         it('should enable all internal controls, by default', () => {
             const form = renderGroup(parcel, {}, withWeightAndVolume(parcel));
 
-            expect(form.get('weight').disabled).toBeFalse();
-            expect(form.get('volume').disabled).toBeFalse();
+            expect(form.get('weight').disabled).toBe(false);;
+            expect(form.get('volume').disabled).toBe(false);;
         });
 
         it('should disable all internal controls if "disabled" is true', () => {
             const form = renderGroup(parcel, { disabled: true }, withWeightAndVolume(parcel));
 
-            expect(form.get('weight').disabled).toBeTrue();
-            expect(form.get('volume').disabled).toBeTrue();
+            expect(form.get('weight').disabled).toBe(true);;
+            expect(form.get('volume').disabled).toBe(true);;
         });
 
         it('should disable all internal controls if "disabled" is true (regardless internal controls disabled flag)', () => {
@@ -90,8 +90,8 @@ describe('WFormGroup', () => {
                 withWeightAndVolume(parcel, { disabled: false }, { disabled: false }),
             );
 
-            expect(form.get('weight').disabled).toBeTrue();
-            expect(form.get('volume').disabled).toBeTrue();
+            expect(form.get('weight').disabled).toBe(true);;
+            expect(form.get('volume').disabled).toBe(true);;
         });
 
         it('should leave "disabled" state for internal controls as they desire when "disabled" is false', () => {
@@ -101,8 +101,8 @@ describe('WFormGroup', () => {
                 withWeightAndVolume(parcel, { disabled: true }, { disabled: false }),
             );
 
-            expect(form.get('weight').disabled).toBeTrue();
-            expect(form.get('volume').disabled).toBeFalse();
+            expect(form.get('weight').disabled).toBe(true);;
+            expect(form.get('volume').disabled).toBe(false);;
         });
 
         describe('validator', () => {
@@ -172,37 +172,37 @@ describe('WFormGroup', () => {
         it('should not mark control as dirty if corresponding tiny flag is not set', () => {
             const form = renderGroup(parcel, {});
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should not mark control as dirty if corresponding tiny flag is set to false', () => {
             const form = renderGroup(parcel, { dirty: false });
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
             const form = renderGroup(parcel, { dirty: true });
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should not mark control as touched if corresponding tiny flag is not set', () => {
             const form = renderGroup(parcel, {});
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should not mark control as touched if corresponding tiny flag is set to false', () => {
             const form = renderGroup(parcel, { touched: false });
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should mark control as touched if corresponding tiny flag is set to true', () => {
             const form = renderGroup(parcel, { touched: true });
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should not render skipped control', () => {
@@ -326,7 +326,7 @@ describe('WFormGroup', () => {
             form.setValue(meButOlder);
     
             expect(form.value).toEqual(meButOlder);
-            expect(tracker.changed).toBeTrue();
+            expect(tracker.changed).toBe(true);;
         });
     
         it('should not update control if value was not changed', () => {
@@ -336,7 +336,7 @@ describe('WFormGroup', () => {
     
             form.setValue({ ...parcel });
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
     
         it('should not update control if unrelated field was added', () => {
@@ -346,7 +346,7 @@ describe('WFormGroup', () => {
     
             form.setValue(fragileParcel);
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
     });
 
@@ -358,7 +358,7 @@ describe('WFormGroup', () => {
     
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
 
         it('should do nothing if only value was changed', () => {
@@ -370,7 +370,7 @@ describe('WFormGroup', () => {
 
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
 
         it('should do nothing if value of child control was changed', () => {
@@ -382,7 +382,7 @@ describe('WFormGroup', () => {
 
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
     });
 
@@ -390,25 +390,25 @@ describe('WFormGroup', () => {
         it('should switch state of control from enabled to disabled', () => {
             const form = renderDisabledConditionalGroup(largeParcel, 50);
     
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
     
             form.setValue(parcel);
     
-            expect(form.control.disabled).toBeTrue();
-            expect(form.get('weight').disabled).toBeTrue();
-            expect(form.get('volume').disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
+            expect(form.get('weight').disabled).toBe(true);;
+            expect(form.get('volume').disabled).toBe(true);;
         });
 
         it('should switch state of control from disabled to enabled', () => {
             const form = renderDisabledConditionalGroup(parcel, 50);
     
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
     
             form.setValue(largeParcel);
     
-            expect(form.control.disabled).toBeFalse();
-            expect(form.get('weight').disabled).toBeFalse();
-            expect(form.get('volume').disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
+            expect(form.get('weight').disabled).toBe(false);;
+            expect(form.get('volume').disabled).toBe(false);;
         });
 
         it('should do nothing if disabled flag was not modified in wform tree', () => {
@@ -420,7 +420,7 @@ describe('WFormGroup', () => {
     
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
 
         it('should disable internal controls if "disabled" flag was switched to true (regardles of "disabled" flag for internal controls)', () => {
@@ -436,13 +436,13 @@ describe('WFormGroup', () => {
                     withWeightAndVolume(largeParcel, { disabled: true }, { disabled: false }),
                 ]);
     
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
     
             form.setValue(parcel);
     
-            expect(form.control.disabled).toBeTrue();
-            expect(form.get('weight').disabled).toBeTrue();
-            expect(form.get('volume').disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
+            expect(form.get('weight').disabled).toBe(true);;
+            expect(form.get('volume').disabled).toBe(true);;
         });
 
         it('should respect "disabled" state of internal controls if "disabled" flag was switched to false', () => {
@@ -458,13 +458,13 @@ describe('WFormGroup', () => {
                     withWeightAndVolume(largeParcel, { disabled: true }, { disabled: false }),
                 ]);
     
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
     
             form.setValue(largeParcel);
     
-            expect(form.control.disabled).toBeFalse();
-            expect(form.get('weight').disabled).toBeTrue();
-            expect(form.get('volume').disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
+            expect(form.get('weight').disabled).toBe(true);;
+            expect(form.get('volume').disabled).toBe(false);;
         });
 
         it('should switch state of internal controls (if any) if "disabled" flag is set to false', () => {
@@ -480,13 +480,13 @@ describe('WFormGroup', () => {
                     withWeightAndVolume(largeParcel, { disabled: true }, { disabled: false }),
                 ]);
     
-            expect(form.get('weight').disabled).toBeFalse();
-            expect(form.get('volume').disabled).toBeTrue();
+            expect(form.get('weight').disabled).toBe(false);;
+            expect(form.get('volume').disabled).toBe(true);;
     
             form.setValue(largeParcel);
     
-            expect(form.get('weight').disabled).toBeTrue();
-            expect(form.get('volume').disabled).toBeFalse();
+            expect(form.get('weight').disabled).toBe(true);;
+            expect(form.get('volume').disabled).toBe(false);;
         });
 
         describe('validator', () => {
@@ -541,7 +541,7 @@ describe('WFormGroup', () => {
         
                 form.update();
         
-                expect(tracker.changed).toBeFalse();
+                expect(tracker.changed).toBe(false);;
             });
         });
 
@@ -617,7 +617,7 @@ describe('WFormGroup', () => {
 
                 tick();
         
-                expect(tracker.changed).toBeFalse();
+                expect(tracker.changed).toBe(false);;
             }));
         });
 
@@ -626,13 +626,13 @@ describe('WFormGroup', () => {
 
             form.setValue(largeParcel);
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
 
             form.control.markAsDirty();
 
             form.setValue(heavyAndLargeParcel);
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should unset dirty flag if corresponding tiny flag is set to false', () => {
@@ -640,13 +640,13 @@ describe('WFormGroup', () => {
 
             form.setValue(largeParcel);
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
 
             form.control.markAsDirty();
 
             form.setValue(heavyAndLargeParcel);
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
@@ -654,13 +654,13 @@ describe('WFormGroup', () => {
 
             form.setValue(largeParcel);
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
 
             form.control.markAsPristine();
 
             form.setValue(heavyAndLargeParcel);
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should not update touched flag if corresponding tiny flag is not set', () => {
@@ -668,13 +668,13 @@ describe('WFormGroup', () => {
 
             form.setValue(largeParcel);
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
 
             form.control.markAsTouched();
 
             form.setValue(heavyAndLargeParcel);
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should unset touched flag if corresponding tiny flag is set to false', () => {
@@ -682,13 +682,13 @@ describe('WFormGroup', () => {
 
             form.setValue(largeParcel);
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
 
             form.control.markAsTouched();
 
             form.setValue(heavyAndLargeParcel);
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
@@ -696,13 +696,13 @@ describe('WFormGroup', () => {
 
             form.setValue(largeParcel);
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
 
             form.control.markAsUntouched();
 
             form.setValue(heavyAndLargeParcel);
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should not recreate underlying FormControl', () => {
@@ -733,14 +733,14 @@ describe('WFormGroup', () => {
                     },
                 ]);
     
-            expect(form.has('weight')).toBeTrue();
-            expect(form.has('volume')).toBeFalse();
+            expect(form.has('weight')).toBe(true);;
+            expect(form.has('volume')).toBe(false);;
             expect(form.value).toEqual({ weight: parcel.weight });
     
             form.setValue(largeParcel);
     
-            expect(form.has('weight')).toBeTrue();
-            expect(form.has('volume')).toBeTrue();
+            expect(form.has('weight')).toBe(true);;
+            expect(form.has('volume')).toBe(true);;
         });
 
         it('should remove control if it disappears from the wform description', () => {
@@ -761,14 +761,14 @@ describe('WFormGroup', () => {
                     },
                 ]);
     
-            expect(form.has('weight')).toBeTrue();
-            expect(form.has('volume')).toBeTrue();
+            expect(form.has('weight')).toBe(true);;
+            expect(form.has('volume')).toBe(true);;
             expect(form.value).toEqual(parcel);
             
             form.setValue(largeParcel);
             
-            expect(form.has('weight')).toBeTrue();
-            expect(form.has('volume')).toBeFalse();
+            expect(form.has('weight')).toBe(true);;
+            expect(form.has('volume')).toBe(false);;
             expect(form.value).toEqual({ weight: largeParcel.weight });
         });
 
@@ -916,11 +916,11 @@ describe('WFormGroup', () => {
 
             form.control.disable();
 
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
             
             form.update();
 
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
         });
 
         it('should restore disabled state', () => {
@@ -928,11 +928,11 @@ describe('WFormGroup', () => {
 
             form.control.enable();
 
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
             
             form.update();
 
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
         });
 
         it('should do nothing if touched state is not specified', () => {
@@ -940,19 +940,19 @@ describe('WFormGroup', () => {
 
             form.control.markAsTouched()
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
             
             form.update();
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
 
             form.control.markAsUntouched();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
 
             form.update();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should restore untouched state', () => {
@@ -960,11 +960,11 @@ describe('WFormGroup', () => {
 
             form.control.markAsTouched()
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
             
             form.update();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should restore touched state', () => {
@@ -972,11 +972,11 @@ describe('WFormGroup', () => {
 
             form.control.markAsUntouched();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
             
             form.update();
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should do nothing if dirty state is not specified', () => {
@@ -984,19 +984,19 @@ describe('WFormGroup', () => {
 
             form.control.markAsDirty()
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
             
             form.update();
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
 
             form.control.markAsPristine();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
             
             form.update();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should restore pristine state', () => {
@@ -1004,11 +1004,11 @@ describe('WFormGroup', () => {
 
             form.control.markAsDirty()
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
             
             form.update();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should restore dirty state', () => {
@@ -1016,11 +1016,11 @@ describe('WFormGroup', () => {
 
             form.control.markAsPristine();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
             
             form.update();
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should remove not specified controls', () => {

@@ -95,7 +95,7 @@ describe('WFormPortal', () => {
 
         form.connect('site', siteForm);
 
-        expect(siteForm.control.disabled).toBeFalse();
+        expect(siteForm.control.disabled).toBe(false);;
     });
 
     it('should disable child form if parent form is disabled', () => {
@@ -108,7 +108,7 @@ describe('WFormPortal', () => {
 
         form.connect('site', siteForm);
 
-        expect(siteForm.control.disabled).toBeTrue();
+        expect(siteForm.control.disabled).toBe(true);;
     });
 
     it('should disable child form (regardless of its "disabled" flag) if parent form is disabled', () => {
@@ -121,7 +121,7 @@ describe('WFormPortal', () => {
 
         form.connect('site', siteForm);
 
-        expect(siteForm.control.disabled).toBeTrue();
+        expect(siteForm.control.disabled).toBe(true);;
     });
 
     it('should disable child form if it is disabled and parent form is enabled', () => {
@@ -134,7 +134,7 @@ describe('WFormPortal', () => {
 
         form.connect('site', siteForm);
 
-        expect(siteForm.control.disabled).toBeTrue();
+        expect(siteForm.control.disabled).toBe(true);;
     });
 
     it('should switch "disabled" flag from enabled to disabled, when it is changed for the parent form', () => {
@@ -148,11 +148,11 @@ describe('WFormPortal', () => {
 
         form.connect('site', siteForm);
 
-        expect(siteForm.control.disabled).toBeFalse();
+        expect(siteForm.control.disabled).toBe(false);;
         
         form.setValue({ value: -10 });
 
-        expect(siteForm.control.disabled).toBeTrue();
+        expect(siteForm.control.disabled).toBe(true);;
     });
 
     it('should switch "disabled" flag from disabled to enabled, when it is changed for the parent form', () => {
@@ -166,10 +166,10 @@ describe('WFormPortal', () => {
 
         form.connect('site', siteForm);
 
-        expect(siteForm.control.disabled).toBeTrue();
+        expect(siteForm.control.disabled).toBe(true);;
         
         form.setValue({ value: 10 });
 
-        expect(siteForm.control.disabled).toBeFalse();
+        expect(siteForm.control.disabled).toBe(false);;
     });
 });

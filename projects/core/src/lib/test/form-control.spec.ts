@@ -8,7 +8,7 @@ import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
 function renderNumber(n: number, options?: WFormControlOptions<number>): WForm<number> {
-    return wForm(() => wControl(options)).updateOnChange(false).build(n);
+    return wForm((_n: number) => wControl(options)).updateOnChange(false).build(n);
 }
 
 function renderConditionalNumber(initial: number, anchor: number, optionsLess: WFormControlOptions<number>, optionsMore: WFormControlOptions<number>): WForm<number> {
@@ -28,15 +28,15 @@ describe('WFormControl', () => {
         });
     
         it('should render enabled control, by default', () => {
-            expect(renderNumber(1).control.disabled).toBeFalse();
+            expect(renderNumber(1).control.disabled).toBe(false);;
         });
     
         it('should render disabled control if "disabled" flag is set to "true"', () => {
-            expect(renderNumber(1, { disabled: true }).control.disabled).toBeTrue();
+            expect(renderNumber(1, { disabled: true }).control.disabled).toBe(true);;
         });
     
         it('should render enabled control if "disabled" flag is set to "false"', () => {
-            expect(renderNumber(1, { disabled: false }).control.disabled).toBeFalse();
+            expect(renderNumber(1, { disabled: false }).control.disabled).toBe(false);;
         });
 
         describe('validator', () => {
@@ -124,37 +124,37 @@ describe('WFormControl', () => {
         it('should not mark control as dirty if corresponding tiny flag is not set', () => {
             const form = renderNumber(2, {});
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should not mark control as dirty if corresponding tiny flag is set to false', () => {
             const form = renderNumber(2, { dirty: false });
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
             const form = renderNumber(2, { dirty: true });
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should not mark control as touched if corresponding tiny flag is not set', () => {
             const form = renderNumber(2, {});
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should not mark control as touched if corresponding tiny flag is set to false', () => {
             const form = renderNumber(2, { touched: false });
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should mark control as touched if corresponding tiny flag is set to true', () => {
             const form = renderNumber(2, { touched: true });
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should set updateOn flag to "change", by default', () => {
@@ -197,7 +197,7 @@ describe('WFormControl', () => {
             form.setValue(5);
     
             expect(form.value).toBe(5);
-            expect(tracker.changed).toBeTrue();
+            expect(tracker.changed).toBe(true);;
         });
     
         it('should not update control if value was not changed', () => {
@@ -207,7 +207,7 @@ describe('WFormControl', () => {
     
             form.setValue(1);
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
     });
 
@@ -219,7 +219,7 @@ describe('WFormControl', () => {
     
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
 
         it('should do nothing if only value was changed', () => {
@@ -231,7 +231,7 @@ describe('WFormControl', () => {
 
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
     });
 
@@ -239,21 +239,21 @@ describe('WFormControl', () => {
         it('should switch state of control from enabled to disabled', () => {
             const form = renderDisabledConditionalNumber(7, 5);
     
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
     
             form.setValue(2);
     
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
         });
 
         it('should switch state of control from disabled to enabled', () => {
             const form = renderDisabledConditionalNumber(2, 5);
     
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
     
             form.setValue(7);
     
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
         });
 
         it('should do nothing if disabled flag was not modified in wform tree', () => {
@@ -265,7 +265,7 @@ describe('WFormControl', () => {
     
             form.update();
     
-            expect(tracker.changed).toBeFalse();
+            expect(tracker.changed).toBe(false);;
         });
 
         describe('validator', () => {
@@ -320,7 +320,7 @@ describe('WFormControl', () => {
         
                 form.update();
         
-                expect(tracker.changed).toBeFalse();
+                expect(tracker.changed).toBe(false);;
             });
         });
 
@@ -396,7 +396,7 @@ describe('WFormControl', () => {
         
                 tick();
 
-                expect(tracker.changed).toBeFalse();
+                expect(tracker.changed).toBe(false);;
             }));
         });
 
@@ -415,13 +415,13 @@ describe('WFormControl', () => {
 
             form.setValue(7);
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
 
             form.control.markAsDirty();
 
             form.setValue(9);
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should unset dirty flag if corresponding tiny flag is set to false', () => {
@@ -429,13 +429,13 @@ describe('WFormControl', () => {
 
             form.setValue(7);
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
 
             form.control.markAsDirty();
 
             form.setValue(9);
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
@@ -443,13 +443,13 @@ describe('WFormControl', () => {
 
             form.setValue(7);
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
 
             form.control.markAsPristine();
 
             form.setValue(9);
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
 
         it('should not update touched flag if corresponding tiny flag is not set', () => {
@@ -457,13 +457,13 @@ describe('WFormControl', () => {
 
             form.setValue(7);
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
 
             form.control.markAsTouched();
 
             form.setValue(9);
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should unset touched flag if corresponding tiny flag is set to false', () => {
@@ -471,13 +471,13 @@ describe('WFormControl', () => {
 
             form.setValue(7);
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
 
             form.control.markAsTouched();
 
             form.setValue(9);
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should mark control as dirty if corresponding tiny flag is set to true', () => {
@@ -485,13 +485,13 @@ describe('WFormControl', () => {
 
             form.setValue(7);
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
 
             form.control.markAsUntouched();
 
             form.setValue(9);
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should not recreate underlying FormControl', () => {
@@ -538,11 +538,11 @@ describe('WFormControl', () => {
 
             form.control.disable();
 
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
             
             form.update();
 
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
         });
 
         it('should restore disabled state', () => {
@@ -550,11 +550,11 @@ describe('WFormControl', () => {
 
             form.control.enable();
 
-            expect(form.control.disabled).toBeFalse();
+            expect(form.control.disabled).toBe(false);;
             
             form.update();
 
-            expect(form.control.disabled).toBeTrue();
+            expect(form.control.disabled).toBe(true);;
         });
 
         it('should do nothing if touched state is not specified', () => {
@@ -562,19 +562,19 @@ describe('WFormControl', () => {
 
             form.control.markAsTouched()
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
             
             form.update();
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
 
             form.control.markAsUntouched();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
 
             form.update();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should restore untouched state', () => {
@@ -582,11 +582,11 @@ describe('WFormControl', () => {
 
             form.control.markAsTouched()
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
             
             form.update();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
         });
 
         it('should restore touched state', () => {
@@ -594,11 +594,11 @@ describe('WFormControl', () => {
 
             form.control.markAsUntouched();
 
-            expect(form.control.touched).toBeFalse();
+            expect(form.control.touched).toBe(false);;
             
             form.update();
 
-            expect(form.control.touched).toBeTrue();
+            expect(form.control.touched).toBe(true);;
         });
 
         it('should do nothing if dirty state is not specified', () => {
@@ -606,19 +606,19 @@ describe('WFormControl', () => {
 
             form.control.markAsDirty()
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
             
             form.update();
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
 
             form.control.markAsPristine();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
             
             form.update();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should restore pristine state', () => {
@@ -626,11 +626,11 @@ describe('WFormControl', () => {
 
             form.control.markAsDirty()
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
             
             form.update();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
         });
 
         it('should restore dirty state', () => {
@@ -638,11 +638,11 @@ describe('WFormControl', () => {
 
             form.control.markAsPristine();
 
-            expect(form.control.dirty).toBeFalse();
+            expect(form.control.dirty).toBe(false);;
             
             form.update();
 
-            expect(form.control.dirty).toBeTrue();
+            expect(form.control.dirty).toBe(true);;
         });
     });
 });
