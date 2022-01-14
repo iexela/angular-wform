@@ -70,7 +70,8 @@ export class PizzaComponent {
     constructor(private snackBar: MatSnackBar) {}
 
     getIngredientName(typeId: string): string {
-        return INGREDIENT_TYPES.find(type => type.id === typeId)?.name || '';
+        const type = INGREDIENT_TYPES.find(type => type.id === typeId);
+        return type && type.name || '';
     }
 
     onIngredientAdd(typeId: string): void {
