@@ -1,6 +1,5 @@
 import { AbstractControl, ValidationErrors } from '@angular/forms';
-import { WValidatorNode } from 'angular-wform';
-import { wValidator } from 'projects/core/src/lib/validators';
+import { wValidator, WValidatorNode } from 'angular-wform';
 
 export enum Gender {
     Male = 'male',

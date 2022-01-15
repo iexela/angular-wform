@@ -1,8 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { WValidators } from 'angular-wform';
-import { wValidator } from 'projects/core/src/lib/validators';
-import { wControl, wForm, wGroup } from 'projects/core/src/public-api';
+import { wControl, wForm, wGroup, wValidator, WValidators } from 'angular-wform';
 
 interface SneackersBrand {
     name: string;

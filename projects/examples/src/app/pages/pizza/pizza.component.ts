@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { wValue } from 'angular-wform';
-import { wArray, wControl, wForm, wGroup, WValidators } from 'projects/core/src/public-api';
+import { wArray, wControl, wForm, wGroup, WValidators, wValue } from 'angular-wform';
 
 interface Pizza {
     size: number;

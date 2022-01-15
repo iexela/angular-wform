@@ -1,7 +1,7 @@
 import { WFormNode, WFormNodeType, WFormPlaceholder, WPathElement } from '../model';
 import { Maybe } from '../common';
 import { WFormArray, WFormGroup } from '../model';
-import { WFormReconcilationOptions } from '../reconcilation';
+import { WFormReconcilationOptions } from '.';
 import { WPortalHost } from '../portal-host';
 
 export class WRenderContext {

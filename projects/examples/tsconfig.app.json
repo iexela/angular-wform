@@ -5,7 +5,7 @@
     "types": [],
     "paths": {
       "angular-wform": [
-        "dist/core"
+        "dist/angular-wform"
       ]
     }
   },
