@@ -27,8 +27,20 @@
     width: 100px;
 }
 
+.w-300 {
+    width: 300px;
+}
+
 .w-400 {
     width: 400px;
+}
+
+.w-700 {
+    width: 700px;
+}
+
+.w-900 {
+    width: 900px;
 }
 
 .w-half {
@@ -67,4 +79,13 @@
 
 .color-error {
     color: red;
+}
+
+.text-uppercase {
+    text-transform: uppercase;
+}
+
+.guideline {
+    width: 300px;
+    margin-left: 15px;
 }

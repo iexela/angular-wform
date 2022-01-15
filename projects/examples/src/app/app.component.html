@@ -1,9 +1,9 @@
 <mat-toolbar class="mat-elevation-z6" color="primary">
     <span>angular-wform Examples</span>
     <span class="flex-1"></span>
-    <button mat-icon-button class="example-icon">
+    <a mat-icon-button class="example-icon">
       <img src="../assets/github.svg">
-    </button>
+    </a>
 </mat-toolbar>
 <mat-sidenav-container class="full-height">
     <mat-sidenav class="menu" mode="side" opened>
@@ -13,6 +13,8 @@
             <a mat-list-item routerLink="movies" routerLinkActive="nav-item-active">Movies</a>
             <a mat-list-item routerLink="sneackers" routerLinkActive="nav-item-active">Sneackers</a>
             <a mat-list-item routerLink="character" routerLinkActive="nav-item-active">Character Builder</a>
+            <a mat-list-item routerLink="dangled-validator" routerLinkActive="nav-item-active">Dangled Validator</a>
+            <a mat-list-item routerLink="dangled-validator-fix" routerLinkActive="nav-item-active">Dangled Validator (fix)</a>
         </mat-nav-list>
     </mat-sidenav>
     <mat-sidenav-content>

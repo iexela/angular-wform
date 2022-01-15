@@ -5,6 +5,8 @@ import { MoviesComponent } from './pages/movies/movies.component';
 import { PizzaComponent } from './pages/pizza/pizza.component';
 import { SneackersComponent } from './pages/sneackers/sneackers.component';
 import { CharacterComponent } from './pages/character/character.component';
+import { DangledValidatorComponent } from './pages/dangled-validator/dangled-validator.component';
+import { DangledValidatorFixComponent } from './pages/dangled-validator-fix/dangled-validator-fix.component';
 
 const routes: Routes = [{
   path: '',
@@ -13,6 +15,12 @@ const routes: Routes = [{
 }, {
   component: LoginComponent,
   path: 'login',
+}, {
+  component: DangledValidatorComponent,
+  path: 'dangled-validator',
+},  {
+  component: DangledValidatorFixComponent,
+  path: 'dangled-validator-fix',
 },  {
   component: PizzaComponent,
   path: 'pizza',

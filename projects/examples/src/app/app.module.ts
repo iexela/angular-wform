@@ -24,7 +24,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoginComponent } from './pages/login/login.component';
 import { PageContentComponent } from './components/page-content/page-content.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PizzaComponent } from './pages/pizza/pizza.component';
 import { CharacterComponent } from './pages/character/character.component';
 import { SneackersComponent } from './pages/sneackers/sneackers.component';
@@ -33,11 +33,15 @@ import { CharacterProfileComponent } from './pages/character/profile/character-p
 import { CharacterAbilitiesComponent } from './pages/character/abilities/character-abilities.component';
 import { CharacterSkillsComponent } from './pages/character/skills/character-skills.component';
 import { CharacterThingsComponent } from './pages/character/things/character-things.component';
+import { DangledValidatorComponent } from './pages/dangled-validator/dangled-validator.component';
+import { DangledValidatorFixComponent } from './pages/dangled-validator-fix/dangled-validator-fix.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
+    DangledValidatorComponent,
+    DangledValidatorFixComponent,
     PizzaComponent,
     MoviesComponent,
     SneackersComponent,
@@ -63,6 +67,7 @@ import { CharacterThingsComponent } from './pages/character/things/character-thi
     MatInputModule,
     MatRadioModule,
     MatCheckboxModule,
+    FormsModule,
     ReactiveFormsModule,
     MatSnackBarModule,
     MatSelectModule,

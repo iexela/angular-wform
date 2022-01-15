@@ -1,16 +1,27 @@
 <wform-page-content>
-    <mat-card class="fixed-width-center w-400">
+    <mat-card class="fixed-width-center w-700">
         <form [formGroup]="form.group" (submit)="onSubmit()">
             <mat-card-title>Search for movies</mat-card-title>
             <mat-card-content>
-                <mat-form-field class="form-field">
-                    <input name="search" formControlName="search" type="text" matInput>
-                </mat-form-field>
-                <div class="checkbox-group-inline">
-                    <mat-checkbox
-                        *ngFor="let restriction of form.getArray('restrictions').controls"
-                        [formControl]="restriction.get('on') | asFormControl">{{restriction.get('code')!.value}}</mat-checkbox>
-                </div>
+                <section class="flex-row">
+                    <section class="flex-1">
+                        <mat-form-field class="form-field">
+                            <input name="search" formControlName="search" type="text" matInput>
+                        </mat-form-field>
+                        <div class="checkbox-group-inline">
+                            <mat-checkbox
+                                *ngFor="let restriction of form.getArray('restrictions').controls"
+                                [formControl]="restriction.get('on') | asFormControl">{{restriction.get('code')!.value}}</mat-checkbox>
+                        </div>
+                    </section>
+                    <section class="guideline">
+                        <p>
+                            When you set your age in <i>Age</i> field
+                            you able to search only for films suitable to your age category.
+                            Not suitable categories are disabled and resets to unchecked state for consistency.
+                        </p>
+                    </section>
+                </section>
             </mat-card-content>
             <mat-card-actions align="end">
                 <mat-form-field>

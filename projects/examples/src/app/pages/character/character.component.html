@@ -1,55 +1,70 @@
 <wform-page-content>
-    <mat-card class="fixed-width-center w-400">
+    <mat-card class="fixed-width-center w-900">
         <form [formGroup]="model.form.group" (submit)="onSubmit()">
             <mat-card-title>Character Builder</mat-card-title>
             <mat-card-content>
-                <mat-form-field>
-                    <mat-select [value]="ui" (valueChange)="onUiChanged($event)">
-                        <mat-option value="no-ui">No UI</mat-option>
-                        <mat-option value="accordion">Accordion</mat-option>
-                        <mat-option value="lazy-tabs">Lazy Tabs</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-accordion *ngIf="ui === 'accordion'" multi>
-                    <mat-expansion-panel [expanded]="isPanelOpened('profile')">
-                        <mat-expansion-panel-header>Profile</mat-expansion-panel-header>
-                        <wform-character-profile></wform-character-profile>
-                    </mat-expansion-panel>
-                    <mat-expansion-panel [expanded]="isPanelOpened('abilities')">
-                        <mat-expansion-panel-header>Abilities</mat-expansion-panel-header>
-                        <wform-character-abilities></wform-character-abilities>
-                    </mat-expansion-panel>
-                    <mat-expansion-panel [expanded]="isPanelOpened('skills')">
-                        <mat-expansion-panel-header>Skills</mat-expansion-panel-header>
-                        <wform-character-skills></wform-character-skills>
-                    </mat-expansion-panel>
-                    <mat-expansion-panel [expanded]="isPanelOpened('things')">
-                        <mat-expansion-panel-header>Things</mat-expansion-panel-header>
-                        <wform-character-things></wform-character-things>
-                    </mat-expansion-panel>
-                </mat-accordion>
-                <mat-tab-group *ngIf="ui === 'lazy-tabs'" [(selectedIndex)]="selectedTabIndex">
-                    <mat-tab label="Profile">
-                        <ng-template matTabContent>
-                            <wform-character-profile></wform-character-profile>
-                        </ng-template>
-                    </mat-tab>
-                    <mat-tab label="Abilities">
-                        <ng-template matTabContent>
-                            <wform-character-abilities></wform-character-abilities>
-                        </ng-template>
-                    </mat-tab>
-                    <mat-tab label="Skills">
-                        <ng-template matTabContent>
-                            <wform-character-skills></wform-character-skills>
-                        </ng-template>
-                    </mat-tab>
-                    <mat-tab label="Things">
-                        <ng-template matTabContent>
-                            <wform-character-things></wform-character-things>
-                        </ng-template>
-                    </mat-tab>
-                </mat-tab-group>
+                <section class="flex-row">
+                    <section class="flex-1">
+                        <mat-form-field>
+                            <mat-select [value]="ui" (valueChange)="onUiChanged($event)">
+                                <mat-option value="no-ui">No UI</mat-option>
+                                <mat-option value="accordion">Accordion</mat-option>
+                                <mat-option value="lazy-tabs">Lazy Tabs</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-accordion *ngIf="ui === 'accordion'" multi>
+                            <mat-expansion-panel [expanded]="isPanelOpened('profile')">
+                                <mat-expansion-panel-header>Profile</mat-expansion-panel-header>
+                                <wform-character-profile></wform-character-profile>
+                            </mat-expansion-panel>
+                            <mat-expansion-panel [expanded]="isPanelOpened('abilities')">
+                                <mat-expansion-panel-header>Abilities</mat-expansion-panel-header>
+                                <wform-character-abilities></wform-character-abilities>
+                            </mat-expansion-panel>
+                            <mat-expansion-panel [expanded]="isPanelOpened('skills')">
+                                <mat-expansion-panel-header>Skills</mat-expansion-panel-header>
+                                <wform-character-skills></wform-character-skills>
+                            </mat-expansion-panel>
+                            <mat-expansion-panel [expanded]="isPanelOpened('things')">
+                                <mat-expansion-panel-header>Things</mat-expansion-panel-header>
+                                <wform-character-things></wform-character-things>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+                        <mat-tab-group *ngIf="ui === 'lazy-tabs'" [(selectedIndex)]="selectedTabIndex">
+                            <mat-tab label="Profile">
+                                <ng-template matTabContent>
+                                    <wform-character-profile></wform-character-profile>
+                                </ng-template>
+                            </mat-tab>
+                            <mat-tab label="Abilities">
+                                <ng-template matTabContent>
+                                    <wform-character-abilities></wform-character-abilities>
+                                </ng-template>
+                            </mat-tab>
+                            <mat-tab label="Skills">
+                                <ng-template matTabContent>
+                                    <wform-character-skills></wform-character-skills>
+                                </ng-template>
+                            </mat-tab>
+                            <mat-tab label="Things">
+                                <ng-template matTabContent>
+                                    <wform-character-things></wform-character-things>
+                                </ng-template>
+                            </mat-tab>
+                        </mat-tab-group>
+                    </section>
+                    <section class="guideline">
+                        <p>
+                            Here you can see how to manage a really large form
+                            having many internal interactions and validators.
+                        </p>
+                        <p>
+                            Also layout of the form can be changed completely to one of
+                            <i>Lazy Tabs</i>, <i>Accordion</i>, <i>No UI</i>.
+                            But this does not affect form state.
+                        </p>
+                    </section>
+                </section>
             </mat-card-content>
             <mat-card-actions align="end">
                 <button type="submit" mat-raised-button color="primary">Create</button>

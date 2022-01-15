@@ -1,0 +1,49 @@
+<wform-page-content>
+    <mat-card class="fixed-width-center w-700">
+        <mat-card-title>Dangled Validator (fix)</mat-card-title>
+        <mat-card-content>
+            <section class="flex-row">
+                <section class="flex-1">
+                    <section class="checkbox-group-inline">
+                        <mat-checkbox [(ngModel)]="isAgeRequired" (change)="onAgeRequiredChanged()" class="form-field">Age is required</mat-checkbox>
+                        <mat-checkbox [(ngModel)]="isDisplayAgeSection" class="form-field">Display age section</mat-checkbox>
+                    </section>
+                    <form [formGroup]="form.group" (submit)="onSubmit()">
+                        <mat-form-field class="form-field">
+                            <input
+                                formControlName="name"
+                                type="text"
+                                matInput
+                                placeholder="User name"
+                                required>
+                        </mat-form-field>
+        
+                        <mat-form-field *ngIf="isDisplayAgeSection" class="form-field">
+                            <input
+                                formControlName="age"
+                                type="number"
+                                matInput
+                                placeholder="Age"
+                                [required]="isAgeRequired"
+                                min="1"
+                                max="99">
+                        </mat-form-field>
+                    </form>
+                </section>
+                <ul class="w-300">
+                    <ol>1. Pay attention that "Age is required" is checked</ol>
+                    <ol>2. Uncheck "Display age section"</ol>
+                    <ol>3. Uncheck "Age is required"</ol>
+                    <ol>4. Check "Display age section"</ol>
+                    <ol>5. Pay attention that "Age is required" is unchecked</ol>
+                    <ol>6. Enter ONLY "Name" field</ol>
+                    <ol>7. Try to save changes</ol>
+                    <ol>8. Save is successful</ol>
+                </ul>
+            </section>
+        </mat-card-content>
+        <mat-card-actions align="end">
+            <button type="button" mat-raised-button color="primary" (click)="onSubmit()">Save</button>
+        </mat-card-actions>
+    </mat-card>
+</wform-page-content>

@@ -1,36 +1,50 @@
 <wform-page-content>
-    <mat-card class="fixed-width-center w-400">
+    <mat-card class="fixed-width-center w-700">
         <form [formGroup]="form.group" (submit)="onSubmit()">
             <mat-card-title>Buy Sneackers!</mat-card-title>
             <mat-card-content>
-                <mat-form-field class="form-field">
-                    <mat-select formControlName="brand">
-                        <mat-option *ngFor="let brand of availableBrands" [value]="brand">{{brand}}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field class="form-field">
-                    <mat-select formControlName="size">
-                        <mat-option *ngFor="let size of brands[this.form.value.brand]" [value]="size.size">{{size.size}}</mat-option>
-                    </mat-select>
-                    <mat-error *ngIf="form.get('size').hasError('noSize')">
-                        There is no sneackers of this size anymore
-                    </mat-error>
-                    <mat-hint *ngIf="selectedSize && selectedSize.count > 0 && selectedSize.count <= 3">
-                        Hurry up! Only {{selectedSize.count}} in stock!
-                    </mat-hint>
-                </mat-form-field>
-                <mat-form-field class="form-field">
-                    <input formControlName="count" type="number" matInput min="0" [max]="selectedSize && selectedSize.count || 0">
-                    <mat-error *ngIf="form.get('count').hasError('required')">
-                        How many sneackers are you going to order?
-                    </mat-error>
-                    <mat-error *ngIf="form.get('count').hasError('min')">
-                        You have to order at least one pair of sneackers
-                    </mat-error>
-                    <mat-error *ngIf="form.get('count').hasError('max')">
-                        There are no so many sneackers in stock
-                    </mat-error>
-                </mat-form-field>
+                <section class="flex-row">
+                    <section class="flex-1">
+                        <mat-form-field class="form-field">
+                            <mat-select formControlName="brand" placeholder="Brand">
+                                <mat-option *ngFor="let brand of availableBrands" [value]="brand">{{brand}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field class="form-field">
+                            <mat-select formControlName="size" placeholder="Size">
+                                <mat-option *ngFor="let size of brands[this.form.value.brand]" [value]="size.size">{{size.size}}</mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="form.get('size').hasError('noSize')">
+                                There is no sneackers of this size anymore
+                            </mat-error>
+                            <mat-hint *ngIf="selectedSize && selectedSize.count > 0 && selectedSize.count <= 3">
+                                Hurry up! Only {{selectedSize.count}} in stock!
+                            </mat-hint>
+                        </mat-form-field>
+                        <mat-form-field class="form-field">
+                            <input formControlName="count" type="number" matInput min="0" [max]="selectedSize && selectedSize.count || 0" placeholder="Count">
+                            <mat-error *ngIf="form.get('count').hasError('required')">
+                                How many sneackers are you going to order?
+                            </mat-error>
+                            <mat-error *ngIf="form.get('count').hasError('min')">
+                                You have to order at least one pair of sneackers
+                            </mat-error>
+                            <mat-error *ngIf="form.get('count').hasError('max')">
+                                There are no so many sneackers in stock
+                            </mat-error>
+                        </mat-form-field>
+                    </section>
+                    <section class="guideline">
+                        <p>You can order sneackers of your lovely brand. But only if it has your size in stock.</p>
+                        <p>Here you can see how to handle forms having large number of interactions between fields.</p>
+                        <p>
+                            Number of available items in stock is managed outside of the form.
+                            But you can change this number using the corresponding button: <i>Outside Action</i>.
+                            When you push this button number of items is reduced on one item.
+                            Here is demonstrated how to use <code>form.update()</code> to reconcile form state manually.
+                        </p>
+                    </section>
+                </section>
             </mat-card-content>
             <mat-card-actions align="end">
                 <button type="button" mat-raised-button [disabled]="!selectedSize" (click)="onRemoveSize()">Outside Action: Remove one selected size</button>
