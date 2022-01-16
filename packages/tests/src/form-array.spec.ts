@@ -1,11 +1,6 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormArray, FormControl } from '@angular/forms';
-import { wArray, wControl, WFormArrayOptions, WFormControlOptions, wGroup, wNative, wPortal, wSkip } from '../basic';
-import { wForm, WFormBuilder } from '../builder';
-import { WForm } from '../form';
-import { WFormArrayChildren, WFormHooks } from '../model';
-import { getLastFormNode } from '../reconcilation';
-import { wValidator, wValidatorAsync } from '../validators';
+import { wValidator, wValidatorAsync, getLastFormNode, WFormArrayChildren, WFormHooks, WForm, wForm, WFormBuilder, wArray, wControl, WFormArrayOptions, WFormControlOptions, wGroup, wNative, wPortal, wSkip } from 'angular-wform';
 import { Box, createTaxControl, elephant, even, krokodile, moreThan10, mouse, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
@@ -71,15 +66,15 @@ describe('WFormArray', () => {
         it('should render control', () => {
             expect(renderArray(fibonaci5).control).toBeTruthy();
         });
-    
+
         it('should render enabled control, by default', () => {
             expect(renderArray(fibonaci5).control.disabled).toBe(false);;
         });
-    
+
         it('should render disabled control if "disabled" flag is set to "true"', () => {
             expect(renderArray(fibonaci5, { disabled: true }).control.disabled).toBe(true);;
         });
-    
+
         it('should render enabled control if "disabled" flag is set to "false"', () => {
             expect(renderArray(fibonaci5, { disabled: false }).control.disabled).toBe(false);;
         });
@@ -122,13 +117,13 @@ describe('WFormArray', () => {
             it('should not assign any validators by default', () => {
                 expect(renderArray(fibonaci5).control.validator).toBeFalsy();
             });
-    
+
             it('should assign provided validator', () => {
                 const options = { validator: lengthLessThan10 };
                 expect(renderArray(fibonaci10, options).control.errors).toEqual({ length: true });
                 expect(renderArray(fibonaci5, options).control.errors).toBeFalsy();
             });
-    
+
             it('should return merged validation result', () => {
                 const options = { validator: [lengthLessThan10, startedFrom0] };
                 expect(renderArray(fibonaci2_10, options).control.errors).toEqual({ zero: true, length: true });
@@ -136,7 +131,7 @@ describe('WFormArray', () => {
                 expect(renderArray(fibonaci10, options).control.errors).toEqual({ length: true });
                 expect(renderArray(fibonaci5, options).control.errors).toBeFalsy();
             });
-    
+
             it('should not validate disabled control', () => {
                 expect(renderArray(fibonaci10, { validator: lengthLessThan10, disabled: true }).control.errors).toBeFalsy();
             });
@@ -146,13 +141,13 @@ describe('WFormArray', () => {
             it('should not assign any async validators by default', () => {
                 expect(renderArray(fibonaci5).control.asyncValidator).toBeFalsy();
             });
-    
+
             it('should assign provided async validator', fakeAsync(() => {
                 const options = { asyncValidator: lengthLessThan10Async };
                 expect(andTick(renderArray(fibonaci10, options)).control.errors).toEqual({ length: true });
                 expect(andTick(renderArray(fibonaci5, options).control.errors)).toBeFalsy();
             }));
-    
+
             it('should return merged async validation result', fakeAsync(() => {
                 const options = { asyncValidator: [lengthLessThan10Async, startedFrom0Async] };
                 expect(andTick(renderArray(fibonaci2_10, options)).control.errors).toEqual({ zero: true, length: true });
@@ -160,7 +155,7 @@ describe('WFormArray', () => {
                 expect(andTick(renderArray(fibonaci10, options)).control.errors).toEqual({ length: true });
                 expect(andTick(renderArray(fibonaci5, options)).control.errors).toBeFalsy();
             }));
-    
+
             it('should not run async validator for disabled control', fakeAsync(() => {
                 expect(andTick(renderArray(fibonaci10, { asyncValidator: lengthLessThan10Async, disabled: true })).control.errors).toBeFalsy();
             }));
@@ -289,7 +284,7 @@ describe('WFormArray', () => {
         it('should render provided value', () => {
             expect(renderArray(fibonaci5).value).toEqual(fibonaci5);
         });
-    
+
         it('should return only fields mapped to controls', () => {
             const form = wForm(() => wArray(withItem(fibonaci5)))
                 .updateOnChange(false)
@@ -297,7 +292,7 @@ describe('WFormArray', () => {
 
             expect(form.value).toEqual(fibonaci5);
         });
-    
+
         it('should return all fields mapped to controls', () => {
             const form = wForm(() => wArray(withItem(fibonaci10)))
                 .updateOnChange(false)
@@ -305,23 +300,23 @@ describe('WFormArray', () => {
 
             expect(form.value).toEqual(fibonaci10);
         });
-    
+
         it('should return value if "disabled"', () => {
             expect(renderArray(fibonaci5, { disabled: true }).value).toEqual(fibonaci5);
         });
-    
+
         it('should return value without disabled controls', () => {
             expect(renderArray(fibonaci10, {}, withItem(fibonaci10, (_, i) => ({ disabled: (i % 2) === 0 }))).value).toEqual([1, 2, 5, 13, 34]);
         });
-    
+
         it('should return rawValue', () => {
             expect(renderArray(fibonaci10).rawValue).toEqual(fibonaci10);
         });
-    
+
         it('should return rawValue if "disabled"', () => {
             expect(renderArray(fibonaci10, { disabled: true }).rawValue).toEqual(fibonaci10);
         });
-    
+
         it('should return rawvalue regardless disabled controls', () => {
             expect(renderArray(
                 fibonaci10,
@@ -334,32 +329,32 @@ describe('WFormArray', () => {
     describe('setValue', () => {
         it('should update control if it is called with different value', () => {
             const form = renderArray(fibonaci5);
-    
+
             const tracker = trackControl(form.control);
 
             form.setValue(fibonaci2_5);
-    
+
             expect(form.value).toEqual(fibonaci2_5);
             expect(tracker.changed).toBe(true);;
         });
-    
+
         it('should not update control if value was not changed', () => {
             const form = renderArray(fibonaci5);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.setValue([ ...fibonaci5 ]);
-    
+
             expect(tracker.changed).toBe(false);;
         });
-    
+
         it('should not update control if unrelated field was added', () => {
             const form = renderArray(fibonaci5, {}, withItem(fibonaci5));
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.setValue(fibonaci10);
-    
+
             expect(tracker.changed).toBe(false);;
         });
     });
@@ -367,11 +362,11 @@ describe('WFormArray', () => {
     describe('update', () => {
         it('should do nothing if it is called without changing a value', () => {
             const form = renderArray(fibonaci5);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
@@ -379,11 +374,11 @@ describe('WFormArray', () => {
             const form = renderArray(fibonaci5);
 
             form.control.setValue(fibonaci2_5);
-    
+
             const tracker = trackControl(form.control);
 
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
@@ -391,11 +386,11 @@ describe('WFormArray', () => {
             const form = renderArray(fibonaci5);
 
             form.control.get('2')!.setValue(fibonaci5[2] + 500);
-    
+
             const tracker = trackControl(form.control);
 
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
     });
@@ -403,11 +398,11 @@ describe('WFormArray', () => {
     describe('reconcilation', () => {
         it('should switch state of control from enabled to disabled', () => {
             const form = renderDisabledConditionalGroup(fibonaci10, 20);
-    
+
             expect(form.control.disabled).toBe(false);;
-    
+
             form.setValue(fibonaci5);
-    
+
             expect(form.control.disabled).toBe(true);;
             expect(form.get('0').disabled).toBe(true);;
             expect(form.get('1').disabled).toBe(true);;
@@ -415,11 +410,11 @@ describe('WFormArray', () => {
 
         it('should switch state of control from disabled to enabled', () => {
             const form = renderDisabledConditionalGroup(fibonaci5, 20);
-    
+
             expect(form.control.disabled).toBe(true);;
-    
+
             form.setValue(fibonaci10);
-    
+
             expect(form.control.disabled).toBe(false);;
             expect(form.get('0').disabled).toBe(false);;
             expect(form.get('1').disabled).toBe(false);;
@@ -429,11 +424,11 @@ describe('WFormArray', () => {
             const form = wForm(() => wArray({ disabled: true }, withItem(fibonaci5)))
                 .updateOnChange(false)
                 .build(fibonaci5);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
@@ -449,11 +444,11 @@ describe('WFormArray', () => {
                     { disabled: false },
                     withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
                 ]);
-    
+
             expect(form.control.disabled).toBe(false);;
-    
+
             form.setValue(fibonaci10);
-    
+
             expect(form.control.disabled).toBe(true);;
             expect(form.get('0').disabled).toBe(true);;
             expect(form.get('1').disabled).toBe(true);;
@@ -471,11 +466,11 @@ describe('WFormArray', () => {
                     { disabled: false },
                     withItem(fibonaci2_10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
                 ]);
-    
+
             expect(form.control.disabled).toBe(true);;
-    
+
             form.setValue(fibonaci2_10);
-    
+
             expect(form.control.disabled).toBe(false);;
             expect(form.get('0').disabled).toBe(false);;
             expect(form.get('1').disabled).toBe(true);;
@@ -493,12 +488,12 @@ describe('WFormArray', () => {
                     {},
                     withItem(fibonaci10, (_, i) => ({ key: i, disabled: i % 2 === 1 })),
                 ]);
-    
+
             expect(form.get('0').disabled).toBe(true);;
             expect(form.get('1').disabled).toBe(false);;
-    
+
             form.setValue(fibonaci2_10);
-    
+
             expect(form.get('0').disabled).toBe(false);;
             expect(form.get('1').disabled).toBe(true);;
         });
@@ -506,55 +501,55 @@ describe('WFormArray', () => {
         describe('validator', () => {
             it('should assign validators', () => {
                 const form = renderConditionalArray(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
-    
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.setValue(fibonaci2_10);
-    
+
                 expect(form.control.errors).toEqual({ zero: true });
             });
-    
+
             it('should remove validators', () => {
                 const form = renderConditionalArray(fibonaci2_10, 50, [{}], [{ validator: startedFrom0 }]);
-        
+
                 expect(form.control.errors).toEqual({ zero: true });
-        
+
                 form.setValue(fibonaci10);
-        
+
                 expect(form.control.errors).toBeFalsy();
             });
-    
+
             it('should change validators', () => {
                 const form = renderConditionalArray(fibonaci10, 50, [{ validator: lengthLessThan10 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
-        
+
                 expect(form.control.errors).toEqual({ length: true });
-        
+
                 form.setValue(fibonaci2_10);
-        
+
                 expect(form.control.errors).toEqual({ length: true, zero: true });
             });
-    
+
             it('should rerender control if value was changed in meantime', () => {
                 const form = renderConditionalArray(fibonaci10, 50, [{}], [{ validator: startedFrom0 }]);
-        
+
                 form.control.setValue(fibonaci2_10);
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.update();
-    
+
                 expect(form.control.errors).toEqual({ zero: true });
             });
-    
+
             it('should do nothing if validators were not changed', () => {
                 const form = wForm(() => wArray({
                     validator: [lengthLessThan10, startedFrom0],
                 }, withItem(fibonaci5))).updateOnChange(false).build(fibonaci5);
-        
+
                 const tracker = trackControl(form.control);
-        
+
                 form.update();
-        
+
                 expect(tracker.changed).toBe(false);;
             });
         });
@@ -562,75 +557,75 @@ describe('WFormArray', () => {
         describe('async validator', () => {
             it('should assign async validators', fakeAsync(() => {
                 const form = renderConditionalArray(fibonaci10, 50, [{}], [{ asyncValidator: startedFrom0Async }]);
-    
+
                 tick();
 
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.setValue(fibonaci2_10);
 
                 tick();
-    
+
                 expect(form.control.errors).toEqual({ zero: true });
             }));
-    
+
             it('should remove async validators', fakeAsync(() => {
                 const form = renderConditionalArray(fibonaci2_10, 50, [{}], [{ asyncValidator: startedFrom0Async }]);
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ zero: true });
-        
+
                 form.setValue(fibonaci10);
-        
+
                 tick();
 
                 expect(form.control.errors).toBeFalsy();
             }));
-    
+
             it('should change async validators', fakeAsync(() => {
                 const form = renderConditionalArray(fibonaci10, 50, [{ asyncValidator: lengthLessThan10Async }], [{ asyncValidator: [lengthLessThan10Async, startedFrom0Async] }]);
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ length: true });
-        
+
                 form.setValue(fibonaci2_10);
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ length: true, zero: true });
             }));
-    
+
             it('should rerender control if value was changed in meantime', fakeAsync(() => {
                 const form = renderConditionalArray(fibonaci10, 50, [{}], [{ asyncValidator: startedFrom0Async }]);
-        
+
                 form.control.setValue(fibonaci2_10);
 
                 tick();
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.update();
 
                 tick();
-    
+
                 expect(form.control.errors).toEqual({ zero: true });
             }));
-    
+
             it('should do nothing if async validators were not changed', fakeAsync(() => {
                 const form = wForm(() => wArray({
                     asyncValidator: [lengthLessThan10Async, startedFrom0Async],
                 }, withItem(fibonaci5))).updateOnChange(false).build(fibonaci5);
-        
+
                 tick();
-        
+
                 const tracker = trackControl(form.control);
-        
+
                 form.update();
 
                 tick();
-        
+
                 expect(tracker.changed).toBe(false);;
             }));
         });
@@ -718,14 +713,14 @@ describe('WFormArray', () => {
 
             expect(form.control.touched).toBe(true);;
         });
-    
+
         it('should not recreate underlying FormControl', () => {
             const form = renderConditionalArray(fibonaci10, 50, [{ validator: startedFrom0 }], [{ validator: [lengthLessThan10, startedFrom0] }]);
-    
+
             const control = form.control;
-    
+
             form.setValue(fibonaci2_10);
-    
+
             expect(form.control).toBe(control);
         });
 
@@ -844,9 +839,9 @@ describe('WFormArray', () => {
 
             expect(form.value).toEqual([-10, -20]);
             expect(array.length).toBe(2);
-            
+
             form.setValue([10, 20]);
-            
+
             expect(form.value).toEqual([30, 10, 20]);
             expect(array.length).toBe(3);
         });
@@ -859,10 +854,10 @@ describe('WFormArray', () => {
             ])).updateOnChange(false).build([10, 20]);
 
             const array = form.control as FormArray;
-            
+
             expect(form.value).toEqual([30, 10, 20]);
             expect(array.length).toBe(3);
-            
+
             form.setValue([-10, -20]);
 
             expect(form.value).toEqual([-10, -20]);
@@ -881,9 +876,9 @@ describe('WFormArray', () => {
 
             expect(form.value).toEqual([-10, -20]);
             expect(array.length).toBe(2);
-            
+
             form.setValue([10, 20]);
-            
+
             expect(form.value).toEqual([999, 10, 20]);
             expect(array.length).toBe(3);
         });
@@ -900,9 +895,9 @@ describe('WFormArray', () => {
 
             expect(form.value).toEqual([999, 10, 20]);
             expect(array.length).toBe(3);
-            
+
             form.setValue([-10, -20]);
-            
+
             expect(form.value).toEqual([-10, -20]);
             expect(array.length).toBe(2);
         });
@@ -949,9 +944,9 @@ describe('WFormArray', () => {
                 50,
                 [{ updateOn: WFormHooks.Change }],
                 [{ updateOn: WFormHooks.Blur }]);
-    
+
             form.setValue(fibonaci2_10);
-            
+
             expect(form.control.updateOn).toBe(WFormHooks.Change);
         });
     });
@@ -986,7 +981,7 @@ describe('WFormArray', () => {
             form.control.disable();
 
             expect(form.control.disabled).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.disabled).toBe(false);;
@@ -998,7 +993,7 @@ describe('WFormArray', () => {
             form.control.enable();
 
             expect(form.control.disabled).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.disabled).toBe(true);;
@@ -1010,7 +1005,7 @@ describe('WFormArray', () => {
             form.control.markAsTouched()
 
             expect(form.control.touched).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(true);;
@@ -1030,7 +1025,7 @@ describe('WFormArray', () => {
             form.control.markAsTouched()
 
             expect(form.control.touched).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(false);;
@@ -1042,7 +1037,7 @@ describe('WFormArray', () => {
             form.control.markAsUntouched();
 
             expect(form.control.touched).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(true);;
@@ -1054,7 +1049,7 @@ describe('WFormArray', () => {
             form.control.markAsDirty()
 
             expect(form.control.dirty).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(true);;
@@ -1062,7 +1057,7 @@ describe('WFormArray', () => {
             form.control.markAsPristine();
 
             expect(form.control.dirty).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(false);;
@@ -1074,7 +1069,7 @@ describe('WFormArray', () => {
             form.control.markAsDirty()
 
             expect(form.control.dirty).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(false);;
@@ -1086,7 +1081,7 @@ describe('WFormArray', () => {
             form.control.markAsPristine();
 
             expect(form.control.dirty).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(true);;
@@ -1129,16 +1124,16 @@ describe('WFormArray', () => {
                 const taxControl = createTaxControl();
 
                 array.insert(0, taxControl);
-    
+
                 expect(array.length).toBe(11);
                 expect(array.get('0')).toBe(taxControl);
-                
+
                 form.setValue(fibonaci2_10);
-                
+
                 expect(array.length).toBe(11);
                 expect(array.get('0')).toBe(taxControl);
                 expect(taxControl.value).toEqual(taxData);
-            
+
         });
     });
 });

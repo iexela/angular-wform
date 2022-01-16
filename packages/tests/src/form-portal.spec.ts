@@ -1,5 +1,4 @@
-import { wControl, wGroup, wPortal } from '../basic';
-import { wForm } from '../builder';
+import { wForm, wControl, wGroup, wPortal } from 'angular-wform';
 
 describe('WFormPortal', () => {
     it('should not render control when portal is not connected', () => {
@@ -61,7 +60,7 @@ describe('WFormPortal', () => {
         })).updateOnChange(false).build({ portal: 10 });
 
         form.connect('site', siteForm);
-        
+
         form.setValue({ portal: 100 });
 
         expect(form.get('portal').value).toBe(100);
@@ -78,7 +77,7 @@ describe('WFormPortal', () => {
         })).updateOnChange(false).build({ portal: 10 });
 
         form.connect('site', siteForm);
-        
+
         form.update();
 
         expect(form.get('portal').value).toBe(1);
@@ -149,7 +148,7 @@ describe('WFormPortal', () => {
         form.connect('site', siteForm);
 
         expect(siteForm.control.disabled).toBe(false);;
-        
+
         form.setValue({ value: -10 });
 
         expect(siteForm.control.disabled).toBe(true);;
@@ -167,7 +166,7 @@ describe('WFormPortal', () => {
         form.connect('site', siteForm);
 
         expect(siteForm.control.disabled).toBe(true);;
-        
+
         form.setValue({ value: 10 });
 
         expect(siteForm.control.disabled).toBe(false);;

@@ -1,10 +1,6 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormControl, FormGroup } from '@angular/forms';
-import { wControl, WFormControlOptions, WFormGroupOptions, wGroup, wNative, wPortal, wSkip } from '../basic';
-import { wForm, WFormBuilder } from '../builder';
-import { WForm } from '../form';
-import { WFormGroupChildren, WFormHooks } from '../model';
-import { getLastFormNode } from '../reconcilation';
+import { getLastFormNode, WFormGroupChildren, WFormHooks, WForm, wForm, WFormBuilder, wControl, WFormControlOptions, WFormGroupOptions, wGroup, wNative, wPortal, wSkip } from 'angular-wform';
 import { belarusToAustralia, belarusToRussia, Box, createFlightWNode, createTaxControl, elephant, even, Flight, fragileParcel, heavyAndLargeParcel, heavyParcel, largeParcel, light, lightAsync, moreThan10, mouse, parcel, parcelWithoutVolume, small, smallAsync, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
@@ -56,15 +52,15 @@ describe('WFormGroup', () => {
         it('should render control', () => {
             expect(renderGroup(parcel).control).toBeTruthy();
         });
-    
+
         it('should render enabled control, by default', () => {
             expect(renderGroup(parcel).control.disabled).toBe(false);;
         });
-    
+
         it('should render disabled control if "disabled" flag is set to "true"', () => {
             expect(renderGroup(parcel, { disabled: true }).control.disabled).toBe(true);;
         });
-    
+
         it('should render enabled control if "disabled" flag is set to "false"', () => {
             expect(renderGroup(parcel, { disabled: false }).control.disabled).toBe(false);;
         });
@@ -109,13 +105,13 @@ describe('WFormGroup', () => {
             it('should not assign any validators by default', () => {
                 expect(renderGroup(parcel).control.validator).toBeFalsy();
             });
-    
+
             it('should assign provided validator', () => {
                 const options = { validator: small };
                 expect(renderGroup(largeParcel, options).control.errors).toEqual({ small: true });
                 expect(renderGroup(parcel, options).control.errors).toBeFalsy();
             });
-    
+
             it('should return merged validation result', () => {
                 const options = { validator: [small, light] };
                 expect(renderGroup(heavyAndLargeParcel, options).control.errors).toEqual({ light: true, small: true });
@@ -123,7 +119,7 @@ describe('WFormGroup', () => {
                 expect(renderGroup(largeParcel, options).control.errors).toEqual({ small: true });
                 expect(renderGroup(parcel, options).control.errors).toBeFalsy();
             });
-    
+
             it('should not validate disabled control', () => {
                 expect(renderGroup(largeParcel, { validator: small, disabled: true }).control.errors).toBeFalsy();
             });
@@ -133,13 +129,13 @@ describe('WFormGroup', () => {
             it('should not assign any async validators by default', () => {
                 expect(renderGroup(parcel).control.asyncValidator).toBeFalsy();
             });
-    
+
             it('should assign provided async validator', fakeAsync(() => {
                 const options = { asyncValidator: smallAsync };
                 expect(andTick(renderGroup(largeParcel, options)).control.errors).toEqual({ small: true });
                 expect(andTick(renderGroup(parcel, options)).control.errors).toBeFalsy();
             }));
-    
+
             it('should return merged async validation result', fakeAsync(() => {
                 const options = { asyncValidator: [smallAsync, lightAsync] };
                 expect(andTick(renderGroup(heavyAndLargeParcel, options)).control.errors).toEqual({ light: true, small: true });
@@ -147,7 +143,7 @@ describe('WFormGroup', () => {
                 expect(andTick(renderGroup(largeParcel, options)).control.errors).toEqual({ small: true });
                 expect(andTick(renderGroup(parcel, options)).control.errors).toBeFalsy();
             }));
-    
+
             it('should not run async validator for disabled control', fakeAsync(() => {
                 const form = renderGroup(largeParcel, { asyncValidator: smallAsync, disabled: true });
                 tick();
@@ -286,31 +282,31 @@ describe('WFormGroup', () => {
         it('should render provided value', () => {
             expect(renderGroup(parcel).value).toEqual(parcel);
         });
-    
+
         it('should return only fields mapped to controls', () => {
             expect(renderGroup(fragileParcel).value).toEqual(parcel);
         });
-    
+
         it('should return all fields mapped to controls', () => {
             expect(renderGroup(parcelWithoutVolume).value).toEqual({ ...parcelWithoutVolume, volume: undefined });
         });
-    
+
         it('should return value if "disabled"', () => {
             expect(renderGroup(parcel, { disabled: true }).value).toEqual(parcel);
         });
-    
+
         it('should return value without disabled controls', () => {
             expect(renderGroup(parcel, {}, withDisabledVolume(parcel)).value).toEqual(parcelWithoutVolume);
         });
-    
+
         it('should return rawValue', () => {
             expect(renderGroup(parcel).rawValue).toEqual(parcel);
         });
-    
+
         it('should return rawValue if "disabled"', () => {
             expect(renderGroup(parcel, { disabled: true }).rawValue).toEqual(parcel);
         });
-    
+
         it('should return rawvalue regardless disabled controls', () => {
             expect(renderGroup(parcel, {}, withDisabledVolume(parcel)).rawValue).toEqual(parcel);
         });
@@ -319,33 +315,33 @@ describe('WFormGroup', () => {
     describe('setValue', () => {
         it('should update control if it is called with different value', () => {
             const form = renderGroup(parcel);
-    
+
             const tracker = trackControl(form.control);
 
             const meButOlder = { ...parcel, volume: parcel.volume + 5 };
             form.setValue(meButOlder);
-    
+
             expect(form.value).toEqual(meButOlder);
             expect(tracker.changed).toBe(true);;
         });
-    
+
         it('should not update control if value was not changed', () => {
             const form = renderGroup(parcel);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.setValue({ ...parcel });
-    
+
             expect(tracker.changed).toBe(false);;
         });
-    
+
         it('should not update control if unrelated field was added', () => {
             const form = renderGroup(parcel);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.setValue(fragileParcel);
-    
+
             expect(tracker.changed).toBe(false);;
         });
     });
@@ -353,11 +349,11 @@ describe('WFormGroup', () => {
     describe('update', () => {
         it('should do nothing if it is called without changing a value', () => {
             const form = renderGroup(parcel);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
@@ -365,11 +361,11 @@ describe('WFormGroup', () => {
             const form = renderGroup(parcel);
 
             form.control.setValue(largeParcel);
-    
+
             const tracker = trackControl(form.control);
 
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
@@ -377,11 +373,11 @@ describe('WFormGroup', () => {
             const form = renderGroup(parcel);
 
             form.control.get('volume')!.setValue(parcel.volume + 5);
-    
+
             const tracker = trackControl(form.control);
 
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
     });
@@ -389,11 +385,11 @@ describe('WFormGroup', () => {
     describe('reconcilation', () => {
         it('should switch state of control from enabled to disabled', () => {
             const form = renderDisabledConditionalGroup(largeParcel, 50);
-    
+
             expect(form.control.disabled).toBe(false);;
-    
+
             form.setValue(parcel);
-    
+
             expect(form.control.disabled).toBe(true);;
             expect(form.get('weight').disabled).toBe(true);;
             expect(form.get('volume').disabled).toBe(true);;
@@ -401,11 +397,11 @@ describe('WFormGroup', () => {
 
         it('should switch state of control from disabled to enabled', () => {
             const form = renderDisabledConditionalGroup(parcel, 50);
-    
+
             expect(form.control.disabled).toBe(true);;
-    
+
             form.setValue(largeParcel);
-    
+
             expect(form.control.disabled).toBe(false);;
             expect(form.get('weight').disabled).toBe(false);;
             expect(form.get('volume').disabled).toBe(false);;
@@ -415,11 +411,11 @@ describe('WFormGroup', () => {
             const form = wForm(() => wGroup({ disabled: true }, withWeightAndVolume(parcel)))
                 .updateOnChange(false)
                 .build(parcel);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
@@ -435,11 +431,11 @@ describe('WFormGroup', () => {
                     { disabled: false },
                     withWeightAndVolume(largeParcel, { disabled: true }, { disabled: false }),
                 ]);
-    
+
             expect(form.control.disabled).toBe(false);;
-    
+
             form.setValue(parcel);
-    
+
             expect(form.control.disabled).toBe(true);;
             expect(form.get('weight').disabled).toBe(true);;
             expect(form.get('volume').disabled).toBe(true);;
@@ -457,11 +453,11 @@ describe('WFormGroup', () => {
                     { disabled: false },
                     withWeightAndVolume(largeParcel, { disabled: true }, { disabled: false }),
                 ]);
-    
+
             expect(form.control.disabled).toBe(true);;
-    
+
             form.setValue(largeParcel);
-    
+
             expect(form.control.disabled).toBe(false);;
             expect(form.get('weight').disabled).toBe(true);;
             expect(form.get('volume').disabled).toBe(false);;
@@ -479,12 +475,12 @@ describe('WFormGroup', () => {
                     {},
                     withWeightAndVolume(largeParcel, { disabled: true }, { disabled: false }),
                 ]);
-    
+
             expect(form.get('weight').disabled).toBe(false);;
             expect(form.get('volume').disabled).toBe(true);;
-    
+
             form.setValue(largeParcel);
-    
+
             expect(form.get('weight').disabled).toBe(true);;
             expect(form.get('volume').disabled).toBe(false);;
         });
@@ -492,55 +488,55 @@ describe('WFormGroup', () => {
         describe('validator', () => {
             it('should assign validators', () => {
                 const form = renderConditionalGroup(parcel, 50, [{}], [{ validator: small }]);
-    
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.setValue(largeParcel);
-    
+
                 expect(form.control.errors).toEqual({ small: true });
             });
-    
+
             it('should remove validators', () => {
                 const form = renderConditionalGroup(largeParcel, 50, [{}], [{ validator: small }]);
-        
+
                 expect(form.control.errors).toEqual({ small: true });
-        
+
                 form.setValue(parcel);
-        
+
                 expect(form.control.errors).toBeFalsy();
             });
-    
+
             it('should change validators', () => {
                 const form = renderConditionalGroup(heavyParcel, 50, [{ validator: light }], [{ validator: [small, light] }]);
-        
+
                 expect(form.control.errors).toEqual({ light: true });
-        
+
                 form.setValue(heavyAndLargeParcel);
-        
+
                 expect(form.control.errors).toEqual({ light: true, small: true });
             });
-    
+
             it('should rerender control if value was changed in meantime', () => {
                 const form = renderConditionalGroup(parcel, 50, [{}], [{ validator: small }]);
-        
+
                 form.control.setValue(largeParcel);
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.update();
-    
+
                 expect(form.control.errors).toEqual({ small: true });
             });
-    
+
             it('should do nothing if validators were not changed', () => {
                 const form = wForm(() => wGroup({ validator: [small, light] }, withWeightAndVolume(parcel)))
                     .updateOnChange(false)
                     .build(parcel);
-        
+
                 const tracker = trackControl(form.control);
-        
+
                 form.update();
-        
+
                 expect(tracker.changed).toBe(false);;
             });
         });
@@ -548,75 +544,75 @@ describe('WFormGroup', () => {
         describe('async validator', () => {
             it('should assign async validators', fakeAsync(() => {
                 const form = renderConditionalGroup(parcel, 50, [{}], [{ asyncValidator: smallAsync }]);
-    
+
                 tick();
 
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.setValue(largeParcel);
-    
+
                 tick();
 
                 expect(form.control.errors).toEqual({ small: true });
             }));
-    
+
             it('should remove async validators', fakeAsync(() => {
                 const form = renderConditionalGroup(largeParcel, 50, [{}], [{ asyncValidator: smallAsync }]);
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ small: true });
-        
+
                 form.setValue(parcel);
-        
+
                 tick();
 
                 expect(form.control.errors).toBeFalsy();
             }));
-    
+
             it('should change async validators', fakeAsync(() => {
                 const form = renderConditionalGroup(heavyParcel, 50, [{ asyncValidator: lightAsync }], [{ asyncValidator: [smallAsync, lightAsync] }]);
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ light: true });
-        
+
                 form.setValue(heavyAndLargeParcel);
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ light: true, small: true });
             }));
-    
+
             it('should rerender control if value was changed in meantime', fakeAsync(() => {
                 const form = renderConditionalGroup(parcel, 50, [{}], [{ asyncValidator: smallAsync }]);
-        
+
                 form.control.setValue(largeParcel);
 
                 tick();
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.update();
 
                 tick();
-    
+
                 expect(form.control.errors).toEqual({ small: true });
             }));
-    
+
             it('should do nothing if async validators were not changed', fakeAsync(() => {
                 const form = wForm(() => wGroup({ asyncValidator: [smallAsync, lightAsync] }, withWeightAndVolume(parcel)))
                     .updateOnChange(false)
                     .build(parcel);
-        
+
                 tick();
 
                 const tracker = trackControl(form.control);
-        
+
                 form.update();
 
                 tick();
-        
+
                 expect(tracker.changed).toBe(false);;
             }));
         });
@@ -707,11 +703,11 @@ describe('WFormGroup', () => {
 
         it('should not recreate underlying FormControl', () => {
             const form = renderConditionalGroup(parcel, 50, [{ validator: small }], [{ validator: [small, light] }]);
-    
+
             const control = form.control;
-    
+
             form.setValue(heavyAndLargeParcel);
-    
+
             expect(form.control).toBe(control);
         });
 
@@ -732,13 +728,13 @@ describe('WFormGroup', () => {
                         volume: wControl(),
                     },
                 ]);
-    
+
             expect(form.has('weight')).toBe(true);;
             expect(form.has('volume')).toBe(false);;
             expect(form.value).toEqual({ weight: parcel.weight });
-    
+
             form.setValue(largeParcel);
-    
+
             expect(form.has('weight')).toBe(true);;
             expect(form.has('volume')).toBe(true);;
         });
@@ -760,13 +756,13 @@ describe('WFormGroup', () => {
                         weight: wControl(),
                     },
                 ]);
-    
+
             expect(form.has('weight')).toBe(true);;
             expect(form.has('volume')).toBe(true);;
             expect(form.value).toEqual(parcel);
-            
+
             form.setValue(largeParcel);
-            
+
             expect(form.has('weight')).toBe(true);;
             expect(form.has('volume')).toBe(false);;
             expect(form.value).toEqual({ weight: largeParcel.weight });
@@ -780,7 +776,7 @@ describe('WFormGroup', () => {
             })).updateOnChange(false).build(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
-            
+
             form.setValue(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
@@ -794,7 +790,7 @@ describe('WFormGroup', () => {
             })).updateOnChange(false).build(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
-            
+
             form.setValue(mouse);
 
             expect(form.control.get('weight')).toBeFalsy();
@@ -810,7 +806,7 @@ describe('WFormGroup', () => {
 
             expect(form.control.get('weight')).toBeFalsy();
             expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume });
-            
+
             form.setValue(elephant);
 
             expect(form.control.get('weight')).toBeTruthy();
@@ -827,9 +823,9 @@ describe('WFormGroup', () => {
 
             expect(form.control.get('weight')).toBeTruthy();
             expect(form.value).toEqual(elephant);
-            
+
             form.setValue(mouse);
-            
+
             expect(form.control.get('weight')).toBeFalsy();
             expect(form.value).toEqual({ name: mouse.name, volume: mouse.volume });
         });
@@ -886,7 +882,7 @@ describe('WFormGroup', () => {
                 [{ updateOn: WFormHooks.Blur }]);
 
             form.setValue(largeParcel);
-            
+
             expect(form.control.updateOn).toBe(WFormHooks.Change);
         });
     });
@@ -917,7 +913,7 @@ describe('WFormGroup', () => {
             form.control.disable();
 
             expect(form.control.disabled).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.disabled).toBe(false);;
@@ -929,7 +925,7 @@ describe('WFormGroup', () => {
             form.control.enable();
 
             expect(form.control.disabled).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.disabled).toBe(true);;
@@ -941,7 +937,7 @@ describe('WFormGroup', () => {
             form.control.markAsTouched()
 
             expect(form.control.touched).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(true);;
@@ -961,7 +957,7 @@ describe('WFormGroup', () => {
             form.control.markAsTouched()
 
             expect(form.control.touched).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(false);;
@@ -973,7 +969,7 @@ describe('WFormGroup', () => {
             form.control.markAsUntouched();
 
             expect(form.control.touched).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(true);;
@@ -985,7 +981,7 @@ describe('WFormGroup', () => {
             form.control.markAsDirty()
 
             expect(form.control.dirty).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(true);;
@@ -993,7 +989,7 @@ describe('WFormGroup', () => {
             form.control.markAsPristine();
 
             expect(form.control.dirty).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(false);;
@@ -1005,7 +1001,7 @@ describe('WFormGroup', () => {
             form.control.markAsDirty()
 
             expect(form.control.dirty).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(false);;
@@ -1017,7 +1013,7 @@ describe('WFormGroup', () => {
             form.control.markAsPristine();
 
             expect(form.control.dirty).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(true);;
@@ -1055,17 +1051,17 @@ describe('WFormGroup', () => {
                 ]);
 
                 const group = form.control as FormGroup;
-                
+
                 expect(group.get('tax')).toBeFalsy();
 
                 const taxControl = createTaxControl();
 
                 group.setControl('tax', taxControl);
-    
+
                 expect(group.get('tax')).toBeTruthy();
-    
+
                 form.setValue(largeParcel);
-    
+
                 expect(group.get('tax')).toBe(taxControl);
                 expect(taxControl.value).toEqual(taxData);
         });

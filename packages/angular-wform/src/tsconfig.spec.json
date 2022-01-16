@@ -5,13 +5,28 @@
     "types": [
       "jasmine",
       "node"
-    ]
+    ],
+    "paths": {
+      "angular-wform": [
+        "src/public-api"
+      ],
+      "@angular/core": [
+        "./node_modules/@angular/core"
+      ],
+      "@angular/common": [
+        "./node_modules/@angular/common"
+      ],
+      "@angular/forms": [
+        "./node_modules/@angular/forms"
+      ]
+    }
   },
   "files": [
     "test.ts"
   ],
   "include": [
     "**/*.spec.ts",
+    "../../tests/**/*.spec.ts",
     "**/*.d.ts"
   ]
 }

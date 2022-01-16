@@ -1,8 +1,5 @@
 import { AbstractControl, FormControl, ValidatorFn, Validators } from '@angular/forms';
-import { wControl, wGroup } from '../basic';
-import { wForm } from '../builder';
-import { WValidationStrategy, WValidatorNode } from '../model';
-import { wCompoundValidator, wValidator, wValidatorFactory, WValidators } from '../validators';
+import { wCompoundValidator, wValidator, wValidatorFactory, WValidators, WValidationStrategy, WValidatorNode, wForm, wControl, wGroup } from 'angular-wform';
 import { elephant, even, moreThan10 } from './test-mocks';
 
 const TEST_VALUE = Object.freeze({});
@@ -37,7 +34,7 @@ function hasControlValidator(control: AbstractControl, validator: ValidatorFn): 
     if (!control.validator) {
         return false;
     }
-    
+
     const temporaryControl = new FormControl(TEST_VALUE);
     const errorsToFind = validator(temporaryControl);
     const foundErrors = control.validator(temporaryControl);
@@ -288,7 +285,7 @@ describe('validators', () => {
             it('should call mixer function with validators created by child validation nodes', () => {
                 const factory = jasmine.createSpy();
                 const compoundValidator = wCompoundValidator(factory);
-                
+
                 wForm((n: number) => wControl({
                     validator: compoundValidator(
                         wValidatorFactory(() => testValidator1)(),
@@ -296,7 +293,7 @@ describe('validators', () => {
                         testValidator3,
                     ),
                 })).updateOnChange(false).build(5);
-                
+
                 expect(factory).toHaveBeenCalledTimes(1);
                 expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2, testValidator3]);
             });
@@ -304,7 +301,7 @@ describe('validators', () => {
             it('should assign to control all retrieved validators', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
                 const compoundValidator = wCompoundValidator(factory);
-                
+
                 const form = wForm((n: number) => wControl({
                     validator: compoundValidator(testValidator1),
                 })).updateOnChange(false).build(5);
@@ -319,7 +316,7 @@ describe('validators', () => {
             it('should assign new validators by creating them from child validators', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
                 const compoundValidator = wCompoundValidator(factory);
-                
+
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? undefined : compoundValidator(
                         wValidatorFactory(() => testValidator1)(),
@@ -329,7 +326,7 @@ describe('validators', () => {
                 })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
-                
+
                 expect(factory).toHaveBeenCalledTimes(1);
                 expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2, testValidator3]);
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
@@ -342,13 +339,13 @@ describe('validators', () => {
             it('should remove validators', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
                 const compoundValidator = wCompoundValidator(factory);
-                
+
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? compoundValidator(testValidator1) : undefined,
                 })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator4)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator5)).toBe(false);;
@@ -358,7 +355,7 @@ describe('validators', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
                 const factory1 = () => testValidator1;
                 const compoundValidator = wCompoundValidator(factory);
-                
+
                 const form = wForm((n: number) => wControl({
                     validator: n < 10
                         ? compoundValidator(
@@ -374,7 +371,7 @@ describe('validators', () => {
                 })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
-                
+
                 expect(factory).toHaveBeenCalledTimes(1);
                 expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2, testValidator3]);
                 expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
@@ -385,7 +382,7 @@ describe('validators', () => {
                 const factory = jasmine.createSpy().and.returnValue([testValidator4, testValidator5]);
                 const factory1 = () => testValidator1;
                 const compoundValidator = wCompoundValidator(factory);
-                
+
                 const form = wForm((n: number) => wControl({
                     validator: n < 10
                         ? compoundValidator(
@@ -399,7 +396,7 @@ describe('validators', () => {
                 })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
-                
+
                 expect(factory).toHaveBeenCalledTimes(1);
                 expect(factory).toHaveBeenCalledWith([testValidator1, testValidator2]);
                 expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
@@ -414,7 +411,7 @@ describe('validators', () => {
                     .returnValue(testValidator5);
                 const factory1 = () => testValidator1;
                 const compoundValidator = wCompoundValidator(factory);
-                
+
                 const form = wForm((n: number) => wControl({
                     validator: compoundValidator(
                         wValidatorFactory<V3>(factory1)(),
@@ -423,7 +420,7 @@ describe('validators', () => {
                 })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
-                
+
                 expect(factory).toHaveBeenCalledTimes(2);
                 expect(hasControlValidator(form.control, testValidator4)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator5)).toBe(true);;
@@ -434,7 +431,7 @@ describe('validators', () => {
                 const factory2 = jasmine.createSpy().and.returnValue([testValidator3, testValidator4]);
                 const compoundValidator1 = wCompoundValidator(factory1);
                 const compoundValidator2 = wCompoundValidator(factory2);
-                
+
                 const form = wForm((n: number) => wControl({
                     validator: n < 10
                         ? compoundValidator1(testValidator5)
@@ -442,7 +439,7 @@ describe('validators', () => {
                 })).updateOnChange(false).build<number>(5);
 
                 form.setValue(20);
-                
+
                 expect(factory1).toHaveBeenCalledTimes(1);
                 expect(factory1).toHaveBeenCalledWith([testValidator5]);
                 expect(factory2).toHaveBeenCalledTimes(1);
@@ -478,68 +475,68 @@ describe('validators', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
                 })).updateOnChange(false).build(5);
-    
+
                 form.control.setValidators(null);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
-    
+
                 form.update();
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
-    
+
             it('should not remove other validators', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
                 })).updateOnChange(false).build(5);
-    
+
                 form.control.setValidators([form.control.validator!, testValidator2]);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
-                
+
                 form.update();
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
             });
-    
+
             it('should not remove other validators, if set of validators was modified', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
                 })).updateOnChange(false).build<number>(5);
-                
+
                 form.control.setValidators([form.control.validator!, testValidator3]);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
-                
+
                 form.setValue(20);
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
             });
-    
+
             it('should update set of validators, even if initial validator was composed', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
                 })).updateOnChange(false).build<number>(5);
-                
+
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
 
                 form.update();
 
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator4]));
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
-                
+
                 form.setValue(20);
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
@@ -554,69 +551,69 @@ describe('validators', () => {
                 })).updateOnChange(false)
                     .validationStrategy(WValidationStrategy.Replace)
                     .build(5);
-    
+
                 form.control.setValidators(null);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
-    
+
                 form.update();
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
-    
+
             it('should remove other validators', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
                 })).updateOnChange(false)
                     .validationStrategy(WValidationStrategy.Replace)
                     .build(5);
-    
+
                 form.control.setValidators([form.control.validator!, testValidator2]);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
-                
+
                 form.update();
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
             });
-    
+
             it('should remove other validators, if set of validators was modified', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
                 })).updateOnChange(false)
                     .validationStrategy(WValidationStrategy.Replace)
                     .build<number>(5);
-    
+
                 form.control.setValidators([form.control.validator!, testValidator3]);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
-                
+
                 form.setValue(20);
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(false);;
             });
-    
+
             it('should replace set of validators, even if initial validator was composed', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
                 })).updateOnChange(false)
                     .validationStrategy(WValidationStrategy.Replace)
                     .build<number>(5);
-    
+
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
-                
+
                 form.setValue(20);
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(false);;
@@ -635,15 +632,15 @@ describe('validators', () => {
                     }),
                 })).updateOnChange(false)
                     .build(elephant);
-    
+
                 const volumeControl = form.get('volume');
                 const weightControl = form.get('weight');
 
                 volumeControl.setValidators([volumeControl.validator!, testValidator2]);
                 weightControl.setValidators([weightControl.validator!, testValidator4]);
-                
+
                 form.update();
-                
+
                 expect(hasControlValidator(volumeControl, testValidator1)).toBe(true);;
                 expect(hasControlValidator(volumeControl, testValidator2)).toBe(false);;
                 expect(hasControlValidator(weightControl, testValidator3)).toBe(true);;
@@ -661,15 +658,15 @@ describe('validators', () => {
                     }),
                 })).updateOnChange(false)
                     .build(elephant);
-    
+
                 const rootControl = form.control;
                 const weightControl = form.get('weight');
 
                 rootControl.setValidators([rootControl.validator!, testValidator2]);
                 weightControl.setValidators([weightControl.validator!, testValidator4]);
-                
+
                 form.update();
-                
+
                 expect(hasControlValidator(rootControl, testValidator1)).toBe(true);;
                 expect(hasControlValidator(rootControl, testValidator2)).toBe(false);;
                 expect(hasControlValidator(weightControl, testValidator3)).toBe(true);;
@@ -685,16 +682,16 @@ describe('validators', () => {
                 })).validationStrategy(WValidationStrategy.Replace)
                     .updateOnChange(false)
                     .build(5);
-    
+
                 form.control.setValidators(null);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
-    
+
                 form.update();
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
-    
+
             it('should not remove other validators', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
@@ -702,18 +699,18 @@ describe('validators', () => {
                 })).validationStrategy(WValidationStrategy.Replace)
                     .updateOnChange(false)
                     .build(5);
-    
+
                 form.control.setValidators([form.control.validator!, testValidator2]);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
-                
+
                 form.update();
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
             });
-    
+
             it('should not remove other validators, if set of validators was modified', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
@@ -721,20 +718,20 @@ describe('validators', () => {
                 })).validationStrategy(WValidationStrategy.Replace)
                     .updateOnChange(false)
                     .build<number>(5);
-                
+
                 form.control.setValidators([form.control.validator!, testValidator3]);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
-                
+
                 form.setValue(20);
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
             });
-    
+
             it('should update set of validators, even if initial validator was composed', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
@@ -742,20 +739,20 @@ describe('validators', () => {
                 })).validationStrategy(WValidationStrategy.Replace)
                     .updateOnChange(false)
                     .build<number>(5);
-                
+
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
 
                 form.update();
 
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator4]));
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator4)).toBe(true);;
-                
+
                 form.setValue(20);
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
@@ -771,16 +768,16 @@ describe('validators', () => {
                 })).updateOnChange(false)
                     .validationStrategy(WValidationStrategy.Append)
                     .build(5);
-    
+
                 form.control.setValidators(null);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
-    
+
                 form.update();
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
             });
-    
+
             it('should remove other validators', () => {
                 const form = wForm((n: number) => wControl({
                     validator: wValidator(testValidator1),
@@ -788,18 +785,18 @@ describe('validators', () => {
                 })).updateOnChange(false)
                     .validationStrategy(WValidationStrategy.Append)
                     .build(5);
-    
+
                 form.control.setValidators([form.control.validator!, testValidator2]);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
-                
+
                 form.update();
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
             });
-    
+
             it('should remove other validators, if set of validators was modified', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
@@ -807,20 +804,20 @@ describe('validators', () => {
                 })).updateOnChange(false)
                     .validationStrategy(WValidationStrategy.Append)
                     .build<number>(5);
-    
+
                 form.control.setValidators([form.control.validator!, testValidator3]);
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
-                
+
                 form.setValue(20);
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(false);;
             });
-    
+
             it('should replace set of validators, even if initial validator was composed', () => {
                 const form = wForm((n: number) => wControl({
                     validator: n < 10 ? wValidator(testValidator1) : wValidator(testValidator2),
@@ -828,15 +825,15 @@ describe('validators', () => {
                 })).updateOnChange(false)
                     .validationStrategy(WValidationStrategy.Append)
                     .build<number>(5);
-    
+
                 form.control.setValidators(Validators.compose([form.control.validator!, testValidator3]));
-    
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(true);;
-                
+
                 form.setValue(20);
-                
+
                 expect(hasControlValidator(form.control, testValidator1)).toBe(false);;
                 expect(hasControlValidator(form.control, testValidator2)).toBe(true);;
                 expect(hasControlValidator(form.control, testValidator3)).toBe(false);;

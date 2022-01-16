@@ -1,9 +1,5 @@
 import { fakeAsync, tick } from '@angular/core/testing';
-import { wControl, WFormControlOptions } from '../basic';
-import { wForm } from '../builder';
-import { WForm } from '../form';
-import { WFormHooks } from '../model';
-import { getLastFormNode } from '../reconcilation';
+import { getLastFormNode, WFormHooks, WForm, wForm, wControl, WFormControlOptions } from 'angular-wform';
 import { even, evenAsync, moreThan10, moreThan10Async } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
@@ -26,15 +22,15 @@ describe('WFormControl', () => {
         it('should render control', () => {
             expect(renderNumber(1).control).toBeTruthy();
         });
-    
+
         it('should render enabled control, by default', () => {
             expect(renderNumber(1).control.disabled).toBe(false);;
         });
-    
+
         it('should render disabled control if "disabled" flag is set to "true"', () => {
             expect(renderNumber(1, { disabled: true }).control.disabled).toBe(true);;
         });
-    
+
         it('should render enabled control if "disabled" flag is set to "false"', () => {
             expect(renderNumber(1, { disabled: false }).control.disabled).toBe(false);;
         });
@@ -43,17 +39,17 @@ describe('WFormControl', () => {
             it('should not assign any validators by default', () => {
                 expect(renderNumber(1).control.validator).toBeFalsy();
             });
-    
+
             it('should assign required validator if "required" is true', () => {
                 expect(renderNumber(null as any, { required: true }).control.errors).toEqual({ required: true });
             });
-    
+
             it('should assign provided validator', () => {
                 const options = { validator: moreThan10 };
                 expect(renderNumber(1, options).control.errors).toEqual({ min: true });
                 expect(renderNumber(100, options).control.errors).toBeFalsy();
             });
-    
+
             it('should return merged validation result', () => {
                 const options = { validator: [moreThan10, even] };
                 expect(renderNumber(1, options).control.errors).toEqual({ min: true, even: true });
@@ -61,18 +57,18 @@ describe('WFormControl', () => {
                 expect(renderNumber(13, options).control.errors).toEqual({ even: true });
                 expect(renderNumber(100, options).control.errors).toBeFalsy();
             });
-    
+
             it('should prefer required validator over all other validators', () => {
                 const options = {
                     required: true,
                     validator: moreThan10,
                 };
-    
+
                 expect(renderNumber(null as any, options).control.errors).toEqual({ required: true });
                 expect(renderNumber(1, options).control.errors).toEqual({ min: true });
                 expect(renderNumber(100, options).control.errors).toBeFalsy();
             });
-    
+
             it('should not validate disabled control', () => {
                 expect(renderNumber(null as any, { required: true, disabled: true }).control.errors).toBeFalsy();
             });
@@ -82,14 +78,14 @@ describe('WFormControl', () => {
             it('should not assign any async validators by default', () => {
                 expect(renderNumber(1).control.asyncValidator).toBeFalsy();
             });
-    
+
             it('should assign provided async validator', fakeAsync(() => {
                 const options = { asyncValidator: moreThan10Async };
 
                 expect(andTick(renderNumber(1, options)).control.errors).toEqual({ min: true });
                 expect(andTick(renderNumber(100, options)).control.errors).toBeFalsy();
             }));
-    
+
             it('should return merged async validation result', fakeAsync(() => {
                 const options = { asyncValidator: [moreThan10Async, evenAsync] };
                 expect(andTick(renderNumber(1, options)).control.errors).toEqual({ min: true, even: true });
@@ -97,7 +93,7 @@ describe('WFormControl', () => {
                 expect(andTick(renderNumber(13, options)).control.errors).toEqual({ even: true });
                 expect(andTick(renderNumber(100, options)).control.errors).toBeFalsy();
             }));
-    
+
             it('should not run async validator for disabled control', fakeAsync(() => {
                 const form = renderNumber(null as any, { asyncValidator: moreThan10Async, disabled: true });
                 tick();
@@ -174,15 +170,15 @@ describe('WFormControl', () => {
         it('should render provided value', () => {
             expect(renderNumber(1).value).toBe(1);
         });
-    
+
         it('should return value if "disabled"', () => {
             expect(renderNumber(1, { disabled: true }).value).toBe(1);
         });
-    
+
         it('should return rawValue', () => {
             expect(renderNumber(1).rawValue).toBe(1);
         });
-    
+
         it('should return rawValue if "disabled"', () => {
             expect(renderNumber(1, { disabled: true }).rawValue).toBe(1);
         });
@@ -191,22 +187,22 @@ describe('WFormControl', () => {
     describe('setValue', () => {
         it('should update control if it is called with different value', () => {
             const form = renderNumber(1);
-    
+
             const tracker = trackControl(form.control);
 
             form.setValue(5);
-    
+
             expect(form.value).toBe(5);
             expect(tracker.changed).toBe(true);;
         });
-    
+
         it('should not update control if value was not changed', () => {
             const form = renderNumber(1);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.setValue(1);
-    
+
             expect(tracker.changed).toBe(false);;
         });
     });
@@ -214,11 +210,11 @@ describe('WFormControl', () => {
     describe('update', () => {
         it('should do nothing if it is called without changing a value', () => {
             const form = renderNumber(1);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
@@ -226,11 +222,11 @@ describe('WFormControl', () => {
             const form = renderNumber(1);
 
             form.control.setValue(5);
-    
+
             const tracker = trackControl(form.control);
 
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
     });
@@ -238,21 +234,21 @@ describe('WFormControl', () => {
     describe('reconcilation', () => {
         it('should switch state of control from enabled to disabled', () => {
             const form = renderDisabledConditionalNumber(7, 5);
-    
+
             expect(form.control.disabled).toBe(false);;
-    
+
             form.setValue(2);
-    
+
             expect(form.control.disabled).toBe(true);;
         });
 
         it('should switch state of control from disabled to enabled', () => {
             const form = renderDisabledConditionalNumber(2, 5);
-    
+
             expect(form.control.disabled).toBe(true);;
-    
+
             form.setValue(7);
-    
+
             expect(form.control.disabled).toBe(false);;
         });
 
@@ -260,66 +256,66 @@ describe('WFormControl', () => {
             const form = wForm((v: number) => wControl({ disabled: true }))
                 .updateOnChange(false)
                 .build(2);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
         describe('validator', () => {
             it('should assign validators', () => {
                 const form = renderConditionalNumber(2, 5, {}, { validator: moreThan10 });
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.setValue(7);
-        
+
                 expect(form.control.errors).toEqual({ min: true });
             });
-    
+
             it('should remove validators', () => {
                 const form = renderConditionalNumber(7, 5, {}, { validator: moreThan10 });
-        
+
                 expect(form.control.errors).toEqual({ min: true });
-        
+
                 form.setValue(2);
-        
+
                 expect(form.control.errors).toBeFalsy();
             });
-    
+
             it('should change validators', () => {
                 const form = renderConditionalNumber(1, 5, { validator: moreThan10 }, { validator: [moreThan10, even] });
-        
+
                 expect(form.control.errors).toEqual({ min: true });
-        
+
                 form.setValue(7);
-        
+
                 expect(form.control.errors).toEqual({ min: true, even: true });
             });
-    
+
             it('should rerender control if value was changed in meantime', () => {
                 const form = renderConditionalNumber(2, 5, {}, { validator: moreThan10 });
-        
+
                 form.control.setValue(7);
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.update();
-    
+
                 expect(form.control.errors).toEqual({ min: true });
             });
-    
+
             it('should do nothing if validators were not changed', () => {
                 const form = wForm((v: number) => wControl({ required: true, validator: [moreThan10, even] }))
                     .updateOnChange(false)
                     .build(1);
-        
+
                 const tracker = trackControl(form.control);
-        
+
                 form.update();
-        
+
                 expect(tracker.changed).toBe(false);;
             });
         });
@@ -327,73 +323,73 @@ describe('WFormControl', () => {
         describe('async validator', () => {
             it('should assign async validators', fakeAsync(() => {
                 const form = renderConditionalNumber(2, 5, {}, { asyncValidator: moreThan10Async });
-        
+
                 tick();
 
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.setValue(7);
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ min: true });
             }));
-    
+
             it('should remove async validators', fakeAsync(() => {
                 const form = renderConditionalNumber(7, 5, {}, { asyncValidator: moreThan10Async });
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ min: true });
-        
+
                 form.setValue(2);
 
                 tick();
-        
+
                 expect(form.control.errors).toBeFalsy();
             }));
-    
+
             it('should change async validators', fakeAsync(() => {
                 const form = renderConditionalNumber(1, 5, { validator: moreThan10 }, { validator: [moreThan10, even] });
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ min: true });
-        
+
                 form.setValue(7);
 
                 tick();
-        
+
                 expect(form.control.errors).toEqual({ min: true, even: true });
             }));
-    
+
             it('should rerender control if value was changed in meantime', fakeAsync(() => {
                 const form = renderConditionalNumber(2, 5, {}, { validator: moreThan10 });
-        
+
                 tick();
 
                 form.control.setValue(7);
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.update();
-    
+
                 tick();
 
                 expect(form.control.errors).toEqual({ min: true });
             }));
-    
+
             it('should do nothing if async validators were not changed', fakeAsync(() => {
                 const form = wForm((v: number) => wControl({ required: true, validator: [moreThan10, even] }))
                     .updateOnChange(false)
                     .build(1);
-        
+
                 tick();
 
                 const tracker = trackControl(form.control);
-        
+
                 form.update();
-        
+
                 tick();
 
                 expect(tracker.changed).toBe(false);;
@@ -496,11 +492,11 @@ describe('WFormControl', () => {
 
         it('should not recreate underlying FormControl', () => {
             const form = renderConditionalNumber(1, 5, { validator: moreThan10 }, { validator: [moreThan10, even] });
-    
+
             const control = form.control;
-    
+
             form.setValue(7);
-    
+
             expect(form.control).toBe(control);
         });
 
@@ -508,7 +504,7 @@ describe('WFormControl', () => {
             const form = renderConditionalNumber(2, 5, { updateOn: WFormHooks.Change }, { updateOn: WFormHooks.Blur });
 
             form.setValue(7);
-            
+
             expect(form.control.updateOn).toBe(WFormHooks.Change);
         });
     });
@@ -539,7 +535,7 @@ describe('WFormControl', () => {
             form.control.disable();
 
             expect(form.control.disabled).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.disabled).toBe(false);;
@@ -551,7 +547,7 @@ describe('WFormControl', () => {
             form.control.enable();
 
             expect(form.control.disabled).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.disabled).toBe(true);;
@@ -563,7 +559,7 @@ describe('WFormControl', () => {
             form.control.markAsTouched()
 
             expect(form.control.touched).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(true);;
@@ -583,7 +579,7 @@ describe('WFormControl', () => {
             form.control.markAsTouched()
 
             expect(form.control.touched).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(false);;
@@ -595,7 +591,7 @@ describe('WFormControl', () => {
             form.control.markAsUntouched();
 
             expect(form.control.touched).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(true);;
@@ -607,7 +603,7 @@ describe('WFormControl', () => {
             form.control.markAsDirty()
 
             expect(form.control.dirty).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(true);;
@@ -615,7 +611,7 @@ describe('WFormControl', () => {
             form.control.markAsPristine();
 
             expect(form.control.dirty).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(false);;
@@ -627,7 +623,7 @@ describe('WFormControl', () => {
             form.control.markAsDirty()
 
             expect(form.control.dirty).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(false);;
@@ -639,7 +635,7 @@ describe('WFormControl', () => {
             form.control.markAsPristine();
 
             expect(form.control.dirty).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(true);;

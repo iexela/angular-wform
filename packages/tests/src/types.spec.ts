@@ -1,6 +1,5 @@
-import { wArray, wControl, wGroup, wValue } from '../basic';
-import { wForm } from '../builder';
-import { Is } from '../common';
+import { wForm, wArray, wControl, wGroup, wValue } from 'angular-wform';
+import { Is } from './common';
 import { GetField, HasField, must } from './test-types';
 
 interface Spaceship {
@@ -19,7 +18,7 @@ describe('type', () => {
             const form = wForm(() => wControl())
                 .updateOnChange(false)
                 .build(1);
-    
+
             must<Is<typeof form.value, any>>(true);
         });
 
@@ -27,47 +26,47 @@ describe('type', () => {
             const form = wForm(() => wControl({ value: '1' }))
                 .updateOnChange(false)
                 .build('1');
-    
+
             must<Is<typeof form.value, string>>(true);
         });
-    
+
         it('should be equal to value type', () => {
             const form = wForm((n: number) => wControl())
                 .updateOnChange(false)
                 .build(1);
-    
+
             must<Is<typeof form.value, number>>(true);
         });
-    
+
         it('should be equal to value type (complex type)', () => {
             const form = wForm((n: Spaceship) => wControl())
                 .updateOnChange(false)
                 .build(first);
-    
+
             must<Is<typeof form.value, Spaceship>>(true);
         });
-    
+
         it('should be equal to value type (| undefined)', () => {
             const form = wForm((n: number | undefined) => wControl())
                 .updateOnChange(false)
                 .build(1);
-    
+
             must<Is<typeof form.value, number | undefined>>(true);
         });
-    
+
         it('should be equal to value type (| null)', () => {
             const form = wForm((n: number | null) => wControl())
                 .updateOnChange(false)
                 .build(1);
-    
+
             must<Is<typeof form.value, number | null>>(true);
         });
-    
+
         it('should be equal to value type (| null | undefined)', () => {
             const form = wForm((n: number | null | undefined) => wControl())
                 .updateOnChange(false)
                 .build(1);
-    
+
             must<Is<typeof form.value, number | null | undefined>>(true);
         });
 
@@ -75,7 +74,7 @@ describe('type', () => {
             const form = wForm((n: number) => wControl({ value: 1 }))
                 .updateOnChange(false)
                 .build(1);
-    
+
             must<Is<typeof form.value, number>>(true);
         });
     });
@@ -191,7 +190,7 @@ describe('type', () => {
 
             must<HasField<typeof form.value, 'price'>>(false);
         });
-        
+
         it('should not declare additional field if value is passed into control', () => {
             type TestSpaceship = {
                 name: string;

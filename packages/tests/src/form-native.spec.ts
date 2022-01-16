@@ -1,9 +1,6 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { AbstractControl, FormControl } from '@angular/forms';
-import { WFormNativeOptions, wNative } from '../basic';
-import { wForm } from '../builder';
-import { WForm } from '../form';
-import { getLastFormNode } from '../reconcilation';
+import { getLastFormNode, WForm, wForm, WFormNativeOptions, wNative } from 'angular-wform';
 import { belarusToRussia, createFlightForm, even, evenAsync, moreThan10, moreThan10Async, russiaToBelarus } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 
@@ -29,15 +26,15 @@ describe('WFormNative', () => {
             const control = testControl(1);
             expect(renderControl(control).control).toBe(control);
         });
-    
+
         it('should render enabled control, by default', () => {
             expect(renderControl(testControl(1)).control.disabled).toBe(false);;
         });
-    
+
         it('should render disabled control if "disabled" flag is set to "true"', () => {
             expect(renderControl(testControl(1), { disabled: true }).control.disabled).toBe(true);;
         });
-    
+
         it('should render enabled control if "disabled" flag is set to "false"', () => {
             expect(renderControl(testControl(1), { disabled: false }).control.disabled).toBe(false);;
         });
@@ -58,13 +55,13 @@ describe('WFormNative', () => {
             it('should not assign any validators by default', () => {
                 expect(renderControl(testControl(1)).control.validator).toBeFalsy();
             });
-    
+
             it('should assign provided validator', () => {
                 const options = { validator: moreThan10 };
                 expect(renderControl(testControl(1), options).control.errors).toEqual({ min: true });
                 expect(renderControl(testControl(100), options).control.errors).toBeFalsy();
             });
-    
+
             it('should return merged validation result', () => {
                 const options = { validator: [moreThan10, even] };
                 expect(renderControl(testControl(1), options).control.errors).toEqual({ min: true, even: true });
@@ -72,7 +69,7 @@ describe('WFormNative', () => {
                 expect(renderControl(testControl(13), options).control.errors).toEqual({ even: true });
                 expect(renderControl(testControl(100), options).control.errors).toBeFalsy();
             });
-    
+
             it('should not validate disabled control', () => {
                 expect(renderControl(testControl(1), { validator: even, disabled: true }).control.errors).toBeFalsy();
             });
@@ -82,14 +79,14 @@ describe('WFormNative', () => {
             it('should not assign any async validators by default', () => {
                 expect(renderControl(testControl(1)).control.asyncValidator).toBeFalsy();
             });
-    
+
             it('should assign provided async validator', fakeAsync(() => {
                 const options = { asyncValidator: moreThan10Async };
 
                 expect(andTick(renderControl(testControl(1), options)).control.errors).toEqual({ min: true });
                 expect(andTick(renderControl(testControl(100), options)).control.errors).toBeFalsy();
             }));
-    
+
             it('should return merged async validation result', fakeAsync(() => {
                 const options = { asyncValidator: [moreThan10Async, evenAsync] };
                 expect(andTick(renderControl(testControl(1), options)).control.errors).toEqual({ min: true, even: true });
@@ -97,7 +94,7 @@ describe('WFormNative', () => {
                 expect(andTick(renderControl(testControl(13), options)).control.errors).toEqual({ even: true });
                 expect(andTick(renderControl(testControl(100), options)).control.errors).toBeFalsy();
             }));
-    
+
             it('should not run async validator for disabled control', fakeAsync(() => {
                 const form = renderControl(testControl(1), { asyncValidator: moreThan10Async, disabled: true });
                 tick();
@@ -210,15 +207,15 @@ describe('WFormNative', () => {
         it('should render value of provided control', () => {
             expect(renderControl(testControl(1)).value).toBe(1);
         });
-    
+
         it('should return value if "disabled"', () => {
             expect(renderControl(testControl(1), { disabled: true }).value).toBe(1);
         });
-    
+
         it('should return rawValue', () => {
             expect(renderControl(testControl(1)).rawValue).toBe(1);
         });
-    
+
         it('should return rawValue if "disabled"', () => {
             expect(renderControl(testControl(1), { disabled: true }).rawValue).toBe(1);
         });
@@ -227,48 +224,48 @@ describe('WFormNative', () => {
     describe('setValue', () => {
         it('should update control if it is called with different value', () => {
             const form = renderControl(testControl(1));
-    
+
             const tracker = trackControl(form.control);
 
             form.setValue(5);
-    
+
             expect(form.value).toBe(5);
             expect(tracker.changed).toBe(true);;
         });
-    
+
         it('should not update control if value was not changed', () => {
             const form = renderControl(testControl(1));
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.setValue(1);
-    
+
             expect(tracker.changed).toBe(false);;
         });
-    
+
         it('should not modify control if value is the same', () => {
             const control = createFlightForm(belarusToRussia);
             const form = wForm(() => wNative(control))
                 .updateOnChange(false)
                 .build(belarusToRussia);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.setValue({ ...belarusToRussia, tax: 123 });
-    
+
             expect(tracker.changed).toBe(false);;
         });
-    
+
         it('should modify control if value is different', () => {
             const control = createFlightForm(belarusToRussia);
             const form = wForm(() => wNative(control))
                 .updateOnChange(false)
                 .build(belarusToRussia);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.setValue(russiaToBelarus);
-    
+
             expect(tracker.changed).toBe(true);;
         });
     });
@@ -276,11 +273,11 @@ describe('WFormNative', () => {
     describe('update', () => {
         it('should do nothing if it is called without changing a value', () => {
             const form = renderControl(testControl(1));
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
@@ -288,11 +285,11 @@ describe('WFormNative', () => {
             const form = renderControl(testControl(1));
 
             form.control.setValue(5);
-    
+
             const tracker = trackControl(form.control);
 
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
     });
@@ -324,23 +321,23 @@ describe('WFormNative', () => {
 
         it('should switch state of control from enabled to disabled', () => {
             const form = renderConditionalControl(testControl(7), 5, { disabled: true }, { disabled: false });
-    
+
             expect(form.control.disabled).toBe(false);;
-    
+
             form.control.setValue(2);
             form.update();
-            
+
             expect(form.control.disabled).toBe(true);;
         });
-        
+
         it('should switch state of control from disabled to enabled', () => {
             const form = renderConditionalControl(testControl(2), 5, { disabled: true }, { disabled: false });
-            
+
             expect(form.control.disabled).toBe(true);;
-            
+
             form.control.setValue(7);
             form.update();
-    
+
             expect(form.control.disabled).toBe(false);;
         });
 
@@ -349,67 +346,67 @@ describe('WFormNative', () => {
             const form = wForm(() => wNative(control, { disabled: true }))
                 .updateOnChange(false)
                 .build(2);
-    
+
             const tracker = trackControl(form.control);
-    
+
             form.update();
-    
+
             expect(tracker.changed).toBe(false);;
         });
 
         describe('validator', () => {
             it('should assign validators', () => {
                 const form = renderConditionalControl(testControl(2), 5, {}, { validator: moreThan10 });
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.setValue(7);
-        
+
                 expect(form.control.errors).toEqual({ min: true });
             });
-    
+
             it('should remove validators', () => {
                 const form = renderConditionalControl(testControl(7), 5, {}, { validator: moreThan10 });
-        
+
                 expect(form.control.errors).toEqual({ min: true });
-        
+
                 form.setValue(2);
-        
+
                 expect(form.control.errors).toBeFalsy();
             });
-    
+
             it('should change validators', () => {
                 const form = renderConditionalControl(testControl(1), 5, { validator: moreThan10 }, { validator: [moreThan10, even] });
-        
+
                 expect(form.control.errors).toEqual({ min: true });
-        
+
                 form.setValue(7);
-        
+
                 expect(form.control.errors).toEqual({ min: true, even: true });
             });
-    
+
             it('should rerender control if value was changed in meantime', () => {
                 const form = renderConditionalControl(testControl(2), 5, {}, { validator: moreThan10 });
-        
+
                 form.control.setValue(7);
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.update();
-    
+
                 expect(form.control.errors).toEqual({ min: true });
             });
-    
+
             it('should do nothing if validators were not changed', () => {
                 const control = testControl(1);
                 const form = wForm(() => wNative(control, { validator: [moreThan10, even] }))
                     .updateOnChange(false)
                     .build(1);
-        
+
                 const tracker = trackControl(form.control);
-        
+
                 form.update();
-        
+
                 expect(tracker.changed).toBe(false);;
             });
         });
@@ -417,74 +414,74 @@ describe('WFormNative', () => {
         describe('async validator', () => {
             it('should assign async validators', fakeAsync(() => {
                 const form = renderConditionalControl(testControl(2), 5, {}, { asyncValidator: moreThan10Async });
-        
+
                 tick();
 
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.setValue(7);
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ min: true });
             }));
-    
+
             it('should remove async validators', fakeAsync(() => {
                 const form = renderConditionalControl(testControl(7), 5, {}, { asyncValidator: moreThan10Async });
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ min: true });
-        
+
                 form.setValue(2);
 
                 tick();
-        
+
                 expect(form.control.errors).toBeFalsy();
             }));
-    
+
             it('should change async validators', fakeAsync(() => {
                 const form = renderConditionalControl(testControl(1), 5, { validator: moreThan10 }, { validator: [moreThan10, even] });
-        
+
                 tick();
 
                 expect(form.control.errors).toEqual({ min: true });
-        
+
                 form.setValue(7);
 
                 tick();
-        
+
                 expect(form.control.errors).toEqual({ min: true, even: true });
             }));
-    
+
             it('should rerender control if value was changed in meantime', fakeAsync(() => {
                 const form = renderConditionalControl(testControl(2), 5, {}, { validator: moreThan10 });
-        
+
                 tick();
 
                 form.control.setValue(7);
-        
+
                 expect(form.control.errors).toBeFalsy();
-        
+
                 form.update();
-    
+
                 tick();
 
                 expect(form.control.errors).toEqual({ min: true });
             }));
-    
+
             it('should do nothing if async validators were not changed', fakeAsync(() => {
                 const control = testControl(1);
                 const form = wForm((v: number) => wNative(control, { validator: [moreThan10, even] }))
                     .updateOnChange(false)
                     .build(1);
-        
+
                 tick();
 
                 const tracker = trackControl(form.control);
-        
+
                 form.update();
-        
+
                 tick();
 
                 expect(tracker.changed).toBe(false);;
@@ -599,12 +596,12 @@ describe('WFormNative', () => {
 
         it('should not recreate underlying FormControl', () => {
             const form = renderConditionalControl(testControl(1), 5, { validator: moreThan10 }, { validator: [moreThan10, even] });
-    
+
             const control = form.control;
-    
+
             form.control.setValue(7);
             form.update();
-    
+
             expect(form.control).toBe(control);
         });
     })
@@ -636,7 +633,7 @@ describe('WFormNative', () => {
             form.control.disable();
 
             expect(form.control.disabled).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.disabled).toBe(false);;
@@ -648,7 +645,7 @@ describe('WFormNative', () => {
             form.control.enable();
 
             expect(form.control.disabled).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.disabled).toBe(true);;
@@ -660,7 +657,7 @@ describe('WFormNative', () => {
             form.control.markAsTouched()
 
             expect(form.control.touched).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(true);;
@@ -680,7 +677,7 @@ describe('WFormNative', () => {
             form.control.markAsTouched()
 
             expect(form.control.touched).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(false);;
@@ -692,7 +689,7 @@ describe('WFormNative', () => {
             form.control.markAsUntouched();
 
             expect(form.control.touched).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.touched).toBe(true);;
@@ -704,7 +701,7 @@ describe('WFormNative', () => {
             form.control.markAsDirty()
 
             expect(form.control.dirty).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(true);;
@@ -712,7 +709,7 @@ describe('WFormNative', () => {
             form.control.markAsPristine();
 
             expect(form.control.dirty).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(false);;
@@ -724,7 +721,7 @@ describe('WFormNative', () => {
             form.control.markAsDirty()
 
             expect(form.control.dirty).toBe(true);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(false);;
@@ -736,7 +733,7 @@ describe('WFormNative', () => {
             form.control.markAsPristine();
 
             expect(form.control.dirty).toBe(false);;
-            
+
             form.update();
 
             expect(form.control.dirty).toBe(true);;

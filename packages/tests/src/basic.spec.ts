@@ -1,10 +1,5 @@
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
-import { wArray, wControl, wGroup, wNative, wPortal, wSkip } from '../basic';
-import { wForm } from '../builder';
-import { WForm } from '../form';
-import { WFormNodeType } from '../model';
-import { dataChanges, getData, getLastFormNode } from '../reconcilation';
-import { WValidators } from '../validators';
+import { wGroup, wControl, wNative, wPortal, wSkip, wArray, wForm, WForm, WFormNodeType, dataChanges, getData, getLastFormNode, WValidators } from 'angular-wform';
 import { belarusToAustralia, belarusToRussia, Box, createFlightForm, createFlightWNode, createTaxControl, elephant, Flight, mouse, russiaToBelarus, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
 const flightFactory = (value: Flight) => wGroup({
@@ -26,37 +21,37 @@ describe('basic', () => {
         it('should accept initial value', () => {
             const fn = jasmine.createSpy('virtual-fn').and.returnValue(wControl());
             wForm(fn).updateOnChange(false).build(1);
-    
+
             expect(fn.calls.count()).toBe(1);
             expect(fn.calls.mostRecent().args[0]).toBe(1);
         });
-    
+
         it('should accept value passed into "setValue" method', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
             const form = wForm(fn).updateOnChange(false).build(1);
-    
+
             form.setValue(5);
-    
+
             expect(fn.calls.count()).toBe(2);
             expect(fn.calls.mostRecent().args[0]).toBe(5);
         });
-    
+
         it('should accept current value if "update" is called', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
             const form = wForm(fn).updateOnChange(false).build(1);
-    
+
             form.update();
-    
+
             expect(fn.calls.count()).toBe(2);
             expect(fn.calls.mostRecent().args[0]).toBe(1);
         });
-    
+
         it('should not be called if value was changed using "control.setValue"', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
             const form = wForm(fn).updateOnChange(false).build(1);
-    
+
             form.control.setValue(5);
-    
+
             expect(fn.calls.count()).toBe(1);
             expect(fn.calls.mostRecent().args[0]).toBe(1);
         });
@@ -66,17 +61,17 @@ describe('basic', () => {
         it('should pass value into virtual function', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
             const form = wForm(fn).updateOnChange(false).build(1);
-    
+
             form.setValue(5);
-    
+
             expect(fn.calls.mostRecent().args[0]).toBe(5);
         });
         it('should pass value transformed by value function into virtual function', () => {
             const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
             const form = wForm(fn).updateOnChange(false).build(2);
-    
+
             form.setValue(value => value + 1);
-    
+
             expect(fn.calls.mostRecent().args[0]).toBe(3);
         });
     });
@@ -89,9 +84,9 @@ describe('basic', () => {
 
             expect(form.value).toEqual(belarusToRussia);
             expect(form.control).toBe(control);
-            
+
             form.setValue(russiaToBelarus);
-            
+
             expect(form.value).toEqual(russiaToBelarus);
             expect(form.control).toBe(control);
 
@@ -211,7 +206,7 @@ describe('basic', () => {
             expect(getLastFormNode(form.get('tax.tax2')!).key).toBe(3);
             expect(getLastFormNode(form.get('tax.tax2.0')!).key).toBe(4);
             expect(getLastFormNode(form.get('tax.tax2.1')!).key).toBe(5);
-            
+
         });
     });
 
@@ -336,7 +331,7 @@ describe('basic', () => {
                     ]),
                 }),
             })).updateOnChange(false).build({});
-            
+
             expect(() => form.update()).toThrowError(errorHasMessage('abracadabra', 'group.nested.{0, 1}'));
         });
 
