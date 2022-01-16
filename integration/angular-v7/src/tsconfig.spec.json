@@ -5,21 +5,7 @@
     "types": [
       "jasmine",
       "node"
-    ],
-    "paths": {
-      "angular-wform": [
-        "../../packages/angular-wform/dist/angular-wform"
-      ],
-      "@angular/core": [
-        "./node_modules/@angular/core"
-      ],
-      "@angular/common": [
-        "./node_modules/@angular/common"
-      ],
-      "@angular/forms": [
-        "./node_modules/@angular/forms"
-      ]
-    }
+    ]
   },
   "files": [
     "test.ts",

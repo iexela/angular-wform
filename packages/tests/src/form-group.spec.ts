@@ -894,7 +894,7 @@ describe('WFormGroup', () => {
             const node3 = wGroup(withVolume(parcel, { validator: even }));
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = wForm(fn).updateOnChange(false).build(parcel);
+            const form = wForm(fn as () => typeof node1).updateOnChange(false).build(parcel);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 
