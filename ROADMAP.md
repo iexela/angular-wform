@@ -1,5 +1,9 @@
 # Roadmap
 
+1. Types
+    1. Think about better typing
+1. Ivy
+    1. Create ivy version of the library
 1. Reconcilation
     1. Implement tests for controls to test changing of wnode types
     1. Think how to simplify patch implementation (patch as wnode transformation)
