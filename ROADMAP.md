@@ -18,3 +18,5 @@
 1. Examples
     1. Add character builder based on portals
     1. Use stackblitz for examples?
+1. Publishing
+    1. Add tags
