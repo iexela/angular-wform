@@ -1,11 +1,20 @@
-3. Implement tests for controls to test changing of wnode types
-7. Think how to simplify patch implementation (patch as wnode transformation)
-12. Support CI
-13. Check that library works for different versions of Angular and rxjs
-14. Check that library works for different TS versions
-16. Write documentation
-18. Log console.debug/console.warn only in dev mode?
-25. Is it a good idea to schedule dataChanges immediately
-29. String `required` validator
-30. Emulate constant errors using custom validator
-31. Character builder (portal example)
+# Roadmap
+
+1. Reconcilation
+    1. Implement tests for controls to test changing of wnode types
+    1. Think how to simplify patch implementation (patch as wnode transformation)
+    1. Is it a good idea to schedule dataChanges immediately
+1. Validators
+    1. Should we allow to customzie `required` validator for strings?
+    1. Think how emulate constant errors using custom validator
+1. Clean code
+    1. Log console.debug/console.warn only in dev mode?
+    1. Prettify code
+1. Support CI
+    1. Check that library works for different versions of Angular and rxjs
+    1. Check that library works for different TS versions
+1. Write documentation
+    1. Use github pages?
+1. Examples
+    1. Add character builder based on portals
+    1. Use stackblitz for examples?

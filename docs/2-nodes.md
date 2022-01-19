@@ -79,7 +79,7 @@ You can store any data you like in `data` and access it later in component/pipe/
 
 ### The `key` property
 
-This property is necessary for children of `wArray` node. Read more about this topic in the corresponding section (**TBD**).
+This property is necessary for children of `wArray` node. Read more about this topic in the corresponding section ([Dynamic Form](6-dynamic-form.md)).
 
 ### The `updateOn` property
 
@@ -194,4 +194,4 @@ wForm((cats: CatForm[]) => wArray(cats.map(cat =>
     }))))
 ```
 
-Pay attention that you **MUST** specify `key` property for children of `wArray`. Using `key` property `wArray` can understand which children to create, update or remove. Read more about dynamic forms in the corresponding section [**TBD**].
+Pay attention that you **MUST** specify `key` property for children of `wArray`. Using `key` property `wArray` can understand which children to create, update or remove. Read more about dynamic forms in the corresponding section ([Dynamic Form](6-dynamic-form.md)).

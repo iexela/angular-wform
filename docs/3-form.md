@@ -79,7 +79,7 @@ form.setValue(value => ({
     age: 10,
 });
 ```
-This is the preferred way to change form value. For more details and examples, see the the section about dynamic forms [**TBD**].
+This is the preferred way to change form value. For more details and examples, see the the section about dynamic forms ([Dynamic Form](6-dynamic-form.md)).
 
 ## Recalculate Form State
 
