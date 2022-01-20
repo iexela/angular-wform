@@ -18,6 +18,8 @@ There is a [roadmap](ROADMAP.md) with some details (but they are not too detaile
 
 ## Overview
 
+`angular-wform` is pronounced as "Angular double form" or just "double form".
+
 Currently the documentation is incomplete and not organized very well. Anyway, you can start from [here](docs/0-index.md).
 
 ## How to install

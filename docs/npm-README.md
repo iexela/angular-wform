@@ -18,6 +18,8 @@ There is a [roadmap](https://github.com/iexela/angular-wform/blob/master/ROADMAP
 
 ## Overview
 
+`angular-wform` is pronounced as "Angular double form" or just "double form".
+
 Currently the documentation is incomplete and not organized very well. Anyway, you can start from [here](https://github.com/iexela/angular-wform/blob/master/docs/0-index.md).
 
 ## How to install

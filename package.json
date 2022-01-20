@@ -10,6 +10,8 @@
     "e2e": "ng e2e",
     "prepublish": "ng build core && cp docs/npm-README.md dist/core/README.md"
   },
+  "author": "Triple Form Inc.",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "@angular/animations": "~7.2.0",
