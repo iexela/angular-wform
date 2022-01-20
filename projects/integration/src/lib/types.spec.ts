@@ -1,7 +1,5 @@
-import { wArray, wControl, wGroup, wValue } from '../basic';
-import { wForm } from '../builder';
-import { Is } from '../common';
-import { GetField, HasField, must } from './test-types';
+import { wForm, wArray, wControl, wGroup, wValue } from 'angular-wform';
+import { Is, GetField, HasField, must } from './test-types';
 
 interface Spaceship {
     name: string;

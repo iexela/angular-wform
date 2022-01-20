@@ -7,16 +7,17 @@
       "node"
     ],
     "paths": {
-      "angular-wform": ["projects/core/src/public-api"]
+      "angular-wform": [
+        "dist/core"
+      ]
     }
   },
   "files": [
-    "src/test.ts"
+    "src/test.ts",
+    "src/main.ts"
   ],
   "include": [
     "**/*.spec.ts",
-    "../integration/src/main.ts",
-    "../integration/**/*.spec.ts",
     "**/*.d.ts"
   ]
 }

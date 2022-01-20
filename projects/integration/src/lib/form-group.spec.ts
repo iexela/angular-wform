@@ -1,10 +1,6 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { FormControl, FormGroup } from '@angular/forms';
-import { wControl, WFormControlOptions, WFormGroupOptions, wGroup, wNative, wPortal, wSkip } from '../basic';
-import { wForm, WFormBuilder } from '../builder';
-import { WForm } from '../form';
-import { WFormGroupChildren, WFormHooks } from '../model';
-import { getLastFormNode } from '../reconcilation';
+import { getLastFormNode, WFormGroupChildren, WFormHooks, WForm, wForm, WFormBuilder, wControl, WFormControlOptions, WFormGroupOptions, wGroup, wNative, wPortal, wSkip } from 'angular-wform';
 import { belarusToAustralia, belarusToRussia, Box, createFlightWNode, createTaxControl, elephant, even, Flight, fragileParcel, heavyAndLargeParcel, heavyParcel, largeParcel, light, lightAsync, moreThan10, mouse, parcel, parcelWithoutVolume, small, smallAsync, taxData, vTaxModel } from './test-mocks';
 import { andTick, trackControl } from './test-utils';
 

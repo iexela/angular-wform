@@ -1,10 +1,5 @@
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
-import { wArray, wControl, wGroup, wNative, wPortal, wSkip } from '../basic';
-import { wForm } from '../builder';
-import { WForm } from '../form';
-import { WFormNodeType } from '../model';
-import { dataChanges, getData, getLastFormNode } from '../reconcilation';
-import { WValidators } from '../validators';
+import { WValidators, dataChanges, getData, getLastFormNode, WFormNodeType, WForm, wForm, wArray, wControl, wGroup, wNative, wPortal, wSkip } from 'angular-wform';
 import { belarusToAustralia, belarusToRussia, Box, createFlightForm, createFlightWNode, createTaxControl, elephant, Flight, mouse, russiaToBelarus, vTaxModel, vTaxModelWithKeys } from './test-mocks';
 
 const flightFactory = (value: Flight) => wGroup({

@@ -46,8 +46,10 @@ export {
     WValidators,
     wValidator,
     wValidatorFactory,
+    wCompoundValidator,
     wValidatorAsync,
     wValidatorFactoryAsync,
+    wCompoundValidatorAsync,
 } from './lib/validators';
 
 export {
