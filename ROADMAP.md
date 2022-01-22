@@ -2,6 +2,7 @@
 
 1. Types
     1. Think about better typing
+    1. compose(...) and composeAsync(...) canoot take nils
 1. Ivy
     1. Create ivy version of the library
 1. Reconcilation

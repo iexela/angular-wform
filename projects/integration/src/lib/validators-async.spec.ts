@@ -14,10 +14,10 @@ const testValidator5 = makeAsyncValidator(5);
 
 function trackAsyncValidators(control: AbstractControl) {
     const spies = [spyOn(control, 'clearAsyncValidators'), spyOn(control, 'setAsyncValidators')];
-    if (control['addAsyncValidators']) {
+    if ((control as any)['addAsyncValidators']) {
         spies.push(spyOn(control as any, 'addAsyncValidators'));
     }
-    if (control['removeAsyncValidators']) {
+    if ((control as any)['removeAsyncValidators']) {
         spies.push(spyOn(control as any, 'removeAsyncValidators'));
     }
 
@@ -643,7 +643,7 @@ describe('async validators', () => {
             }));
 
             it('should allow nilable validators', fakeAsync(() => {
-                const single = controlWithValidator(WValidators.composeAsync(null, undefined, evenAsync, null, undefined));
+                const single = controlWithValidator(WValidators.composeAsync(null as any, undefined as any, evenAsync, null as any, undefined as any));
 
                 single.setValue(1);
                 tick();

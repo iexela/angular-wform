@@ -12,10 +12,10 @@ const testValidator5 = makeValidator(5);
 
 function trackValidators(control: AbstractControl) {
     const spies = [spyOn(control, 'clearValidators'), spyOn(control, 'setValidators')];
-    if (control['addValidators']) {
+    if ((control as any)['addValidators']) {
         spies.push(spyOn(control as any, 'addValidators'));
     }
-    if (control['removeValidators']) {
+    if ((control as any)['removeValidators']) {
         spies.push(spyOn(control as any, 'removeValidators'));
     }
 
@@ -859,7 +859,7 @@ describe('validators', () => {
             });
 
             it('should allow nilable validators', () => {
-                const single = controlWithValidator(WValidators.compose(null, undefined, even, null, undefined));
+                const single = controlWithValidator(WValidators.compose(null as any, undefined as any, even, null as any, undefined as any));
 
                 single.setValue(1);
                 expect(single.errors).toEqual({ even: true });

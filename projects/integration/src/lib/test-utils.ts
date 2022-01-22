@@ -22,7 +22,7 @@ export function andTick<T>(value: T): T {
 
 export function toPromise<T>(value: Observable<T> | Promise<T>): Promise<T> {
     if (isObservable(value)) {
-        return value.toPromise();
+        return value.toPromise() as Promise<T>;
     }
     return value;
 }
