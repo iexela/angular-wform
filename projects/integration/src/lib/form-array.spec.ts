@@ -962,7 +962,7 @@ describe('WFormArray', () => {
             }, withItem(fibonaci10));
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = wForm(fn).updateOnChange(false).build(fibonaci10);
+            const form = wForm(fn as () => typeof node1).updateOnChange(false).build(fibonaci10);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

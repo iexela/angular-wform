@@ -1,0 +1,11 @@
+{
+    "$schema": "../../node_modules/@angular-devkit/architect/src/builders-schema.json",
+    "builders": {
+      "build": {
+        "class": "./commands/build",
+        "schema": "./commands/build-schema.json",
+        "description": "Build an integration library"
+      }
+    }
+  }
+  

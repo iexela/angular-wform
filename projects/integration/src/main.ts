@@ -1,1 +1,9 @@
 import './lib/basic.spec';
+import './lib/form-array.spec';
+import './lib/form-control.spec';
+import './lib/form-group.spec';
+import './lib/form-native.spec';
+import './lib/form-portal.spec';
+import './lib/types.spec.ts';
+import './lib/validators-async.spec';
+import './lib/validators.spec';

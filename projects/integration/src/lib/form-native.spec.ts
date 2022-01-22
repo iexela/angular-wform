@@ -309,8 +309,10 @@ describe('WFormNative', () => {
         it('should update control if it was changed', () => {
             const control1 = new FormControl();
             const control2 = new FormControl();
-            const factory = jasmine.createSpy().and.returnValues(wNative(control1), wNative(control2));
-            const form = wForm(factory)
+            const node1 = wNative(control1);
+            const node2 = wNative(control2);
+            const factory = jasmine.createSpy().and.returnValues(node1, node2);
+            const form = wForm(factory as () => typeof node1)
                 .updateOnChange(false)
                 .build(1);
 
@@ -614,7 +616,7 @@ describe('WFormNative', () => {
             const node3 = wNative(control, { validator: even });
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = wForm(fn).updateOnChange(false).build(1);
+            const form = wForm(fn as () => typeof node1).updateOnChange(false).build(1);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

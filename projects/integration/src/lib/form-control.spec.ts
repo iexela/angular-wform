@@ -516,7 +516,7 @@ describe('WFormControl', () => {
             const node3 = wControl({ validator: even });
             const fn = jasmine.createSpy().and.returnValues(node1, node2, node3);
 
-            const form = wForm(fn).updateOnChange(false).build(1);
+            const form = wForm(fn as () => typeof node1).updateOnChange(false).build(1);
 
             expect(getLastFormNode(form.control)).toBe(node1);
 

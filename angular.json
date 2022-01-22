@@ -175,10 +175,10 @@
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "./tools/integration-builder:build",
           "options": {
-            "tsConfig": "projects/integration/tsconfig.lib.json",
-            "project": "projects/integration/ng-package.json"
+            "src": "projects/integration/src",
+            "dest": "dist/integration"
           }
         },
         "test": {

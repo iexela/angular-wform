@@ -19,60 +19,66 @@ function errorHasMessage(...strs: string[]): RegExp {
 describe('basic', () => {
     describe('virtual function', () => {
         it('should accept initial value', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.returnValue(wControl());
-            wForm(fn).updateOnChange(false).build(1);
+            const fn = () => wControl();
+            const spy = jasmine.createSpy('virtual-fn').and.callFake(fn);
+            wForm(spy as typeof fn).updateOnChange(false).build(1);
     
-            expect(fn.calls.count()).toBe(1);
-            expect(fn.calls.mostRecent().args[0]).toBe(1);
+            expect(spy.calls.count()).toBe(1);
+            expect(spy.calls.mostRecent().args[0]).toBe(1);
         });
     
         it('should accept value passed into "setValue" method', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).updateOnChange(false).build(1);
+            const fn = () => wControl();
+            const spy = jasmine.createSpy('virtual-fn').and.callFake(fn);
+            const form = wForm(spy as typeof fn).updateOnChange(false).build(1);
     
             form.setValue(5);
     
-            expect(fn.calls.count()).toBe(2);
-            expect(fn.calls.mostRecent().args[0]).toBe(5);
+            expect(spy.calls.count()).toBe(2);
+            expect(spy.calls.mostRecent().args[0]).toBe(5);
         });
     
         it('should accept current value if "update" is called', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).updateOnChange(false).build(1);
+            const fn = () => wControl();
+            const spy = jasmine.createSpy('virtual-fn').and.callFake(fn);
+            const form = wForm(spy as typeof fn).updateOnChange(false).build(1);
     
             form.update();
     
-            expect(fn.calls.count()).toBe(2);
-            expect(fn.calls.mostRecent().args[0]).toBe(1);
+            expect(spy.calls.count()).toBe(2);
+            expect(spy.calls.mostRecent().args[0]).toBe(1);
         });
     
         it('should not be called if value was changed using "control.setValue"', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).updateOnChange(false).build(1);
+            const fn = () => wControl();
+            const spy = jasmine.createSpy('virtual-fn').and.callFake(fn);
+            const form = wForm(spy as typeof fn).updateOnChange(false).build(1);
     
             form.control.setValue(5);
     
-            expect(fn.calls.count()).toBe(1);
-            expect(fn.calls.mostRecent().args[0]).toBe(1);
+            expect(spy.calls.count()).toBe(1);
+            expect(spy.calls.mostRecent().args[0]).toBe(1);
         });
     });
 
     describe('setValue', () => {
         it('should pass value into virtual function', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).updateOnChange(false).build(1);
+            const fn = () => wControl();
+            const spy = jasmine.createSpy('virtual-fn').and.callFake(fn);
+            const form = wForm(spy as typeof fn).updateOnChange(false).build(1);
     
             form.setValue(5);
     
-            expect(fn.calls.mostRecent().args[0]).toBe(5);
+            expect(spy.calls.mostRecent().args[0]).toBe(5);
         });
         it('should pass value transformed by value function into virtual function', () => {
-            const fn = jasmine.createSpy('virtual-fn').and.callFake(wControl);
-            const form = wForm(fn).updateOnChange(false).build(2);
+            const fn = () => wControl();
+            const spy = jasmine.createSpy('virtual-fn').and.callFake(fn);
+            const form = wForm(spy as typeof fn).updateOnChange(false).build(2);
     
             form.setValue(value => value + 1);
     
-            expect(fn.calls.mostRecent().args[0]).toBe(3);
+            expect(spy.calls.mostRecent().args[0]).toBe(3);
         });
     });
 
@@ -113,7 +119,7 @@ describe('basic', () => {
         it('[when false] should not update form when some value has changed', () => {
             const factory = jasmine.createSpy('virtual-fn').and.callFake(flightFactory);
 
-            const form = wForm(factory)
+            const form = wForm(factory as typeof flightFactory)
                 .updateOnChange(false)
                 .build(belarusToAustralia);
 
@@ -128,7 +134,7 @@ describe('basic', () => {
         it('[when true] should update form as soon as some value has changed', () => {
             const factory = jasmine.createSpy('virtual-fn').and.callFake(flightFactory);
 
-            const form = wForm(factory)
+            const form = wForm(factory as typeof flightFactory)
                 .updateOnChange(true)
                 .build(belarusToAustralia);
 
@@ -151,7 +157,7 @@ describe('basic', () => {
         it('[when true] should update form as soon as some value has changed (even when corresponding control is disabled)', () => {
             const factory = jasmine.createSpy('virtual-fn').and.callFake(flightFactory);
 
-            const form = wForm(factory)
+            const form = wForm(factory as typeof flightFactory)
                 .updateOnChange(true)
                 .build(belarusToAustralia);
 

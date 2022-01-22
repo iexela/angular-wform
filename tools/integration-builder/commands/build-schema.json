@@ -1,0 +1,26 @@
+{
+    "title": "build integration library",
+    "description": "target options to build integration library",
+    "type": "object",
+    "properties": {
+      "src": {
+        "type": "string",
+        "description": "Path of source directory"
+      },
+      "dest": {
+        "type": "string",
+        "description": "Path of destination directory"
+      },
+      "watch": {
+        "type": "boolean",
+        "description": "Is watch mode on",
+        "default": false
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+        "src",
+        "dest"
+    ]
+  }
+  
