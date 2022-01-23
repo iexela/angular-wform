@@ -177,7 +177,7 @@
         "build": {
           "builder": "./tools/integration-builder:build",
           "options": {
-            "src": "projects/integration/src",
+            "src": "projects/integration/src/lib",
             "dest": "dist/integration"
           }
         },

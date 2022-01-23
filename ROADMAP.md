@@ -2,7 +2,7 @@
 
 1. Types
     1. Think about better typing
-    1. compose(...) and composeAsync(...) canoot take nils
+    1. compose(...) and composeAsync(...) cannot take nils
 1. Ivy
     1. Create ivy version of the library
 1. Reconcilation
@@ -18,6 +18,7 @@
 1. Support CI
     1. Check that library works for different versions of Angular and rxjs
     1. Check that library works for different TS versions
+    1. Publish through CI
 1. Write documentation
     1. Use github pages?
 1. Examples
