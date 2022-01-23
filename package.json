@@ -8,6 +8,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
+    "build:core": "ng build core",
+    "test:core": "ng test core",
     "prepublish": "ng build core && cp docs/npm-README.md dist/core/README.md && cp LICENSE dist/core/LICENSE"
   },
   "author": "Triple Form Inc.",
