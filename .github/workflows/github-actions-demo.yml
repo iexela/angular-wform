@@ -7,12 +7,6 @@ jobs:
       matrix:
         node-version: [14.x]
     steps:
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@latest
-        with:
-          chrome-version: stable
-      - run: chrome --version
-      - run: which chrome
       - uses: actions/checkout@v2
       - name: Setup node.js
         uses: actions/setup-node@v2
@@ -24,4 +18,4 @@ jobs:
       # - name: Build library
         # run: npm run build:core
       - name: Test library
-        run: npm run test:core --watch=false
+        run: npm run test:core -- --watch=false --browsers=ChromeHeadless
