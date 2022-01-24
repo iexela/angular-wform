@@ -27,10 +27,16 @@ module.exports = function (config) {
     autoWatch: true,
     browsers: ['ChromeNoSandbox'],
     customLaunchers: {
-        ChromeNoSandbox: {
-            base: 'Chrome',
-            flags: ['--no-sandbox']
-        }
+      ChromeNoSandbox: {
+        base: 'ChromiumHeadless',
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--disable-translate',
+          '--disable-extensions',
+          '--mute-audio',
+        ],
+      }
     },
     singleRun: false,
     restartOnFileChange: true
