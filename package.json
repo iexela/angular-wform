@@ -4,11 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
+    "build": "ng build core",
+    "test": "ng test core",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "test:core": "ng test core"
+    "e2e": "ng e2e"
   },
   "author": "Triple Form Inc.",
   "license": "MIT",
