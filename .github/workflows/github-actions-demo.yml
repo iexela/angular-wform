@@ -21,7 +21,7 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
-      - name: Build library
-        run: npm run build:core
+      # - name: Build library
+        # run: npm run build:core
       - name: Test library
         run: npm run test:core --watch=false
