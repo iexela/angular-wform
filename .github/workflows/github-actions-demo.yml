@@ -7,11 +7,12 @@ jobs:
       matrix:
         node-version: [14.x]
     steps:
-      - uses: actions/checkout@v2
+      - uses: browser-actions/setup-chrome@latest
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+      - uses: actions/checkout@v2
       - run: npm ci
       - run: npm run build:core
-      - run: npm run test:core
+      - run: npm run test:core --watch=false
