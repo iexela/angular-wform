@@ -46,11 +46,11 @@ jobs:
         with:
           repository: iexela/angular-wform-integration
           path: angular-wform-integration
-      - name: Setup node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '12.x'
-          cache: 'npm'
+      # - name: Setup node.js
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: '12.x'
+      #     cache: 'npm'
       - run: pwd
       - run: ls
       - run: cd angular-wform-integration
