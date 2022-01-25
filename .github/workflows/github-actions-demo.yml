@@ -61,4 +61,4 @@ jobs:
         run: |
           cd angular-wform-integration
           npm ci
-          npm test {{matrix.environment}} $GITHUB_WORKSPACE/angular-wform/dist/integration
+          npm test ${{matrix.environment}} $GITHUB_WORKSPACE/angular-wform/dist/integration

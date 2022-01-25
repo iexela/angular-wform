@@ -8,7 +8,7 @@
     "test": "ng test core",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build:integration": "ng build core"
+    "build:integration": "ng build integration"
   },
   "author": "Triple Form Inc.",
   "license": "MIT",
