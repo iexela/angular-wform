@@ -51,10 +51,11 @@ jobs:
       #   with:
       #     node-version: '12.x'
       #     cache: 'npm'
-      - run: pwd
-      - run: ls
-      - run: cd angular-wform-integration
-      - run: ls
+      - run: |
+          pwd
+          ls
+          cd angular-wform-integration
+          ls
       # - name: Install dependencies
       #   run: npm ci
       # - name: Build library
