@@ -4,7 +4,7 @@ const fs = require('fs');
 const { promisify } = require('util');
 const chokidar = require('chokidar');
 
-const del = promisify(fs.rm);
+const del = promisify(fs.rmdir);
 const copy = promisify(ncp);
 
 class IntegrationBuilder {
