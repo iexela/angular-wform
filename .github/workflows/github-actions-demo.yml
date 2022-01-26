@@ -2,11 +2,9 @@ name: GitHub Actions Demo
 on: [push]
 jobs:
   testing:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: ./.github/workflows/testing.yml
-        with:
-          ref: ${{github.ref}}
+    uses: ./.github/workflows/testing.yml
+    with:
+      ref: ${{github.ref}}
   # build-and-test:
   #   runs-on: ubuntu-latest
   #   steps:
