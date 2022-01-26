@@ -1,7 +1,6 @@
-name: Validate PR
-on: [workflow_call]
+name: Status Checks
 jobs:
-  build-and-test:
+  validate-pr:
     runs-on: ubuntu-latest
     steps:
       - run: pwd
