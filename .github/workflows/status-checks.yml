@@ -1,5 +1,5 @@
 name: Status Checks
-on: [workflow_call]
+on: [pull_request]
 jobs:
   validate-pr:
     runs-on: ubuntu-latest
