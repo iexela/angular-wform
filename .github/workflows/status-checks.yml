@@ -4,7 +4,7 @@ jobs:
   validate-pr:
     runs-on: ubuntu-latest
     steps:
-      - run: pwd
+      - run: sfsdfs
   # testing:
   #   uses: ./.github/workflows/testing.yml
   #   with:
