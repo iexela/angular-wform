@@ -1,4 +1,4 @@
-name: GitHub Actions Demo
+name: Test Code
 on:
   workflow_call:
     inputs:
@@ -33,11 +33,11 @@ jobs:
       matrix:
         environment:
           - angular-v7
-          # - angular-v8
-          # - angular-v9
-          # - angular-v10
+          - angular-v8
+          - angular-v9
+          - angular-v10
           - angular-v11
-          # - angular-v12
+          - angular-v12
           - angular-v13
     steps:
       - name: Setup Chrome

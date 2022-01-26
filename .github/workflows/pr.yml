@@ -1,0 +1,12 @@
+name: Validate PR
+on: [pull_request]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pwd
+  # testing:
+  #   uses: ./.github/workflows/testing.yml
+  #   with:
+  #     ref: ${{github.ref}}
+  
