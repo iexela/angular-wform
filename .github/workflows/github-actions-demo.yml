@@ -1,6 +1,12 @@
 name: GitHub Actions Demo
 on: [push]
 jobs:
+  testing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/workflows/testing.yml
+        with:
+          ref: ${{github.ref}}
   # build-and-test:
   #   runs-on: ubuntu-latest
   #   steps:
@@ -20,45 +26,45 @@ jobs:
   #       run: npm run build
   #     - name: Test library
   #       run: npm run test -- --watch=false --browsers=ChromeHeadless
-  integration-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment:
-          - angular-v7
-          # - angular-v8
-          # - angular-v9
-          # - angular-v10
-          - angular-v11
-          # - angular-v12
-          - angular-v13
-    steps:
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@latest
-        with:
-          chrome-version: stable
-      - name: Checkout angular-wform
-        uses: actions/checkout@v2
-        with:
-          path: angular-wform
-      - name: Checkout angular-wform-integration
-        uses: actions/checkout@v2
-        with:
-          repository: iexela/angular-wform-integration
-          path: angular-wform-integration
-      - name: Setup node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '12.x'
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
-      - name: Build integration library
-        run: |
-          cd angular-wform
-          npm ci
-          npm run build:integration
-      - name: Run integration tests
-        run: |
-          cd angular-wform-integration
-          npm ci
-          npm test ${{matrix.environment}} $GITHUB_WORKSPACE/angular-wform/dist/integration
+  # integration-tests:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       environment:
+  #         - angular-v7
+  #         # - angular-v8
+  #         # - angular-v9
+  #         # - angular-v10
+  #         - angular-v11
+  #         # - angular-v12
+  #         - angular-v13
+  #   steps:
+  #     - name: Setup Chrome
+  #       uses: browser-actions/setup-chrome@latest
+  #       with:
+  #         chrome-version: stable
+  #     - name: Checkout angular-wform
+  #       uses: actions/checkout@v2
+  #       with:
+  #         path: angular-wform
+  #     - name: Checkout angular-wform-integration
+  #       uses: actions/checkout@v2
+  #       with:
+  #         repository: iexela/angular-wform-integration
+  #         path: angular-wform-integration
+  #     - name: Setup node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '12.x'
+  #         cache: 'npm'
+  #         cache-dependency-path: '**/package-lock.json'
+  #     - name: Build integration library
+  #       run: |
+  #         cd angular-wform
+  #         npm ci
+  #         npm run build:integration
+  #     - name: Run integration tests
+  #       run: |
+  #         cd angular-wform-integration
+  #         npm ci
+  #         npm test ${{matrix.environment}} $GITHUB_WORKSPACE/angular-wform/dist/integration
