@@ -1,7 +1,7 @@
 name: Make Candidate 
 on:
   push:
-    branches: [master]
+    branches: [test/master]
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
