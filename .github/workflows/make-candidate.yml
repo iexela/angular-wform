@@ -8,6 +8,9 @@ on:
       - 'projects/integration/**'
       - 'docs/npm/**'
       - package.json
+      - package-lock.json
+      - angular.json
+      - tsconfig.json
 jobs:
   validate:
     uses: ./.github/workflows/testing.yml
