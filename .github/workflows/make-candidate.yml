@@ -3,7 +3,9 @@ on:
   push:
     branches: [test/master]
     paths:
+      - '.github/workflows/**'
       - 'projects/core/**'
+      - 'projects/integration/**'
 jobs:
   validate:
     uses: ./.github/workflows/testing.yml
