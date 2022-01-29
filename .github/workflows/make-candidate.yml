@@ -1,6 +1,7 @@
-name: Status Checks
+name: Make Candidate 
 on:
-  pull_request:
+  push:
+    branches: [test/master]
     paths:
       - 'projects/core/**'
       - 'projects/integration/**'
@@ -10,7 +11,12 @@ on:
       - 'tsconfig.json',
       - 'docs/npm/**'
 jobs:
-  validate-pr:
+  validate:
     uses: ./.github/workflows/testing.yml
     with:
       ref: ${{github.ref}}
+  stable:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo make candidate

@@ -1,9 +1,0 @@
-name: Make Candidate 
-on:
-  push:
-    branches: [test/master]
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: pwd
