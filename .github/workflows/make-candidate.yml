@@ -2,6 +2,8 @@ name: Make Candidate
 on:
   push:
     branches: [test/master]
+    paths:
+      - 'projects/core/**'
 jobs:
   validate:
     uses: ./.github/workflows/testing.yml
