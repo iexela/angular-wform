@@ -6,6 +6,8 @@ on:
       - '.github/workflows/**'
       - 'projects/core/**'
       - 'projects/integration/**'
+      - 'docs/npm/**'
+      - package.json
 jobs:
   validate:
     uses: ./.github/workflows/testing.yml
