@@ -8,7 +8,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'angular.json'
-      - 'tsconfig.json',
+      - 'tsconfig.json'
       - 'docs/npm/**'
 jobs:
   validate:

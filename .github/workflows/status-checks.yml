@@ -1,14 +1,5 @@
 name: Status Checks
-on:
-  pull_request:
-    paths:
-      - 'projects/core/**'
-      - 'projects/integration/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'angular.json'
-      - 'tsconfig.json',
-      - 'docs/npm/**'
+on: [pull_request]
 jobs:
   validate-pr:
     uses: ./.github/workflows/testing.yml
