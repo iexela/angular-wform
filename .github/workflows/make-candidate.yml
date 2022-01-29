@@ -2,14 +2,6 @@ name: Make Candidate
 on:
   push:
     branches: [test/master]
-    paths:
-      - 'projects/core/**'
-      - 'projects/integration/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'angular.json'
-      - 'tsconfig.json'
-      - 'docs/npm/**'
 jobs:
   validate:
     uses: ./.github/workflows/testing.yml
