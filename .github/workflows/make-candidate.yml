@@ -25,4 +25,5 @@ jobs:
           ref: test/stable
       - run: |
           git fetch --unshallow
+          git checkout test/stable
           git merge test/master
