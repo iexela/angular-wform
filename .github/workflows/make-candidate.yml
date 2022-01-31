@@ -20,7 +20,7 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - run: echo make candidate
-      - run: |
-          git checkout test/stable
-          git merge ${{github.ref}}
+      - uses: actions/checkout@v2
+        with:
+          ref: test/stable
+      - run: git merge ${{github.ref}}
