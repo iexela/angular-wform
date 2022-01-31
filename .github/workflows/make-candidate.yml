@@ -26,4 +26,4 @@ jobs:
       - run: |
           git fetch --unshallow
           git checkout test/stable
-          git merge test/master
+          git merge origin/test/master
