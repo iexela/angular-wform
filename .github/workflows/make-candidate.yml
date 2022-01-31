@@ -2,15 +2,15 @@ name: Make Candidate
 on:
   push:
     branches: [test/master]
-    paths:
-      - '.github/workflows/**'
-      - 'projects/core/**'
-      - 'projects/integration/**'
-      - 'docs/npm/**'
-      - package.json
-      - package-lock.json
-      - angular.json
-      - tsconfig.json
+    # paths:
+    #   - '.github/workflows/**'
+    #   - 'projects/core/**'
+    #   - 'projects/integration/**'
+    #   - 'docs/npm/**'
+    #   - package.json
+    #   - package-lock.json
+    #   - angular.json
+    #   - tsconfig.json
 jobs:
   validate:
     uses: ./.github/workflows/testing.yml
@@ -21,3 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo make candidate
+      - run: |
+          git checkout test/stable
+          git merge ${{github.ref}}
