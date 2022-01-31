@@ -25,4 +25,4 @@ jobs:
           ref: test/stable
       - run: |
           git fetch --unshallow
-          git merge ${{github.ref}}
+          git merge test/master
