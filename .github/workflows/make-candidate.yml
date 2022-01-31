@@ -23,4 +23,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: test/stable
-      - run: git merge test/master
+      - run: |
+          git fetch --unshallow
+          git merge ${{github.ref}}
