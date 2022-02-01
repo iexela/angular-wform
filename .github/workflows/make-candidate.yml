@@ -20,10 +20,12 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
         with:
           ref: test/stable
-      - run: |
+      - name: Merge into stable branch
+        run: |
           git fetch --unshallow
           git merge origin/test/master
           git push
