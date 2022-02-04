@@ -8,25 +8,26 @@ on:
 jobs:
   validatable:
     runs-on: ubuntu-latest
+    env:
+      VALIDATED_PATHS: |
+        .github/workflows,
+        projects/core,
+        projects/integration,
+        docs/npm,
+        package.json,
+        package-lock.json,
+        angular.json,
+        tsconfig.json
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{inputs.ref}}
       - run: |
           git diff --name-only > _diff.txt
-          cat > _patterns.sed <<EOF
-          s/^.github\/workflows/###/
-          s/^projects\/core/###/
-          s/^projects\/integration/###/
-          s/^docs\/npm/###/
-          s/^package.json/###/
-          s/^package-lock.json/###/
-          s/^angular.json/###/
-          s/^tsconfig.json/###/
-          EOF
+          echo $VALIDATED_PATHS | tr ',' '\n' | sed 's/\//\\\//g' | sed 's/\(.*\)/s\/^\1\/###\//' > _patterns.sed
           N_ROWS=$(sed -f _patterns.sed _diff.txt | grep ### | wc -l)
           HAS_ROWS=$([ "$N_ROWS" -eq "0" ] && echo false || echo true)
-          echo "::set-output name=is::$($N_ROWS)"
+          echo "::set-output name=is::$($HAS_ROWS)"
   test:
     runs-on: ubuntu-latest
     steps:
