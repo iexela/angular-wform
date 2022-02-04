@@ -8,6 +8,8 @@ on:
 jobs:
   pretest:
     runs-on: ubuntu-latest
+    outputs:
+      validate: false
     env:
       VALIDATED_PATHS: |
         .github/workflows,
@@ -27,7 +29,7 @@ jobs:
           echo $VALIDATED_PATHS | tr ',' '\n' | sed 's/\//\\\//g' | sed 's/\(.*\)/s\/^\1\/:::\//' > _patterns.sed
           N_FILES=$(sed -f _patterns.sed _diff.txt | grep ':::' | wc -l)
           HAS_FILES=$([ "$N_FILES" -eq "0" ] && echo false || echo true)
-          echo "::set-output name=has::$($HAS_FILES)"
+          echo "::set-output name=validate::$($HAS_FILES)"
   test:
     needs: pretest
     # if: ${{ needs.pretest.outputs.has == 'true' }}
