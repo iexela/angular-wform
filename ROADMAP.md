@@ -17,7 +17,7 @@
     1. Prettify code
 1. Support CI
     1. Publish through CI
-    1. Try to get rid of `fetch --unshallow`
+    1. Try to get rid of `git fetch --unshallow`
 1. Write documentation
     1. Use github pages?
 1. Examples
