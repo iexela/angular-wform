@@ -30,7 +30,7 @@ jobs:
           echo "::set-output name=has::$($HAS_FILES)"
   test:
     needs: pretest
-    if: ${{ needs.pretest.outputs.has == "true" }}
+    if: ${{ needs.pretest.outputs.has == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - run: echo does nothing
