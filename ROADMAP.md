@@ -16,9 +16,8 @@
     1. Log console.debug/console.warn only in dev mode?
     1. Prettify code
 1. Support CI
-    1. Check that library works for different versions of Angular and rxjs
-    1. Check that library works for different TS versions
     1. Publish through CI
+    1. Try to get rid of `fetch --unshallow`
 1. Write documentation
     1. Use github pages?
 1. Examples
