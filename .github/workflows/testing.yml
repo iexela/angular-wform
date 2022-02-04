@@ -33,10 +33,10 @@ jobs:
   test:
     needs: pretest
     # if: ${{ needs.pretest.outputs.has == 'true' }}
-    if: ${{ needs.pretest.outputs.validate == 'true' }}
+    # if: ${{ needs.pretest.outputs.validate == true }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo does nothing
+      - run: echo does nothing ${{needs.pretest.outputs.validate}}
 # jobs:
 #   build-and-test:
 #     runs-on: ubuntu-latest
