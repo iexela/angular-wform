@@ -33,7 +33,7 @@ jobs:
   test:
     needs: pretest
     # if: ${{ needs.pretest.outputs.has == 'true' }}
-    if: ${{ needs.pretest.outputs.has != null }}
+    if: ${{ needs.pretest.outputs.validate != null }}
     runs-on: ubuntu-latest
     steps:
       - run: echo does nothing
