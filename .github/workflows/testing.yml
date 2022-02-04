@@ -12,7 +12,7 @@ jobs:
   pretest:
     runs-on: ubuntu-latest
     outputs:
-      has_changes: ${{ steps.changes.outputs.has === 'true' }}
+      has_changes: ${{ steps.changes.outputs.has == 'true' }}
     env:
       VALIDATED_PATHS: |
         .github/workflows,
