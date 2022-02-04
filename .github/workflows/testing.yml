@@ -27,10 +27,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{inputs.ref}}
+          fetch-depth: 0
       - id: changes
         name: Find changes
         run: |
-          git fetch --unshallow
           git diff --name-only ${{inputs.base_ref}} ${{inputs.ref}} > _diff.txt
           echo $VALIDATED_PATHS | tr ',' '\n' | sed 's/\//\\\//g' | sed 's/\(.*\)/s\/^\1\/:::\//' > _patterns.sed
           N_FILES=$(sed -f _patterns.sed _diff.txt | grep ':::' | wc -l)
