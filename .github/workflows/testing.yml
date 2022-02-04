@@ -24,10 +24,10 @@ jobs:
           ref: ${{inputs.ref}}
       - run: |
           git diff --name-only > _diff.txt
-          echo $VALIDATED_PATHS | tr ',' '\n' | sed 's/\//\\\//g' | sed 's/\(.*\)/s\/^\1\/###\//' > _patterns.sed
-        # N_ROWS=$(sed -f _patterns.sed _diff.txt | grep ### | wc -l)
-        # HAS_ROWS=$([ "$N_ROWS" -eq "0" ] && echo false || echo true)
-        # echo "::set-output name=is::$($HAS_ROWS)"
+          echo $VALIDATED_PATHS | tr ',' '\n' | sed 's/\//\\\//g' | sed 's/\(.*\)/s\/^\1\/:::\//' > _patterns.sed
+          N_ROWS=$(sed -f _patterns.sed _diff.txt | grep ':::' | wc -l)
+          HAS_ROWS=$([ "$N_ROWS" -eq "0" ] && echo false || echo true)
+          echo "::set-output name=is::$($HAS_ROWS)"
   test:
     runs-on: ubuntu-latest
     steps:
