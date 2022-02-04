@@ -12,7 +12,7 @@ jobs:
   pretest:
     runs-on: ubuntu-latest
     outputs:
-      has_changes: ${{ steps.changes.outputs.has }}
+      has_changes: ${{ steps.changes.outputs.has === 'true' }}
     env:
       VALIDATED_PATHS: |
         .github/workflows,
@@ -38,7 +38,7 @@ jobs:
           echo "::set-output name=has::$HAS_FILES"
   test:
     needs: pretest
-    if: ${{ needs.pretest.outputs.has_changes == 'true' }}
+    if: ${{ needs.pretest.outputs.has_changes == true }}
     runs-on: ubuntu-latest
     steps:
       - run: echo does nothing
