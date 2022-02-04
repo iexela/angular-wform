@@ -31,7 +31,7 @@ jobs:
   test:
     needs: pretest
     # if: ${{ needs.pretest.outputs.has == 'true' }}
-    if: ${{ needs.pretest != null }}
+    if: ${{ needs.pretest.outputs != null }}
     runs-on: ubuntu-latest
     steps:
       - run: echo does nothing
