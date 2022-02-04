@@ -5,4 +5,4 @@ jobs:
     uses: ./.github/workflows/testing.yml
     with:
       ref: ${{github.ref}}
-      base_ref: ${{env.base_ref}}
+      base_ref: ${{github.base_ref}}
