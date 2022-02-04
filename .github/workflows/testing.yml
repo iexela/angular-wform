@@ -28,6 +28,7 @@ jobs:
         with:
           ref: ${{inputs.ref}}
       - run: |
+          set -x
           git fetch --unshallow
           echo $VALIDATED_PATHS
           git diff --name-only ${{inputs.base_ref}} ${{inputs.ref}}
