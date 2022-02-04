@@ -25,6 +25,8 @@ jobs:
         with:
           ref: ${{inputs.ref}}
       - run: |
+          echo $VALIDATED_PATHS
+          git diff --name-only
           git diff --name-only > _diff.txt
           echo $VALIDATED_PATHS | tr ',' '\n' | sed 's/\//\\\//g' | sed 's/\(.*\)/s\/^\1\/:::\//' > _patterns.sed
           N_FILES=$(sed -f _patterns.sed _diff.txt | grep ':::' | wc -l)
@@ -32,7 +34,6 @@ jobs:
           echo "::set-output name=validate::$($HAS_FILES)"
   test:
     needs: pretest
-    # if: ${{ needs.pretest.outputs.has == 'true' }}
     # if: ${{ needs.pretest.outputs.validate == true }}
     runs-on: ubuntu-latest
     steps:
