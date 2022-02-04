@@ -16,7 +16,7 @@ jobs:
     uses: ./.github/workflows/testing.yml
     with:
       ref: ${{github.ref}}
-      base_ref: test/stable
+      base_ref: origin/test/stable
   stable:
     needs: validate
     runs-on: ubuntu-latest
