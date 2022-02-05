@@ -14,15 +14,7 @@ jobs:
     outputs:
       has_changes: ${{ steps.changes.outputs.has }}
     env:
-      VALIDATED_PATHS: |
-        .github/workflows,
-        projects/core,
-        projects/integration,
-        docs/npm,
-        package.json,
-        package-lock.json,
-        angular.json,
-        tsconfig.json
+      VALIDATED_PATHS: .github/workflows,projects/core,projects/integration,docs/npm,package.json,package-lock.json,angular.json,tsconfig.json
     steps:
       - uses: actions/checkout@v2
         with:
