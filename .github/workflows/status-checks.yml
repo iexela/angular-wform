@@ -5,4 +5,4 @@ jobs:
     uses: iexela/angular-wform/.github/workflows/testing.yml@test/master
     with:
       ref: ${{github.ref}}
-      base_ref: ${{github.base_ref}}
+      base_ref: origin/${{github.base_ref}}
