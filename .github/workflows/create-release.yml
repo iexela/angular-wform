@@ -22,6 +22,6 @@ jobs:
       - name: Publish package
         run: |
           cd dist/core
-          npm publish --dry
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
