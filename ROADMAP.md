@@ -15,10 +15,9 @@
 1. Clean code
     1. Log console.debug/console.warn only in dev mode?
     1. Prettify code
-1. Support CI
-    1. Publish through CI
 1. Write documentation
     1. Use github pages?
+    1. Use badges (shields.io)
 1. Examples
     1. Add character builder based on portals
     1. Use stackblitz for examples?
