@@ -4,7 +4,8 @@ const fs = require('fs');
 const { promisify } = require('util');
 const chokidar = require('chokidar');
 
-const del = promisify(fs.rm);
+const mkdir = promisify(fs.mkdir);
+const del = promisify(fs.rmdir);
 const copy = promisify(ncp);
 
 class IntegrationBuilder {
@@ -52,7 +53,8 @@ class IntegrationBuilder {
     }
     rebuild(options) {
         this.buildInProgress = true;
-        return del(options.dest, { recursive: true, force: true })
+        return mkdir(options.dest, { recursive: true })
+            .then(() => del(options.dest, { recursive: true, force: true }))
             .then(() => copy(options.src, options.dest))
             .then(() => ({ success: true }))
             .finally(() => {

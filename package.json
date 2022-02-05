@@ -4,11 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
+    "build": "ng build core",
+    "test": "ng test core",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "prepublish": "ng build core && cp docs/npm-README.md dist/core/README.md && cp LICENSE dist/core/LICENSE"
+    "build:integration": "ng build integration"
   },
   "author": "Triple Form Inc.",
   "license": "MIT",

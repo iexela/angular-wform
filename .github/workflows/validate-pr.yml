@@ -1,0 +1,8 @@
+name: Validate Pull Request
+on: [pull_request]
+jobs:
+  validate-pr:
+    uses: iexela/angular-wform/.github/workflows/testing.yml@test/master
+    with:
+      ref: ${{github.ref}}
+      base_ref: origin/${{github.base_ref}}

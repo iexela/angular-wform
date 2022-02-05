@@ -1,0 +1,23 @@
+name: Make Candidate 
+on:
+  push:
+    branches: [test/master]
+jobs:
+  validate:
+    uses: ./.github/workflows/testing.yml
+    with:
+      ref: ${{github.ref}}
+      base_ref: origin/test/stable
+  stable:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: test/stable
+          fetch-depth: 0
+      - name: Merge into stable branch
+        run: |
+          git merge origin/test/master
+          git push
