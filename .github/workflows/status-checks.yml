@@ -1,4 +1,5 @@
 name: Status Checks
+on: [pull_request]
 jobs:
   validate-pr:
     uses: ./.github/workflows/testing.yml
