@@ -32,32 +32,3 @@ or yarn
 ```
 yarn add angular-wform
 ```
-
-## Hos to setup development environment
-
-Run
-```
-npm install
-```
-
-## How to build library
-
-Run
-```
-npx ng build core
-```
-
-## How to run tests
-
-Run
-```
-npx ng test core
-```
-
-## How to run example application
-
-Run
-```
-npx ng build core
-npx ng serve examples
-```
