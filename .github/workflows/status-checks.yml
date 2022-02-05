@@ -2,7 +2,7 @@ name: Status Checks
 on: [pull_request]
 jobs:
   validate-pr:
-    uses: ./.github/workflows/testing.yml@test/master
+    uses: iexela/angular-wform/.github/workflows/testing.yml@test/master
     with:
       ref: ${{github.ref}}
       base_ref: ${{github.base_ref}}
